@@ -14,3 +14,9 @@
 <script setup lang="ts">
 
 </script>
+
+<style>
+  body{
+    background-color: #F3F3F3;
+  }
+</style>

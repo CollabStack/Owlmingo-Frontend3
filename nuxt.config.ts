@@ -1,4 +1,5 @@
 export default defineNuxtConfig({
+  pages: true,
   css: ['vuetify/styles'],
   build: {
     transpile: ['vuetify'],

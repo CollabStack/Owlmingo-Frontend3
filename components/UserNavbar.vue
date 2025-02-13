@@ -1,5 +1,5 @@
 <template>
-    <v-app-bar app class="d-flex justify-space-between align-center app-bar">
+    <v-container app class="d-flex justify-space-between align-center app-bar">
         <v-container fluid class="mx-2 mx-sm-2 mx-md-12 mx-lg-16">
             <v-row align="center" justify="space-between" class="d-flex" no-gutters>
                 <!-- Left: Navigation Tabs -->
@@ -40,7 +40,7 @@
                 </v-col>
             </v-row>
         </v-container>
-    </v-app-bar>
+    </v-container>
 </template>
 
 <script setup lang="ts">
@@ -53,6 +53,7 @@ const tabs = [
     { label: 'Home', route: '/' },
     { label: 'Flashcard', route: '/flashcard' },
     { label: 'Quiz', route: '/quiz' },
+    { label: 'About Us', route: '/about' },
 ];
 
 // Compute the active tab based on route path
