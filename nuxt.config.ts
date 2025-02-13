@@ -36,7 +36,10 @@ export default defineNuxtConfig({
       USER_PUBLIC_API: process.env.USER_PUBLIC_API,
       ADMIN_PUBLIC_API: process.env.ADMIN_PUBLIC_API,
       ADMIN_PRIVATE_API: process.env.ADMIN_PRIVATE_API,
-      TELEGRAM_BOT_TOKEN: process.env.TELEGRAM_BOT_TOKEN,
+    },
+    telegramAuth: {
+      botToken: process.env.TELEGRAM_BOT_TOKEN, // Store in .env
+      botUsername: process.env.TELEGRAM_BOT_USERNAME, // Store in .env
     },
   },
 
