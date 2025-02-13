@@ -1,21 +1,18 @@
 export default defineNuxtConfig({
-  css: ['vuetify/styles'],
-  build: {
-    transpile: ['vuetify'],
-  },
-  compatibilityDate: '2025-01-22',
-  plugins: [
-    '~/plugins/vuetify.js',
-    '~/plugins/axios.js',
-    '~/plugins/pinia.js',
-    
+  // Disable SSR if not needed
+  ssr: false,
+
+  css: [
+    'vuetify/styles', // Include Vuetify styles
   ],
-  devServer: {
-    port: 5000, // Change to your desired port
+
+  build: {
+    transpile: ['vuetify'], // Transpile Vuetify
   },
+
   app: {
     head: {
-      title: 'Owlmingo', // Set your app name here
+      title: 'Owlmingo', // App title
       meta: [
         {
           name: 'description',
@@ -24,17 +21,23 @@ export default defineNuxtConfig({
         },
       ],
       link: [
-        { rel: 'icon', type: 'image/x-icon', href: '/logo/icon-no-bg.svg' }, // Correct path
+        { rel: 'icon', type: 'image/x-icon', href: '/logo/icon-no-bg.svg' }, // Favicon
       ],
     },
   },
 
+  devServer: {
+    port: 5000, // Change the port if needed
+  },
+
   runtimeConfig: {
     public: {
-      USER_PRIVATE_API: process.env.USER_PRIVATE_API,
+      USER_PRIVATE_API: process.env.USER_PRIVATE_API, // Environment variables
       USER_PUBLIC_API: process.env.USER_PUBLIC_API,
       ADMIN_PUBLIC_API: process.env.ADMIN_PUBLIC_API,
       ADMIN_PRIVATE_API: process.env.ADMIN_PRIVATE_API,
     },
   },
+
+  compatibilityDate: '2025-02-12',
 });
