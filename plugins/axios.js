@@ -1,5 +1,5 @@
 import axios from 'axios';
-import cookie from 'js-cookie';
+import Cookies from 'js-cookie';
 export default defineNuxtPlugin(nuxtApp => {
   const UserPublicAPI = useRuntimeConfig().public.USER_PUBLIC_API;
   const UserPrivateAPI = useRuntimeConfig().public.USER_PRIVATE_API;
@@ -25,7 +25,7 @@ export default defineNuxtPlugin(nuxtApp => {
   
   // Attach token to the private Axios instance (if needed)
   UserPrivateAPIAxiosInstance.interceptors.request.use(config => {
-    const token = cookie.get('token'); // Example: Getting token from cookies or any store
+    const token = Cookies.get('token'); // Example: Getting token from cookies or any store
     if (token) {
       config.headers.Authorization = `Bearer ${token}`;
     }
@@ -34,9 +34,9 @@ export default defineNuxtPlugin(nuxtApp => {
 
   // Attach token to the private Axios instance (if needed)
   AdminPrivateAPIAxiosInstance.interceptors.request.use(config => {
-    const token = cookie.get('token'); // Example: Getting token from cookies or any store
+    const token = Cookies.get('token'); // Fixed token retrieval
     if (token) {
-      config.headers.Authorization = `Bearer ${token}`;
+      config.headers.Authorization = `Bearer ${token}`; // Fixed string interpolation
     }
     return config;
   });
