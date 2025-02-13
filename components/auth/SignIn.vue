@@ -23,8 +23,8 @@
                                 type="password"
                                 required
                             ></v-text-field>
-                            <TelegramLoginWidget telegram-login="owlmingo_bot" @callback="testCallback" />
                         </v-form>
+                        <TelegramLoginWidget telegram-login="owlmingo_bot" @callback="testCallback" />
                     </v-card-text>
                     <v-card-actions>
                         <v-spacer></v-spacer>
