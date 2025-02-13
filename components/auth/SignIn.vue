@@ -46,6 +46,11 @@ const email = ref('');
 const password = ref('');
 const authStore = userAuth();
 
+// Mounted 
+onMounted(() => {
+    console.log('Sign In mounted');
+});
+
 // Login method
 const login = async () => {
     try {

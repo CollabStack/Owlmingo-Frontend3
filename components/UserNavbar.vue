@@ -34,7 +34,7 @@
                 </v-col>
 
                 <!-- Right: Buttons -->
-                <v-col v-if="isLoggedIn" cols="8" md="3" class="d-none d-md-flex text-right d-flex align-center justify-end gap-x-20">
+                <v-col v-if="!isLoggedIn" cols="8" md="3" class="d-none d-md-flex text-right d-flex align-center justify-end gap-x-20">
                     <div>
                         <v-btn to="/auth">sign in</v-btn>
                         <v-btn to="/auth/sign-up">Sign Up</v-btn>
@@ -96,6 +96,11 @@ watch(() => route.path, (newPath) => {
     activeTab.value = newPath;
 });
 
+/* ========== MOUNTED ==========*/
+onMounted(() => {
+    console.log('Navbar mounted');
+    console.log('isLoggedIn', isLoggedIn.value);
+});
 /* ========== METHODS ==========*/
 function setActive(tab: string) {
   if (activeTab.value === tab) return; // Prevent redundant navigation
