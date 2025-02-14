@@ -26,7 +26,7 @@ window.onTelegramAuth = (user) => {
 };
 </script> -->
 
-// components/TelegramLogin.vue
+// components/auth/TelegramLogin.vue
 <template>
   <div class="relative">
     <!-- Custom Button -->
@@ -60,7 +60,7 @@ window.onTelegramAuth = (user) => {
 <script setup>
 import { onMounted, ref } from 'vue'
 
-const botUsername = "owlmingo_bot" // Replace with your bot username
+const botUsername = "owlmingo_bot"
 const telegramLoginButton = ref(null)
 
 onMounted(() => {
@@ -103,54 +103,10 @@ const triggerTelegramLogin = () => {
   }
 }
 
-// Global callback function for handling auth
+// Global callback function
 window.onTelegramAuth = (user) => {
   console.log("User authenticated:", user)
   alert(`Hello ${user.first_name}, you are logged in!`)
-  // Here you can handle the authenticated user data
-  // For example, send it to your backend or store in state management
+  // Handle the authenticated user data here
 }
 </script>
-
-// pages/login.vue or any other page where you want to use the login
-<template>
-  <div class="flex min-h-screen items-center justify-center">
-    <TelegramLogin />
-  </div>
-</template>
-
-<script setup>
-import TelegramLogin from '~/components/TelegramLogin.vue'
-</script>
-
-// types/telegram.d.ts (Optional - for TypeScript support)
-interface TelegramUser {
-  id: number;
-  first_name: string;
-  last_name?: string;
-  username?: string;
-  photo_url?: string;
-  auth_date: number;
-  hash: string;
-}
-
-declare global {
-  interface Window {
-    onTelegramAuth: (user: TelegramUser) => void;
-  }
-}
-
-// nuxt.config.ts
-export default defineNuxtConfig({
-  modules: [
-    '@nuxtjs/tailwindcss',
-  ],
-  app: {
-    head: {
-      script: [
-        // You can add the Telegram script here as well if you prefer
-        // { src: 'https://telegram.org/js/telegram-widget.js?22', body: true }
-      ]
-    }
-  }
-})
