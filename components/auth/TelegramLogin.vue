@@ -25,63 +25,7 @@ window.onTelegramAuth = (user) => {
     alert(`Hello ${user.first_name}, you are logged in!`);
 };
 </script> -->
-<!-- <template>
-    <div>
-        <button class="custom-telegram-button" @click="redirectToTelegramAuth">
-            <img src="/icons/icons8-telegram-48.svg" alt="Telegram Login" />
-            Login
-        </button>
-    </div>
-</template>
 
-<script setup>
-const botId = "8103176938"; // Replace with your actual bot ID
-const returnTo = "https://owlmingo.space/auth"; // Your return URL
-
-const redirectToTelegramAuth = () => {
-    const authUrl = `https://oauth.telegram.org/auth?bot_id=${botId}&origin=${encodeURIComponent(window.location.origin)}&embed=1&request_access=write&return_to=${encodeURIComponent(returnTo)}`;
-    window.location.href = authUrl; // Redirect user to Telegram OAuth
-};
-
-
-onMounted(() => {
-    const route = useRoute();
-    const hash = route.hash;
-
-    if (hash.startsWith("#tgAuthResult=")) {
-        const encodedData = hash.replace("#tgAuthResult=", "");
-        const jsonData = decodeURIComponent(encodedData);
-        const userData = JSON.parse(jsonData);
-
-        console.log("Telegram Auth Data:", userData);
-
-        // Send userData to the backend for verification
-        // verifyTelegramLogin(userData);
-    } else {
-        console.warn("No Telegram auth data found.");
-    }
-});
-</script>
-
-<style>
-.custom-telegram-button {
-    background-color: #0088cc;
-    border: none;
-    padding: 10px 15px;
-    border-radius: 10px;
-    cursor: pointer;
-    display: flex;
-    align-items: center;
-    gap: 10px;
-    color: white;
-    font-size: 16px;
-    font-weight: bold;
-}
-.custom-telegram-button img {
-    width: 24px;
-    height: 24px;
-}
-</style> -->
 
 <template>
     <div class="custom-telegram-button" @click="redirectToTelegramAuth">
@@ -141,19 +85,10 @@ onMounted(() => {
 
 <style>
 .custom-telegram-button {
-    /* background-color: #0088cc; */
-    /* border: none; */
-    /* padding: 10px 15px;
-    border-radius: 10px; */
     cursor: pointer;
-    /* display: flex; */
     align-items: center;
     width: 50px;
     height: 50px;
-    /* gap: 10px; */
-    /* color: white; */
-    /* font-size: 16px;
-    font-weight: bold; */
 }
 
 .custom-telegram-button img {
