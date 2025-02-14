@@ -142,12 +142,14 @@ onMounted(() => {
 <style>
 .custom-telegram-button {
     /* background-color: #0088cc; */
-    border: none;
-    padding: 10px 15px;
-    border-radius: 10px;
+    /* border: none; */
+    /* padding: 10px 15px;
+    border-radius: 10px; */
     cursor: pointer;
-    display: flex;
+    /* display: flex; */
     align-items: center;
+    width: 50px;
+    height: 50px;
     /* gap: 10px; */
     /* color: white; */
     /* font-size: 16px;
