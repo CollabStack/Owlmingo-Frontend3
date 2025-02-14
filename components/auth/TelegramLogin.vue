@@ -1,4 +1,4 @@
-<!-- <template>
+<template>
     <div>
       <div id="telegram-login"></div>
     </div>
@@ -25,7 +25,7 @@
     alert(`Hello ${user.first_name}, you are logged in!`);
   };
   </script>
-   -->
+  
 <!-- 
 <template>
       <div id="telegram-login" style="display: none;"></div>
@@ -79,9 +79,10 @@
   }
   </style>
    -->
-   <template>
+
+   
+   <!-- <template>
     <div>
-      <!-- Custom Telegram Login Button -->
       <button class="custom-telegram-button" @click="openTelegramAuth">
         <img src="/icons/icons8-telegram-48.svg" alt="Telegram Login" />
       </button>
@@ -125,4 +126,4 @@
   }
   </style>
   
-  
+   -->
