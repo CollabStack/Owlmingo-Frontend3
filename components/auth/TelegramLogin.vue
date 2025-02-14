@@ -25,7 +25,7 @@ window.onTelegramAuth = (user) => {
     alert(`Hello ${user.first_name}, you are logged in!`);
 };
 </script> -->
-<template>
+<!-- <template>
     <div>
         <button class="custom-telegram-button" @click="redirectToTelegramAuth">
             <img src="/icons/icons8-telegram-48.svg" alt="Telegram Login" />
@@ -77,6 +77,85 @@ onMounted(() => {
     font-size: 16px;
     font-weight: bold;
 }
+.custom-telegram-button img {
+    width: 24px;
+    height: 24px;
+}
+</style> -->
+
+
+<template>
+    <div>
+        <button class="custom-telegram-button" @click="redirectToTelegramAuth">
+            <img src="/icons/icons8-telegram-48.svg" alt="Telegram Login" />
+            Login
+        </button>
+    </div>
+</template>
+
+<script setup>
+import { useRoute } from "vue";
+import { onMounted } from "vue";
+
+// Telegram Bot ID
+const botId = "8103176938"; // Replace with your actual bot ID
+const returnTo = "https://owlmingo.space/auth"; // Redirect after login
+
+// Redirect to Telegram authentication
+const redirectToTelegramAuth = () => {
+    const authUrl = `https://oauth.telegram.org/auth?bot_id=${botId}&origin=${encodeURIComponent(window.location.origin)}&embed=1&request_access=write&return_to=${encodeURIComponent(returnTo)}`;
+    window.location.href = authUrl;
+};
+
+// Function to decode Base64
+const decodeBase64 = (str) => {
+    try {
+        return JSON.parse(atob(str));
+    } catch (error) {
+        console.error("Failed to decode Telegram Auth Result:", error);
+        return null;
+    }
+};
+
+// Extract Telegram authentication data
+onMounted(() => {
+    const route = useRoute();
+    const hash = route.hash;
+
+    if (hash.startsWith("#tgAuthResult=")) {
+        const encodedData = hash.replace("#tgAuthResult=", "");
+
+        try {
+            const userData = decodeBase64(encodedData);
+            if (userData) {
+                console.log("Telegram Auth Data:", userData);
+            } else {
+                console.warn("Failed to parse Telegram Auth Data.");
+            }
+        } catch (error) {
+            console.error("Error decoding Telegram Auth Result:", error);
+        }
+    } else {
+        console.warn("No Telegram auth data found.");
+    }
+});
+</script>
+
+<style>
+.custom-telegram-button {
+    background-color: #0088cc;
+    border: none;
+    padding: 10px 15px;
+    border-radius: 10px;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    color: white;
+    font-size: 16px;
+    font-weight: bold;
+}
+
 .custom-telegram-button img {
     width: 24px;
     height: 24px;
