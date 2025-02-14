@@ -49,7 +49,7 @@ window.onTelegramAuth = (user) => {
         <path d="M21.2 7.6L3.4 16.5c-1.2.6-1.2 2.3 0 2.9l4.8 2.4c.4.2.9.1 1.2-.2l8.3-8.3" />
         <path d="m7.4 21.8 1.5-5.8 12.3-12.3c.3-.3.8-.3 1.1 0l2.8 2.8c.3.3.3.8 0 1.1L12.8 19.9l-5.4 1.9z" />
       </svg>
-      Login with Telegram
+      Login 
     </button>
 
     <!-- Hidden Original Telegram Login Button -->
