@@ -61,8 +61,10 @@ window.onTelegramAuth = (user) => {
   
   // Function to simulate a click on the hidden Telegram login button
   const triggerTelegramAuth = () => {
+    console.log("Triggering Telegram authentication...");
     const telegramButton = document.querySelector("#telegram-login iframe");
     if (telegramButton) {
+        console.log("Telegram login widget loaded.");
       telegramButton.contentWindow.postMessage("login", "*");
     } else {
       console.error("Telegram login widget not loaded.");
