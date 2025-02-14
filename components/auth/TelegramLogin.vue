@@ -83,7 +83,6 @@ onMounted(() => {
 }
 </style> -->
 
-
 <template>
     <div>
         <button class="custom-telegram-button" @click="redirectToTelegramAuth">
@@ -94,7 +93,7 @@ onMounted(() => {
 </template>
 
 <script setup>
-import { useRoute } from "vue";
+import { useRoute } from "#imports"; // ✅ Correct import for Nuxt
 import { onMounted } from "vue";
 
 // Telegram Bot ID
