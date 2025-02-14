@@ -1,4 +1,4 @@
-<template>
+<!-- <template>
     <div>
         <div id="telegram-login"></div>
     </div>
@@ -24,4 +24,42 @@ window.onTelegramAuth = (user) => {
     console.log("User authenticated:", user);
     alert(`Hello ${user.first_name}, you are logged in!`);
 };
+</script> -->
+<template>
+    <div>
+        <button class="custom-telegram-button" @click="redirectToTelegramAuth">
+            <img src="/icons/icons8-telegram-48.svg" alt="Telegram Login" />
+            Login
+        </button>
+    </div>
+</template>
+
+<script setup>
+const botId = "8103176938"; // Replace with your actual bot ID
+const returnTo = "https://owlmingo.space/auth"; // Your return URL
+
+const redirectToTelegramAuth = () => {
+    const authUrl = `https://oauth.telegram.org/auth?bot_id=${botId}&origin=${encodeURIComponent(window.location.origin)}&embed=1&request_access=write&return_to=${encodeURIComponent(returnTo)}`;
+    window.location.href = authUrl; // Redirect user to Telegram OAuth
+};
 </script>
+
+<style>
+.custom-telegram-button {
+    background-color: #0088cc;
+    border: none;
+    padding: 10px 15px;
+    border-radius: 10px;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    color: white;
+    font-size: 16px;
+    font-weight: bold;
+}
+.custom-telegram-button img {
+    width: 24px;
+    height: 24px;
+}
+</style>
