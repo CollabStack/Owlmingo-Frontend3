@@ -30,7 +30,7 @@ window.onTelegramAuth = (user) => {
 </script> -->
 <template>
     <div>
-      <!-- Custom Telegram Button -->
+      <!-- Custom Telegram Login Button -->
       <button class="custom-telegram-button" @click="openTelegramAuth">
         <img src="/icons/icons8-telegram-48.svg" alt="Telegram Login" />
       </button>
@@ -40,21 +40,21 @@ window.onTelegramAuth = (user) => {
   <script setup>
   import { useRuntimeConfig } from "nuxt/app";
   
-  const botUsername = useRuntimeConfig().public.BOT_USERNAME; // Ensure this is correct
+  const botUsername = useRuntimeConfig().public.BOT_USERNAME; // Ensure this is set in .env
   
   console.log("Bot Username:", botUsername);
   
-  // Function to manually open Telegram OAuth login
+  // Function to open Telegram authentication
   const openTelegramAuth = () => {
     if (!botUsername) {
-      console.error("Bot username is missing! Check your .env file.");
+      console.error("Bot username is missing! Check your environment variables.");
       return;
     }
   
-    // Construct Telegram OAuth URL
+    // Use bot username (NOT bot_id)
     const authUrl = `https://oauth.telegram.org/auth?bot=${botUsername}&origin=${window.location.origin}&embed=1`;
   
-    // Open login in new popup window
+    // Open Telegram OAuth login in a popup
     const authWindow = window.open(authUrl, "_blank", "width=600,height=600");
   
     if (!authWindow) {
@@ -65,7 +65,7 @@ window.onTelegramAuth = (user) => {
   // Listen for authentication messages from Telegram
   window.addEventListener("message", (event) => {
     if (event.origin !== "https://oauth.telegram.org") return;
-    
+  
     console.log("Authenticated User:", event.data);
     alert(`Welcome, ${event.data.first_name}!`);
   });
@@ -81,6 +81,11 @@ window.onTelegramAuth = (user) => {
     cursor: pointer;
     background-color: #0088cc;
     padding: 10px;
+    transition: all 0.3s ease-in-out;
+  }
+  
+  .custom-telegram-button:hover {
+    background-color: #006699;
   }
   
   .custom-telegram-button img {
