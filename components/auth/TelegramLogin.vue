@@ -79,74 +79,44 @@
   }
   </style>
    -->
-
    <template>
     <div>
-      <!-- Hidden Telegram Login Button -->
-      <div id="telegram-login" class="hidden-telegram-button"></div>
-  
       <!-- Custom Telegram Login Button -->
-      <button class="custom-telegram-button" @click="triggerTelegramLogin">
+      <button class="custom-telegram-button" @click="openTelegramAuth">
         <img src="/icons/icons8-telegram-48.svg" alt="Telegram Login" />
       </button>
     </div>
   </template>
   
   <script setup>
-  import { onMounted } from "vue";
+  import { useRuntimeConfig } from "nuxt/app";
   
-  const botUsername = "owlmingo_bot"; // Replace with your bot's username
+  const botUsername = useRuntimeConfig().public.BOT_USERNAME; // Load bot username from env
   
-  onMounted(() => {
-    const script = document.createElement("script");
-    script.src = "https://telegram.org/js/telegram-widget.js?22";
-    script.setAttribute("data-telegram-login", botUsername);
-    script.setAttribute("data-size", "large");
-    script.setAttribute("data-radius", "20");
-    script.setAttribute("data-onauth", "onTelegramAuth(user)");
-    script.setAttribute("data-request-access", "write");
-    document.getElementById("telegram-login").appendChild(script);
+  console.log("Bot Username:", botUsername);
+  
+  // Function to open Telegram authentication
+  const openTelegramAuth = () => {
+    const authUrl = `https://oauth.telegram.org/auth?bot=${botUsername}&origin=${window.location.origin}&embed=1`;
+    window.open(authUrl, "_blank", "width=600,height=600");
+  };
+  
+  // Listen for authentication messages from Telegram
+  window.addEventListener("message", (event) => {
+    if (event.origin !== "https://oauth.telegram.org") return;
+    console.log("Authenticated User:", event.data);
+    alert(`Welcome, ${event.data.first_name}!`);
   });
-  
-  // Function to trigger the hidden Telegram login
-  const triggerTelegramLogin = () => {
-    console.log("Triggering Telegram login...");
-    const telegramFrame = document.querySelector("#telegram-login iframe");
-    if (telegramFrame) {
-      telegramFrame.style.display = "block"; // Show the hidden iframe
-      telegramFrame.click(); // Try to trigger click on it
-    } else {
-      console.error("Telegram iframe not found!");
-    }
-  };
-  
-  // Handle Telegram login response
-  window.onTelegramAuth = (user) => {
-    console.log("User authenticated:", user);
-    alert(`Hello ${user.first_name}, you are logged in!`);
-  };
   </script>
   
   <style scoped>
-  /* Hide the default Telegram button (but keep it in the DOM) */
-  .hidden-telegram-button {
-    position: absolute;
-    top: -100px; /* Moves it off-screen */
-    left: -100px;
-    opacity: 0;
-    pointer-events: none;
-  }
-  
-  /* Custom Telegram Button */
   .custom-telegram-button {
-    /* background-color: #29a9eb; */
     border: none;
     border-radius: 50%;
     display: flex;
     justify-content: center;
     align-items: center;
     cursor: pointer;
-    /* box-shadow: 0px 4px 6px rgba(0, 0, 0, 0.1); */
   }
   
   .custom-telegram-button img {
@@ -154,4 +124,5 @@
     height: 50px;
   }
   </style>
+  
   
