@@ -29,7 +29,7 @@
   };
   </script>
    -->
-<!-- 
+
     <template>
         <div>
           <button class="custom-telegram-button" @click="openTelegramAuth">
@@ -74,12 +74,11 @@
         height: 50px;
       }
       </style>
-       -->
+      
 
 
-<template>
+<!-- <template>
     <div>
-        <!-- Custom Telegram Login Button -->
         <button class="custom-telegram-button" @click="openTelegramAuth">
             <img src="/icons/icons8-telegram-48.svg" alt="Telegram Login" />
         </button>
@@ -127,7 +126,7 @@ window.addEventListener("message", (event) => {
     width: 50px;
     height: 50px;
 }
-</style>
+</style> -->
 <!-- const authUrl = `https://oauth.telegram.org/auth?bot_id=${botId}&origin=${window.location.origin}&embed=1`;
       const authUrl = `https://oauth.telegram.org/auth?bot_id=${botId}&origin=${window.location.origin}&embed=1`;
       const authUrl = `https://oauth.telegram.org/auth?bot=${botUsername}&origin=${window.location.origin}&embed=1`; -->
