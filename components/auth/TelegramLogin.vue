@@ -40,8 +40,8 @@ import { useRoute } from "#imports"; // ✅ Correct import for Nuxt
 import { onMounted } from "vue";
 
 // Telegram Bot ID
-const botId = "8103176938"; // Replace with your actual bot ID
-const returnTo = "https://owlmingo.space/auth"; // Redirect after login
+const botId = useRuntimeConfig().public.BOT_ID;
+const returnTo = useRuntimeConfig().public.BOT_RETURN_URL; // Redirect after login
 
 // Redirect to Telegram authentication
 const redirectToTelegramAuth = () => {

@@ -40,6 +40,7 @@ export default defineNuxtConfig({
       BOT_TOKEN: process.env.TELEGRAM_BOT_TOKEN, // Store in .env
       BOT_USERNAME: process.env.TELEGRAM_BOT_USERNAME, // Store in .env
       BOT_ID: process.env.TELEGRAM_BOT_ID, // Store in .env
+      BOT_RETURN_URL: process.env.TELEGRAM_BOT_WEBHOOK_URL, // Store in .env
     },
   },
 
