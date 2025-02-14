@@ -42,7 +42,7 @@ window.onTelegramAuth = (user) => {
   
   <script setup>
   // Replace with your bot username
-  const botUsername = 'your_bot_username';
+  const botUsername = 'owlmingo_bot';
   
   // Handle Telegram Login
   const handleTelegramLogin = () => {
