@@ -40,8 +40,11 @@ import { useRoute } from "#imports"; // ✅ Correct import for Nuxt
 import { onMounted } from "vue";
 
 // Telegram Bot ID
-const botId = useRuntimeConfig().public.BOT_ID;
-const returnTo = useRuntimeConfig().public.BOT_RETURN_URL; // Redirect after login
+
+const botId = "8103176938"; // Replace with your actual bot ID
+const returnTo = "https://owlmingo.space/auth"; // Redirect after login
+// const botId = useRuntimeConfig().public.BOT_ID;
+// const returnTo = useRuntimeConfig().public.BOT_RETURN_URL;
 
 // Redirect to Telegram authentication
 const redirectToTelegramAuth = () => {
@@ -52,6 +55,7 @@ const redirectToTelegramAuth = () => {
 // Function to decode Base64
 const decodeBase64 = (str) => {
     try {
+        console.log("Decoding Base64:", str);
         return JSON.parse(atob(str));
     } catch (error) {
         console.error("Failed to decode Telegram Auth Result:", error);
@@ -61,6 +65,9 @@ const decodeBase64 = (str) => {
 
 // Extract Telegram authentication data
 onMounted(() => {
+    console.log("Telegram Auth Component Mounted.");
+    console.log("Bot ID:", botId);
+    console.log("Return URL:", returnTo);
     const route = useRoute();
     const hash = route.hash;
 
