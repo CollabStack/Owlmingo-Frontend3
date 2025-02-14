@@ -3,10 +3,14 @@
     <v-btn color="#4667E5">
       Testing
     </v-btn>
+    <!-- <Auth-Otp /> -->
+     <AuthLogin />
+
   </v-container>
 </template>
 
 <script setup>
+
 // template
 
 
