@@ -30,38 +30,43 @@ window.onTelegramAuth = (user) => {
 </script> -->
 <template>
     <div>
-      <!-- Hidden container for Telegram login -->
+      <!-- Hidden Telegram Widget -->
       <div id="telegram-login" style="display: none;"></div>
   
-      <!-- Custom Button -->
-      <button class="custom-telegram-button" @click="loadTelegramAuth">
+      <!-- Custom Telegram Button -->
+      <button class="custom-telegram-button" @click="triggerTelegramAuth">
         <img src="/icons/icons8-telegram-48.svg" alt="Telegram Login" />
       </button>
     </div>
   </template>
   
   <script setup>
-  import { useRuntimeConfig, onMounted } from "nuxt/app";
+  import { onMounted } from "vue";
   
   const botUsername = "owlmingo_bot"; // Replace with your bot username
   
-  const loadTelegramAuth = () => {
-    // Remove old script if exists (to avoid duplicates)
-    const oldScript = document.querySelector("#telegram-login-script");
-    if (oldScript) oldScript.remove();
-  
-    // Create a new script
+  onMounted(() => {
+    // Load Telegram widget script
     const script = document.createElement("script");
-    script.id = "telegram-login-script";
     script.src = "https://telegram.org/js/telegram-widget.js?22";
     script.setAttribute("data-telegram-login", botUsername);
     script.setAttribute("data-size", "large");
     script.setAttribute("data-radius", "20");
     script.setAttribute("data-onauth", "onTelegramAuth");
     script.setAttribute("data-request-access", "write");
-  
-    // Append to hidden div
+    script.id = "telegram-login-widget";
+    
     document.getElementById("telegram-login").appendChild(script);
+  });
+  
+  // Function to simulate a click on the hidden Telegram login button
+  const triggerTelegramAuth = () => {
+    const telegramButton = document.querySelector("#telegram-login iframe");
+    if (telegramButton) {
+      telegramButton.contentWindow.postMessage("login", "*");
+    } else {
+      console.error("Telegram login widget not loaded.");
+    }
   };
   
   // Handle authentication
@@ -88,6 +93,7 @@ window.onTelegramAuth = (user) => {
     height: 50px;
   }
   </style>
+  
   
 
 <!-- <template>
