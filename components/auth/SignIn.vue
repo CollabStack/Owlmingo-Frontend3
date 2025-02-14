@@ -26,10 +26,22 @@
                         </v-form>
                         
                         <!-- Telegram Custom Login Button -->
-                        <v-btn color="primary" block @click="initiateTelegramLogin">
+                        <!-- <v-btn color="primary" block @click="initiateTelegramLogin">
                             <v-icon left>mdi-telegram</v-icon>
                             Login with Telegram
-                        </v-btn>
+                        </v-btn> -->
+                        <!-- <client-only> -->
+                            <!-- <vueTelegramLogin
+                                class="pa-2"
+                                mode="callback"
+                                size="large"
+                                radius="10px"
+                                userpic="false"
+                                :telegram-login="telegram_bot_name"
+                                @callback="telegramCallback"
+                            /> -->
+                        <!-- </client-only> -->
+                        <Auth-TelegramLogin />
                         
                     </v-card-text>
                     <v-card-actions>
@@ -46,23 +58,25 @@
 import { ref, onMounted } from 'vue';
 import Swal from 'sweetalert2';
 import { userAuth } from '~/store/userAuth';
+import { vueTelegramLogin } from 'vue-telegram-login';
 
+const authStore = userAuth();
 const email = ref('');
 const password = ref('');
-const authStore = userAuth();
+const telegram_bot_name = useRuntimeConfig().public.botUsername;
 
 onMounted(() => {
     console.log('Sign In mounted');
 
-    window.onTelegramAuth = (user) => {
-        console.log('Telegram user data:', user);
-        Swal.fire({
-            icon: 'success',
-            title: 'Logged in with Telegram',
-            text: `Welcome, ${user.first_name}!`,
-        });
-        // Handle authentication logic here
-    };
+    // window.onTelegramAuth = (user) => {
+    //     console.log('Telegram user data:', user);
+    //     Swal.fire({
+    //         icon: 'success',
+    //         title: 'Logged in with Telegram',
+    //         text: `Welcome, ${user.first_name}!`,
+    //     });
+    //     // Handle authentication logic here
+    // };
 });
 
 const login = async () => {
@@ -78,15 +92,22 @@ const login = async () => {
     }
 };
 
-const initiateTelegramLogin = () => {
-    const script = document.createElement('script');
-    script.async = true;
-    script.src = "https://telegram.org/js/telegram-widget.js?22";
-    script.setAttribute("data-telegram-login", "owlmingo_bot");
-    script.setAttribute("data-size", "large");
-    script.setAttribute("data-radius", "20");
-    script.setAttribute("data-onauth", "onTelegramAuth(user)");
-    script.setAttribute("data-request-access", "write");
-    document.body.appendChild(script);
+const telegramCallback = async (user) => {
+    // const authStore = useAuthStore();
+    // await authStore.telegramCallback(user);
+    console.log('Telegram user data:', user);
+
 };
+
+// const initiateTelegramLogin = () => {
+//     const script = document.createElement('script');
+//     script.async = true;
+//     script.src = "https://telegram.org/js/telegram-widget.js?22";
+//     script.setAttribute("data-telegram-login", "owlmingo_bot");
+//     script.setAttribute("data-size", "large");
+//     script.setAttribute("data-radius", "20");
+//     script.setAttribute("data-onauth", "onTelegramAuth(user)");
+//     script.setAttribute("data-request-access", "write");
+//     document.body.appendChild(script);
+// };
 </script>

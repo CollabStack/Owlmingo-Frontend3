@@ -1,6 +1,6 @@
 <template>
     <Auth-SignIn />
-    <TelegramAuth />
+    <!-- <TelegramAuth /> -->
 
 </template>
 <script setup>
