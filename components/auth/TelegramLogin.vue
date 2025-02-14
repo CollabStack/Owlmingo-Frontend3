@@ -42,6 +42,25 @@ const redirectToTelegramAuth = () => {
     const authUrl = `https://oauth.telegram.org/auth?bot_id=${botId}&origin=${encodeURIComponent(window.location.origin)}&embed=1&request_access=write&return_to=${encodeURIComponent(returnTo)}`;
     window.location.href = authUrl; // Redirect user to Telegram OAuth
 };
+
+
+onMounted(() => {
+    const route = useRoute();
+    const hash = route.hash;
+
+    if (hash.startsWith("#tgAuthResult=")) {
+        const encodedData = hash.replace("#tgAuthResult=", "");
+        const jsonData = decodeURIComponent(encodedData);
+        const userData = JSON.parse(jsonData);
+
+        console.log("Telegram Auth Data:", userData);
+
+        // Send userData to the backend for verification
+        // verifyTelegramLogin(userData);
+    } else {
+        console.warn("No Telegram auth data found.");
+    }
+});
 </script>
 
 <style>
