@@ -30,52 +30,45 @@ window.onTelegramAuth = (user) => {
 </script> -->
 <template>
     <div>
-      <!-- Hidden Telegram Widget -->
-      <div id="telegram-login" style="display: none;"></div>
-  
       <!-- Custom Telegram Button -->
-      <button class="custom-telegram-button" @click="triggerTelegramAuth">
+      <button class="custom-telegram-button" @click="openTelegramAuth">
         <img src="/icons/icons8-telegram-48.svg" alt="Telegram Login" />
       </button>
     </div>
   </template>
   
   <script setup>
-  import { onMounted } from "vue";
+  import { useRuntimeConfig } from "nuxt/app";
   
-  const botUsername = "owlmingo_bot"; // Replace with your bot username
+  const botUsername = useRuntimeConfig().public.BOT_USERNAME; // Ensure this is correct
   
-  onMounted(() => {
-    // Load Telegram widget script
-    const script = document.createElement("script");
-    script.src = "https://telegram.org/js/telegram-widget.js?22";
-    script.setAttribute("data-telegram-login", botUsername);
-    script.setAttribute("data-size", "large");
-    script.setAttribute("data-radius", "20");
-    script.setAttribute("data-onauth", "onTelegramAuth");
-    script.setAttribute("data-request-access", "write");
-    script.id = "telegram-login-widget";
-    
-    document.getElementById("telegram-login").appendChild(script);
-  });
+  console.log("Bot Username:", botUsername);
   
-  // Function to simulate a click on the hidden Telegram login button
-  const triggerTelegramAuth = () => {
-    console.log("Triggering Telegram authentication...");
-    const telegramButton = document.querySelector("#telegram-login iframe");
-    if (telegramButton) {
-        console.log("Telegram login widget loaded.");
-      telegramButton.contentWindow.postMessage("login", "*");
-    } else {
-      console.error("Telegram login widget not loaded.");
+  // Function to manually open Telegram OAuth login
+  const openTelegramAuth = () => {
+    if (!botUsername) {
+      console.error("Bot username is missing! Check your .env file.");
+      return;
+    }
+  
+    // Construct Telegram OAuth URL
+    const authUrl = `https://oauth.telegram.org/auth?bot=${botUsername}&origin=${window.location.origin}&embed=1`;
+  
+    // Open login in new popup window
+    const authWindow = window.open(authUrl, "_blank", "width=600,height=600");
+  
+    if (!authWindow) {
+      console.error("Popup blocked! Allow popups in your browser.");
     }
   };
   
-  // Handle authentication
-  window.onTelegramAuth = (user) => {
-    console.log("User authenticated:", user);
-    alert(`Hello ${user.first_name}, you are logged in!`);
-  };
+  // Listen for authentication messages from Telegram
+  window.addEventListener("message", (event) => {
+    if (event.origin !== "https://oauth.telegram.org") return;
+    
+    console.log("Authenticated User:", event.data);
+    alert(`Welcome, ${event.data.first_name}!`);
+  });
   </script>
   
   <style scoped>
@@ -95,7 +88,6 @@ window.onTelegramAuth = (user) => {
     height: 50px;
   }
   </style>
-  
   
 
 <!-- <template>
