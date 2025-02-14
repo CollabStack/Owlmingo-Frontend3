@@ -77,52 +77,57 @@
        -->
 
 
-       <template>
-        <div>
-          <!-- Custom Telegram Login Button -->
-          <button class="custom-telegram-button" @click="openTelegramAuth">
+<template>
+    <div>
+        <!-- Custom Telegram Login Button -->
+        <button class="custom-telegram-button" @click="openTelegramAuth">
             <img src="/icons/icons8-telegram-48.svg" alt="Telegram Login" />
-          </button>
-        </div>
-      </template>
-      
-      <script setup>
-      import { useRuntimeConfig } from "nuxt/app";
-      
-      const botId = useRuntimeConfig().public.BOT_ID; // Load bot ID from env
-      
-        console.log("Bot ID:", botId);      
-      // Function to open Telegram authentication
-      const openTelegramAuth = () => {
-        if (!botId) {
-          console.error("Bot ID is missing! Check your environment variables.");
-          return;
-        }
-        const authUrl = `https://oauth.telegram.org/auth?bot_id=${botId}&origin=${window.location.origin}&embed=1`;
-        window.open(authUrl, "_blank", "width=600,height=600");
-      };
-      
-      // Listen for authentication messages from Telegram
-      window.addEventListener("message", (event) => {
-        if (event.origin !== "https://oauth.telegram.org") return;
-        console.log("Authenticated User:", event.data);
-        alert(`Welcome, ${event.data.first_name}!`);
-      });
-      </script>
-      
-      <style scoped>
-      .custom-telegram-button {
-        border: none;
-        border-radius: 50%;
-        display: flex;
-        justify-content: center;
-        align-items: center;
-        cursor: pointer;
-      }
-      
-      .custom-telegram-button img {
-        width: 50px;
-        height: 50px;
-      }
-      </style>
-      
+        </button>
+    </div>
+</template>
+
+<script setup>
+import { useRuntimeConfig } from "nuxt/app";
+
+const botId = useRuntimeConfig().public.BOT_ID; // Load bot ID from env
+const botUsername = useRuntimeConfig().public.BOT_USERNAME; // Use bot username instead
+console.log("Bot Username:", botUsername);
+console.log("Bot ID:", botId);
+// Function to open Telegram authentication
+const openTelegramAuth = () => {
+    if (!botId) {
+        console.error("Bot ID is missing! Check your environment variables.");
+        return;
+    }
+    // const authUrl = `https://oauth.telegram.org/auth?bot_id=${botId}&origin=${window.location.origin}&embed=1`;
+    const authUrl = `https://oauth.telegram.org/auth?bot=${botUsername}&origin=${window.location.origin}&embed=1`;
+
+    window.open(authUrl, "_blank", "width=600,height=600");
+};
+
+// Listen for authentication messages from Telegram
+window.addEventListener("message", (event) => {
+    if (event.origin !== "https://oauth.telegram.org") return;
+    console.log("Authenticated User:", event.data);
+    alert(`Welcome, ${event.data.first_name}!`);
+});
+</script>
+
+<style scoped>
+.custom-telegram-button {
+    border: none;
+    border-radius: 50%;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    cursor: pointer;
+}
+
+.custom-telegram-button img {
+    width: 50px;
+    height: 50px;
+}
+</style>
+<!-- const authUrl = `https://oauth.telegram.org/auth?bot_id=${botId}&origin=${window.location.origin}&embed=1`;
+      const authUrl = `https://oauth.telegram.org/auth?bot_id=${botId}&origin=${window.location.origin}&embed=1`;
+      const authUrl = `https://oauth.telegram.org/auth?bot=${botUsername}&origin=${window.location.origin}&embed=1`; -->
