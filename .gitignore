@@ -24,3 +24,7 @@ logs
 !.env.example
 
 .vercel
+
+package-lock.json
+yarn.lock
+package-*.*
