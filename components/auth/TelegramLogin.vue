@@ -1,10 +1,10 @@
-<!-- <template>
+<template>
     <div>
-        <div id="telegram-login" style="display: none;"></div>
+        <div id="telegram-login"></div>
     </div>
-    <button class="custom-telegram-button" @click="openTelegramAuth">
+    <!-- <button class="custom-telegram-button" @click="openTelegramAuth">
         <img src="/icons/icons8-telegram-48.svg" alt="Telegram Login" />
-    </button>
+    </button> -->
 </template>
 
 <script setup>
@@ -27,10 +27,9 @@ window.onTelegramAuth = (user) => {
     console.log("User authenticated:", user);
     alert(`Hello ${user.first_name}, you are logged in!`);
 };
-</script> -->
-<template>
+</script>
+<!-- <template>
     <div>
-      <!-- Custom Telegram Login Button -->
       <button class="custom-telegram-button" @click="openTelegramAuth">
         <img src="/icons/icons8-telegram-48.svg" alt="Telegram Login" />
       </button>
@@ -93,7 +92,7 @@ window.onTelegramAuth = (user) => {
     height: 50px;
   }
   </style>
-  
+   -->
 
 <!-- <template>
         <div>
