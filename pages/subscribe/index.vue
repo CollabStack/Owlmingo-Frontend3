@@ -7,27 +7,18 @@
       to reinforce learning or assess knowledge for students and professionals alike.
     </p>
 
-    <!-- Toggle between School & Work -->
     <v-btn-toggle v-model="selectedTab" class="mt-3" rounded mandatory>
-      <v-btn
-        value="school"
-        class="toggle-button"
-        :class="{ active: selectedTab === 'school' }"
-      >
+      <v-btn value="school" class="toggle-button" :class="{ active: selectedTab === 'school' }">
         School
       </v-btn>
-      <v-btn
-        value="work"
-        class="toggle-button"
-        :class="{ active: selectedTab === 'work' }"
-      >
+      <v-btn value="work" class="toggle-button" :class="{ active: selectedTab === 'work' }">
         Work
       </v-btn>
     </v-btn-toggle>
 
     <v-row class="mt-6 justify-center">
       <v-col cols="12" md="5" v-for="(plan, index) in activePlans" :key="index">
-        <v-card class="pa-6" elevation="2"  style="border-radius: 20px">
+        <v-card class="pa-6" elevation="2" style="border-radius: 20px">
           <p class="text-h6 font-weight-bold" :class="plan.colorClass">{{ plan.name }}</p>
           <p class="text-h4 font-weight-bold">
             {{ plan.price }} <span class="text-h6">/ month</span>
@@ -45,7 +36,6 @@
             </v-list-item>
           </v-list>
 
-          <!-- Dynamic Button Behavior -->
           <v-btn
             block
             :color="plan.buttonColor"
@@ -82,9 +72,9 @@ const plans = {
         "200 pages per document",
         "150,000 characters per text upload",
       ],
-      colorClass: "text-purple",
-      iconColor: "purple",
-      buttonColor: "purple",
+      colorClass: "text-primary",
+      iconColor: "primary",
+      buttonColor: "primary",
     },
     {
       name: "Monthly",
@@ -96,9 +86,9 @@ const plans = {
         "200 pages per document",
         "150,000 characters per text upload",
       ],
-      colorClass: "text-green",
-      iconColor: "green",
-      buttonColor: "green",
+      colorClass: "text-error",
+      iconColor: "error",
+      buttonColor: "error",
     },
   ],
   work: [
@@ -114,9 +104,9 @@ const plans = {
         "500 responses per month",
         "Revisely Branding on Quizzes",
       ],
-      colorClass: "text-blue",
-      iconColor: "blue",
-      buttonColor: "blue",
+      colorClass: "text-primary",
+      iconColor: "primary",
+      buttonColor: "primary",
     },
     {
       name: "Business",
@@ -130,9 +120,9 @@ const plans = {
         "Unlimited responses",
         "No Revisely branding",
       ],
-      colorClass: "text-orange",
-      iconColor: "orange",
-      buttonColor: "orange",
+      colorClass: "text-error",
+      iconColor: "error",
+      buttonColor: "error",
     },
   ],
 };
@@ -145,24 +135,12 @@ const getButtonVariant = (planName) => {
   if (selectedTab.value === "school") {
     return planName === "Annual" ? "flat" : "outlined";
   } else {
-    return planName === "Professional" ? "flat" : "outlined";
+    return planName === "Professional" ? "outlined" : "flat";
   }
 };
 </script>
 
 <style scoped>
-.text-purple {
-  color: #8e44ad;
-}
-.text-green {
-  color: #27ae60;
-}
-.text-blue {
-  color: #3498db;
-}
-.text-orange {
-  color: #e67e22;
-}
 
 .toggle-container {
   display: flex;

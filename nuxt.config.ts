@@ -4,6 +4,7 @@ export default defineNuxtConfig({
 
   css: [
     'vuetify/styles', // Include Vuetify styles
+    '@mdi/font/css/materialdesignicons.min.css', // Include MDI CSS
   ],
 
   build: {
@@ -39,5 +40,5 @@ export default defineNuxtConfig({
     },
   },
 
-  compatibilityDate: '2025-02-12',
+  compatibilityDate: '2025-02-13',
 });
