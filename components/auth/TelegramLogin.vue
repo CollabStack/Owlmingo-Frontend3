@@ -84,11 +84,10 @@ onMounted(() => {
 </style> -->
 
 <template>
-    <div>
-        <button class="custom-telegram-button" @click="redirectToTelegramAuth">
+    <div class="custom-telegram-button" @click="redirectToTelegramAuth">
+        <!-- <button class="custom-telegram-button" @click="redirectToTelegramAuth"> -->
             <img src="/icons/icons8-telegram-48.svg" alt="Telegram Login" />
-            Login
-        </button>
+        <!-- </button> -->
     </div>
 </template>
 
@@ -142,17 +141,17 @@ onMounted(() => {
 
 <style>
 .custom-telegram-button {
-    background-color: #0088cc;
+    /* background-color: #0088cc; */
     border: none;
     padding: 10px 15px;
     border-radius: 10px;
     cursor: pointer;
     display: flex;
     align-items: center;
-    gap: 10px;
-    color: white;
-    font-size: 16px;
-    font-weight: bold;
+    /* gap: 10px; */
+    /* color: white; */
+    /* font-size: 16px;
+    font-weight: bold; */
 }
 
 .custom-telegram-button img {
