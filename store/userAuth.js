@@ -28,10 +28,14 @@ export const userAuth = defineStore('userAuth', {
             const {$UserPublicAxios} = useNuxtApp(); // Use full Nuxt app instance
             try{
                 const response = await $UserPublicAxios.post('/login', {email, password});
+                if (response.status !== 200) {
+                    throw new Error(`Error: Received status code ${response.status}`);
+                }
                 const token = response.data.data['token'];
                 this.setUser(response.data.data['user']);
                 this.setToken(token);  
                 this.refreshToken(); 
+                this.isLoggedIn = true;
                 return response.data; 
             } catch (error){
                 throw error;
