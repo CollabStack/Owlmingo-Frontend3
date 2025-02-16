@@ -63,9 +63,6 @@ const decodeBase64 = (str) => {
 
 // Extract Telegram authentication data
 onMounted(async () => {
-    console.log("Telegram Auth Component Mounted.");
-    console.log("Bot ID:", botId);
-    console.log("Return URL:", returnTo);
     const route = useRoute();
     const hash = route.hash;
     if (hash.startsWith("#tgAuthResult=")) {
