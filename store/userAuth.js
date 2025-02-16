@@ -98,12 +98,23 @@ export const userAuth = defineStore('userAuth', {
                 this.logout(); // Token expired, log out the user
                 return false;
               }
-          
+              this.isLoggedIn = true;
               return true; // Token is valid
             } catch (error) {
               this.logout(); // Logout on invalid token
               return false;
             }
         },
+        initializeSession() {
+            if (!this.token) {
+                this.logout();
+                return;
+            }
+            this.checkTokenExpired().then(isValid => {
+                if (isValid) {
+                    this.refreshToken();
+                }
+            });
+        }
     }
 });

@@ -100,6 +100,7 @@ watch(() => route.path, (newPath) => {
 onMounted(() => {
     console.log('Navbar mounted');
     console.log('isLoggedIn', isLoggedIn.value);
+    authStore.initializeSession();
 });
 /* ========== METHODS ==========*/
 function setActive(tab: string) {
