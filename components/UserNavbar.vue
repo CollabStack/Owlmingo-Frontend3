@@ -110,7 +110,10 @@ function setActive(tab: string) {
 
 function logout() {
   authStore.logout();
-  router.push('/');
+  // redirect and reload 
+    router.push('/').then(() => {
+        window.location.reload();
+    });
 }
 
 </script>
