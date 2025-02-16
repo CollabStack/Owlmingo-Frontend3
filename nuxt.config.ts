@@ -9,10 +9,6 @@ export default defineNuxtConfig({
   build: {
     transpile: ['vuetify'], // Transpile Vuetify
   },
-  modules: [
-    '@pinia/nuxt'
-  ],
-  
   app: {
     head: {
       title: 'Owlmingo', // App title
