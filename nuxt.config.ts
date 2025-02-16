@@ -9,7 +9,9 @@ export default defineNuxtConfig({
   build: {
     transpile: ['vuetify'], // Transpile Vuetify
   },
-  // modules: ['nuxt-telegram-auth'],
+  modules: [
+    '@pinia/nuxt'
+  ],
   
   app: {
     head: {
