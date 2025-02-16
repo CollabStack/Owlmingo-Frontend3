@@ -84,14 +84,14 @@ onMounted(() => {
             Swal.fire({
                 icon: 'error',
                 title: 'Login Failed',
-                text: reponse.message || 'Failed to authenticate with Telegram.'
+                text: 'Failed to authenticate with Telegram.'
             });
         } catch (error) {
             console.error("Error decoding Telegram Auth Result:", error);
             Swal.fire({
                 icon: 'error',
                 title: 'Login Failed',
-                text: reponse.message || 'Failed to authenticate with Telegram.'
+                text: 'Failed to authenticate with Telegram.'
             });
         }
     } else {
@@ -99,7 +99,7 @@ onMounted(() => {
         Swal.fire({
             icon: 'error',
             title: 'Login Failed',
-            text: reponse.message || 'No Telegram auth data found.'
+            text: 'No Telegram auth data found.'
         });
     }
 });
