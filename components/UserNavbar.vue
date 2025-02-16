@@ -57,7 +57,7 @@
                             <v-btn to="/auth">Explore</v-btn>
                             <v-btn to="/auth/sign-up">Upgrade Plan</v-btn>
                             <v-divider></v-divider>
-                            <v-btn color="secondary" to="/auth/sign-up">Sign Out</v-btn>
+                            <v-btn color="secondary" @click="logout">Sign Out</v-btn>
                         </div>
                     </v-menu>
 
@@ -106,6 +106,11 @@ function setActive(tab: string) {
   if (activeTab.value === tab) return; // Prevent redundant navigation
   activeTab.value = tab;
   router.push(tab);
+}
+
+function logout() {
+  authStore.logout();
+  router.push('/');
 }
 
 </script>
