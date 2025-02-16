@@ -42,22 +42,25 @@ export const userAuth = defineStore('userAuth', {
             this.user = null;
             Cookies.remove('token'); // Updated to remove token using Cookies.remove
         },
-        async telegramOAuth(data){
+        async telegramOAuth(data) {
             const {$UserPublicAxios} = useNuxtApp(); // Use full Nuxt app instance
-            try{
-                const {first_name, last_name, username} = data;
-                const telegram_id = data.id;
-                const response = await $UserPublicAxios.post('/telegram-oauth', {first_name, last_name, username, telegram_id});
-                console.log("response OAuth", response);
-                const token = response.data.data['token'];
-                this.setUser(response.data.data['user']);
-                this.setToken(token);  
-                this.refreshToken(); 
-                return response; 
-            } catch (error){
-                throw error;
+            try {
+            const {first_name, last_name, username} = data;
+            const telegram_id = data.id;
+            const response = await $UserPublicAxios.post('/telegram-oauth', {first_name, last_name, username, telegram_id});
+            if (response.status !== 200) {
+                throw new Error(`Error: Received status code ${response.status}`);
             }
-
+            console.log("response OAuth", response);
+            const token = response.data.data['token'];
+            this.setUser(response.data.data['user']);
+            this.setToken(token);
+            this.refreshToken();
+            this.isLoggedIn = true;
+            return response;
+            } catch (error) {
+            throw error;
+            }
         },
         async refreshToken() {
             try{
