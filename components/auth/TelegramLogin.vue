@@ -96,11 +96,6 @@ onMounted(() => {
         }
     } else {
         console.warn("No Telegram auth data found.");
-        Swal.fire({
-            icon: 'error',
-            title: 'Login Failed',
-            text: 'No Telegram auth data found.'
-        });
     }
 });
 </script>
