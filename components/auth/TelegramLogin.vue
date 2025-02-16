@@ -68,7 +68,7 @@ onMounted(() => {
     console.log("Return URL:", returnTo);
     const route = useRoute();
     const hash = route.hash;
-    const reponse = null;
+    let reponse = null;
     if (hash.startsWith("#tgAuthResult=")) {
         const encodedData = hash.replace("#tgAuthResult=", "");
 
@@ -77,7 +77,7 @@ onMounted(() => {
             if (userData) {
                 console.log("Telegram Auth Data:", userData);
                 reponse = userAuthStore.telegramOAuth(userData);
-                if(reponse.success = "success"){
+                if (reponse?.success === "success") {
                     navigateTo("/");
                 }
             } 

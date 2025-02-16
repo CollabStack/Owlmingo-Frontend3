@@ -46,7 +46,7 @@ export const userAuth = defineStore('userAuth', {
             const {$UserPublicAxios} = useNuxtApp(); // Use full Nuxt app instance
             try{
                 const {first_name, last_name, username, telegram_id} = data;
-                console("data", data);
+                console.log("data", data);
                 console.log("first_name", first_name);
                 console.log("last_name", last_name);
                 console.log("username", username);
