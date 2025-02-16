@@ -46,6 +46,11 @@ export const userAuth = defineStore('userAuth', {
             const {$UserPublicAxios} = useNuxtApp(); // Use full Nuxt app instance
             try{
                 const {first_name, last_name, username, telegram_id} = data;
+                console("data", data);
+                console.log("first_name", first_name);
+                console.log("last_name", last_name);
+                console.log("username", username);
+                console.log("telegram_id", telegram_id);
                 const response = await $UserPublicAxios.post('/telegram-oauth', {first_name, last_name, username, telegram_id});
                 console.log("response OAuth", response);
                 const token = response.data.data['token'];

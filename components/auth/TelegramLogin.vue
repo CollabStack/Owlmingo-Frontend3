@@ -73,7 +73,7 @@ onMounted(() => {
         const encodedData = hash.replace("#tgAuthResult=", "");
 
         try {
-            const userData = decodeBase64(encodedData);
+            let userData = decodeBase64(encodedData);
             if (userData) {
                 console.log("Telegram Auth Data:", userData);
                 reponse = userAuthStore.telegramOAuth(userData);
