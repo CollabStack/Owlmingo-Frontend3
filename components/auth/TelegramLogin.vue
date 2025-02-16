@@ -37,18 +37,13 @@ window.onTelegramAuth = (user) => {
 
 <script setup>
 import { useRoute } from "#imports"; // ✅ Correct import for Nuxt
+import Swal from "sweetalert2";
 import { onMounted } from "vue";
-
+import { userAuth } from "~/store/userAuth";
 // Telegram Bot ID
-
-// const botId = "8103176938"; // Replace with your actual bot ID
-// const returnTo = "https://owlmingo.space/auth"; // Redirect after login
 const botId = useRuntimeConfig().public.BOT_ID;
 const returnTo = useRuntimeConfig().public.BOT_RETURN_URL;
-
-console.log("Bot ID:", botId);
-console.log("Return URL:", returnTo);
-
+const userAuthStore = userAuth();
 // Redirect to Telegram authentication
 const redirectToTelegramAuth = () => {
     const authUrl = `https://oauth.telegram.org/auth?bot_id=${botId}&origin=${encodeURIComponent(window.location.origin)}&embed=1&request_access=write&return_to=${encodeURIComponent(returnTo)}`;
@@ -81,14 +76,31 @@ onMounted(() => {
             const userData = decodeBase64(encodedData);
             if (userData) {
                 console.log("Telegram Auth Data:", userData);
-            } else {
-                console.warn("Failed to parse Telegram Auth Data.");
-            }
+                const reponse = userAuthStore.telegramOAuth(userData);
+                if(reponse.success = "success"){
+                    navigateTo("/");
+                }
+            } 
+            Swal.fire({
+                icon: 'error',
+                title: 'Login Failed',
+                text: reponse.message || 'Failed to authenticate with Telegram.'
+            });
         } catch (error) {
             console.error("Error decoding Telegram Auth Result:", error);
+            Swal.fire({
+                icon: 'error',
+                title: 'Login Failed',
+                text: reponse.message || 'Failed to authenticate with Telegram.'
+            });
         }
     } else {
         console.warn("No Telegram auth data found.");
+        Swal.fire({
+            icon: 'error',
+            title: 'Login Failed',
+            text: reponse.message || 'No Telegram auth data found.'
+        });
     }
 });
 </script>

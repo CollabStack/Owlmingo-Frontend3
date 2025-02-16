@@ -29,6 +29,7 @@ export const userAuth = defineStore('userAuth', {
             try{
                 const response = await $UserPublicAxios.post('/login', {email, password});
                 const token = response.data.data['token'];
+                this.setUser(response.data.data['user']);
                 this.setToken(token);  
                 this.refreshToken(); 
                 return response.data; 
@@ -40,6 +41,21 @@ export const userAuth = defineStore('userAuth', {
             this.token = null;
             this.user = null;
             Cookies.remove('token'); // Updated to remove token using Cookies.remove
+        },
+        async telegramOAuth(data){
+            const {$UserPublicAxios} = useNuxtApp(); // Use full Nuxt app instance
+            try{
+                const {first_name, last_name, username, telegram_id} = data;
+                const response = await $UserPublicAxios.post('/telegram-oauth', {first_name, last_name, username, telegram_id});
+                const token = response.data.data['token'];
+                this.setUser(response.data.data['user']);
+                this.setToken(token);  
+                this.refreshToken(); 
+                return response.data; 
+            } catch (error){
+                throw error;
+            }
+
         },
         async refreshToken() {
             try{
