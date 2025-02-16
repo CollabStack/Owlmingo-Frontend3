@@ -47,6 +47,7 @@ export const userAuth = defineStore('userAuth', {
             try{
                 const {first_name, last_name, username, telegram_id} = data;
                 const response = await $UserPublicAxios.post('/telegram-oauth', {first_name, last_name, username, telegram_id});
+                console.log("response OAuth", response);
                 const token = response.data.data['token'];
                 this.setUser(response.data.data['user']);
                 this.setToken(token);  
