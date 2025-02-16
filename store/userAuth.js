@@ -105,5 +105,14 @@ export const userAuth = defineStore('userAuth', {
               return false;
             }
         },
+        async initialize() {
+            const hasToken = this.getToken();
+            if (hasToken) {
+                const valid = await this.checkTokenExpired();
+                this.isLoggedIn = valid;
+            } else {
+                this.isLoggedIn = false;
+            }
+        },
     }
 });
