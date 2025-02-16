@@ -68,7 +68,6 @@ onMounted(() => {
     console.log("Return URL:", returnTo);
     const route = useRoute();
     const hash = route.hash;
-    let reponse = null;
     if (hash.startsWith("#tgAuthResult=")) {
         const encodedData = hash.replace("#tgAuthResult=", "");
 
@@ -76,18 +75,13 @@ onMounted(() => {
             let userData = decodeBase64(encodedData);
             if (userData) {
                 console.log("Telegram Auth Data:", userData);
-                reponse = userAuthStore.telegramOAuth(userData);
-                console.log("Telegram Auth Response Page:", reponse);
-                if (reponse?.success === "success") {
+                const response = userAuthStore.telegramOAuth(userData);
+                console.log("Telegram Auth Response Page:", response);
+                if (response?.success === "success") {
                     navigateTo("/");
-                    
                 }
             } 
-            Swal.fire({
-                icon: 'error',
-                title: 'Login Failed',
-                text: 'Failed to authenticate with Telegram.'
-            });
+            
         } catch (error) {
             console.error("Error decoding Telegram Auth Result:", error);
             Swal.fire({
