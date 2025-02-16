@@ -93,7 +93,7 @@ onMounted(async () => {
 });
 </script>
 
-<style>
+<style scoped>
 .custom-telegram-button {
     cursor: pointer;
     align-items: center;
