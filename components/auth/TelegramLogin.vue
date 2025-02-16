@@ -77,8 +77,10 @@ onMounted(() => {
             if (userData) {
                 console.log("Telegram Auth Data:", userData);
                 reponse = userAuthStore.telegramOAuth(userData);
+                console.log("Telegram Auth Response Page:", reponse);
                 if (reponse?.success === "success") {
                     navigateTo("/");
+                    
                 }
             } 
             Swal.fire({
