@@ -62,7 +62,7 @@ const decodeBase64 = (str) => {
 };
 
 // Extract Telegram authentication data
-onMounted(() => {
+onMounted(async () => {
     console.log("Telegram Auth Component Mounted.");
     console.log("Bot ID:", botId);
     console.log("Return URL:", returnTo);
@@ -75,9 +75,9 @@ onMounted(() => {
             let userData = decodeBase64(encodedData);
             if (userData) {
                 console.log("Telegram Auth Data:", userData);
-                const response = userAuthStore.telegramOAuth(userData);
+                const response = await userAuthStore.telegramOAuth(userData);
                 console.log("Telegram Auth Response Page:", response);
-                if (response?.success === "success") {
+                if (response.status === 200) {
                     navigateTo("/");
                 }
             } 
