@@ -98,8 +98,6 @@ watch(() => route.path, (newPath) => {
 
 /* ========== MOUNTED ==========*/
 onMounted(() => {
-    console.log('Navbar mounted');
-    console.log('isLoggedIn', isLoggedIn.value);
     authStore.initializeSession();
 });
 /* ========== METHODS ==========*/
