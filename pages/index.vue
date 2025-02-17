@@ -1,9 +1,13 @@
 <template>
-  <v-container>
-    <v-btn color="#4667E5">
-      Testing
-    </v-btn>
-  </v-container>
+  <div >
+    <!-- <HomePage-WellcomeCom /> -->
+     <HomePage-Banner />
+    <HomePage-CardCom/>
+    <!-- <HomePage-AiCard /> -->
+     <HomePage-CardAi/>
+    <HomePage-GetStart />
+   
+  </div>
 </template>
 
 <script setup>
@@ -25,3 +29,7 @@
     console.log('Testing');
   }
 </script>
+
+<style scoped>
+
+</style>

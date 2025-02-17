@@ -1,10 +1,16 @@
 import { createVuetify } from 'vuetify';
 import * as components from 'vuetify/components';
 import * as directives from 'vuetify/directives';
+import '@mdi/font/css/materialdesignicons.css';
+
 import { watch } from 'vue';
 
 export default defineNuxtPlugin((nuxtApp) => {
+  
   const vuetify = createVuetify({
+    icons: {
+      iconfont: 'mdi', // Use mdi icon font
+    },
     components,
     directives,
     theme: {
