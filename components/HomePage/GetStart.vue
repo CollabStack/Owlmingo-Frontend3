@@ -10,7 +10,7 @@
             Save hours by instantly generating flashcards with AI-powered tools that help you efficiently test and strengthen your knowledge.
           </p>
           <NuxtLink to="/about">
-            <v-btn color="#9D7BFC" variant="elevated" class="px-6 py-3">Get Started</v-btn>
+            <v-btn color="secondary" variant="elevated" class="px-6 py-3">Get Started</v-btn>
           </NuxtLink>
         </div>
       </v-col>
@@ -45,7 +45,7 @@
           <p class="mb-5 text-body-1">
             Effortlessly create quizzes with AI that understands your material and evaluates answers to enhance both learning and teaching experiences.          </p>
           <NuxtLink to="/about">
-            <v-btn color="#9D7BFC" variant="elevated" class="px-6 py-3">Get Started</v-btn>
+            <v-btn color="secondary" variant="elevated" class="px-6 py-3">Get Started</v-btn>
           </NuxtLink>
         </div>
       </v-col>
@@ -61,7 +61,7 @@
           <p class="mb-5 text-body-1">
             Save hours by instantly generating flashcards with AI-powered tools that help you efficiently test and strengthen your knowledge.          </p>
           <NuxtLink to="/about">
-            <v-btn color="#9D7BFC" variant="elevated" class="px-6 py-3">Get Started</v-btn>
+            <v-btn color="secondary" variant="elevated" class="px-6 py-3">Get Started</v-btn>
           </NuxtLink>
         </div>
       </v-col>
@@ -97,7 +97,7 @@
             Save hours by instantly generating flashcards with AI-powered tools that help you efficiently test and strengthen your knowledge.
           </p>
           <NuxtLink to="/about">
-            <v-btn color="#9D7BFC" variant="elevated" class="px-6 py-3">Get Started</v-btn>
+            <v-btn color="secondary" variant="elevated" class="px-6 py-3">Get Started</v-btn>
           </NuxtLink>
         </div>
       </v-col>

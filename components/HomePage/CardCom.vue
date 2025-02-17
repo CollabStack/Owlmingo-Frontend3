@@ -12,7 +12,7 @@
           </v-card-item>
           <v-card-actions class="justify-center">
             <NuxtLink to="/about">
-              <v-btn variant="outlined" rounded="xl" color="#3E53A1" class="ma-2">Explore Features</v-btn>
+              <v-btn variant="outlined" rounded="xl" color="black" class="ma-2">Explore Features</v-btn>
             </NuxtLink>
           </v-card-actions>
         </v-card>
