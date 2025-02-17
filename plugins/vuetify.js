@@ -29,6 +29,7 @@ export default defineNuxtPlugin((nuxtApp) => {
             info: '#2196F3',
             success: '#4CAF50',
             warning: '#FFC107',
+            background: '#F3F3F3'
           },
         },
         dark: {

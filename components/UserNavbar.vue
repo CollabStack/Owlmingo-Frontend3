@@ -5,7 +5,7 @@
             <v-row align="center" justify="space-between" class="d-flex" no-gutters>
                 <!-- Left: Navigation Tabs -->
                 <v-col class="d-none d-lg-flex align-center">
-                    <v-tabs background-color="transparent" class="tab-items">
+                    <v-tabs background-color="white" class="tab-items">
                         <v-tab
                             v-for="(item, index) in tabs"
                             :key="index"
@@ -120,7 +120,7 @@ function setActive(tab: string) {
 }
 
 .app-bar {
-    background-color: var(--v-theme-primary);
+    /* background-color: var(--v-theme-primary); */
     box-shadow: none;
     border-bottom: 1px solid #e0e0e0;
 }

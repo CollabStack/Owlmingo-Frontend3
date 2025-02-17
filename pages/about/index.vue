@@ -10,6 +10,7 @@
         <p class="text-info">info Color</p>
         <p class="text-success">success Color</p>
         <p class="text-warning">warning Color</p>
+        <p class="text-background">Backgroun color</p>
         <p>I wanna  change  again</p>
     </div>
 </template>
