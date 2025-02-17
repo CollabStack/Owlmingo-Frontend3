@@ -1,4 +1,5 @@
 export default defineNuxtConfig({
+
   pages: true,
   css: ['vuetify/styles'],
   build: {
@@ -10,13 +11,21 @@ export default defineNuxtConfig({
     '~/plugins/axios.js',
     '~/plugins/pinia.js',
     
+
+  // Disable SSR if not needed
+  ssr: false,
+
+  css: [
+    'vuetify/styles', // Include Vuetify styles
+
   ],
-  devServer: {
-    port: 5000, // Change to your desired port
+
+  build: {
+    transpile: ['vuetify'], // Transpile Vuetify
   },
   app: {
     head: {
-      title: 'Owlmingo', // Set your app name here
+      title: 'Owlmingo', // App title
       meta: [
         {
           name: 'description',
@@ -25,17 +34,27 @@ export default defineNuxtConfig({
         },
       ],
       link: [
-        { rel: 'icon', type: 'image/x-icon', href: '/logo/icon-no-bg.svg' }, // Correct path
+        { rel: 'icon', type: 'image/x-icon', href: '/logo/icon-no-bg.svg' }, // Favicon
       ],
     },
   },
 
+  devServer: {
+    port: 5000, // Change the port if needed
+  },
+
   runtimeConfig: {
     public: {
-      USER_PRIVATE_API: process.env.USER_PRIVATE_API,
+      USER_PRIVATE_API: process.env.USER_PRIVATE_API, // Environment variables
       USER_PUBLIC_API: process.env.USER_PUBLIC_API,
       ADMIN_PUBLIC_API: process.env.ADMIN_PUBLIC_API,
       ADMIN_PRIVATE_API: process.env.ADMIN_PRIVATE_API,
+      BOT_TOKEN: process.env.TELEGRAM_BOT_TOKEN, // Store in .env
+      BOT_USERNAME: process.env.TELEGRAM_BOT_USERNAME, // Store in .env
+      BOT_ID: process.env.TELEGRAM_BOT_ID, // Store in .env
+      BOT_RETURN_URL: process.env.TELEGRAM_BOT_RETURN_URL, // Store in .env
     },
   },
+
+  compatibilityDate: '2025-02-12',
 });

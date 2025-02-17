@@ -1,5 +1,10 @@
 <template>
+
     <v-container app class="d-flex justify-space-between align-center app-bar">
+
+    <!-- <v-container app fixed class="d-flex justify-space-between align-center app-bar"> -->
+        <v-app-bar app fixed class="d-flex justify-space-between align-center app-bar">
+
         <v-container fluid class="mx-2 mx-sm-2 mx-md-12 mx-lg-16">
             <v-row align="center" justify="space-between" class="d-flex" no-gutters>
                 <!-- Left: Navigation Tabs -->
@@ -10,7 +15,8 @@
                             :key="index"
                             :to="item.route"
                             class="custom-tab"
-                            :class="{ 'active-tab': isActive(item.route) }"
+                            :class="{ 'active-tab': activeTab === item.route }"
+                            @click="setActive(item.route)"
                         >
                             {{ item.label }}
                         </v-tab>
@@ -32,52 +38,113 @@
                 </v-col>
 
                 <!-- Right: Buttons -->
-                <v-col cols="8" md="3" class="d-none d-md-flex text-right d-flex align-center justify-end gap-x-20">
+                <v-col v-if="!isLoggedIn" cols="8" md="3" class="d-none d-md-flex text-right d-flex align-center justify-end gap-x-20">
                     <div>
-                        <v-btn to="/login">Login</v-btn>
-                        <v-btn to="/register">Sign Up</v-btn>
+                        <v-btn to="/auth">sign in</v-btn>
+                        <v-btn to="/auth/sign-up">Sign Up</v-btn>
                     </div>
+                </v-col>
+                <v-col v-else cols="8" md="3" class="d-none d-md-flex text-right d-flex align-center justify-end gap-x-20">
+                    <v-menu transition="scale-transition" offset-y>
+                        <template #activator="{ props }" >
+                            <v-avatar v-bind="props" class="cursor-pointer" size="40">
+                                <v-img
+                                    src="/female_profile.jpg"
+                                    alt="Profile"
+                                    contain
+                                    class="rounded-full"
+                                />
+                            </v-avatar>
+                        </template>
+                        <!-- Updated dropdown: vertical layout, transparent, floating -->
+                        <div style="display: flex; flex-direction: column; gap: 10px; background: transparent; position: fixed; top: 0; left: 50%; transform: translateX(-50%); z-index: 1000; margin-top: 20px; margin-right: 200px;">
+                            <v-btn to="/auth">Explore</v-btn>
+                            <v-btn to="/auth/sign-up">Upgrade Plan</v-btn>
+                            <v-divider></v-divider>
+                            <v-btn color="secondary" @click="logout">Sign Out</v-btn>
+                        </div>
+                    </v-menu>
+
                 </v-col>
             </v-row>
         </v-container>
+
     </v-container>
+
+    <!-- </v-container> -->
+</v-app-bar>
+
 </template>
 
 <script setup lang="ts">
-import { useRoute } from 'vue-router';
-import { computed } from 'vue';
+import { ref, watch } from 'vue';
+import { useRoute, useRouter } from 'vue-router';
+import { userAuth } from '~/store/userAuth';
 
-const route = useRoute(); // Reactive route object
 
+/* ========== DATA ==========*/
+const route = useRoute();
+const router = useRouter();
 const tabs = [
     { label: 'Home', route: '/' },
     { label: 'Flashcard', route: '/flashcard' },
     { label: 'Quiz', route: '/quiz' },
-    { label: 'About Us', route: '/about' },
-];
 
-// Compute the active tab based on route path
-const isActive = (tabRoute: string) => computed(() => route.path === tabRoute).value;
+    { label: 'About Us', route: '/about' },
+
+    { label: 'About', route: '/about' },
+
+];
+const activeTab = ref(route.path);
+const authStore = userAuth();
+
+/* ========== COMPUTED ==========*/
+const isLoggedIn = computed(() => {
+    return authStore.isLoggedIn;
+});
+
+/* ========== WATCH ==========*/
+watch(() => route.path, (newPath) => {
+    activeTab.value = newPath;
+});
+
+/* ========== MOUNTED ==========*/
+onMounted(() => {
+    authStore.initializeSession();
+});
+/* ========== METHODS ==========*/
+function setActive(tab: string) {
+  if (activeTab.value === tab) return; // Prevent redundant navigation
+  activeTab.value = tab;
+  router.push(tab);
+}
+
+function logout() {
+  authStore.logout();
+  // redirect and reload 
+    router.push('/').then(() => {
+        window.location.reload();
+    });
+}
+
 </script>
 
 <style scoped>
 .custom-tab {
     text-transform: none;
     font-size: 15px;
-    font-weight: 600;
-    color: black !important;
-    transition: color 0.3s ease-in-out, border-bottom 0.3s ease-in-out;
+    font-weight: 400;
 }
 
-/* Active tab styling */
+/* Active tab styling updated for consistency */
 .active-tab {
-    color: #1976D2 !important; /* Vuetify primary color */
+    color: var(--v-primary);
     font-weight: bold;
-    border-bottom: 2px solid #1976D2;
+    border-bottom: 2px solid;
 }
 
 .app-bar {
-    background-color: white;
+    background-color: var(--v-theme-primary);
     box-shadow: none;
     border-bottom: 1px solid #e0e0e0;
 }

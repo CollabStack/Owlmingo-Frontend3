@@ -1,10 +1,14 @@
 <template>
   <v-app>
-    <v-app-bar>
+    <!-- <v-app-bar> -->
       <UserNavbar />
-    </v-app-bar>
+    <!-- </v-app-bar> -->
     <v-main>
-      <slot />
+      <transition name="fade" mode="out-in">
+        <div :key="$route.fullPath">
+          <slot />
+        </div>
+      </transition>
     </v-main>
     <!-- <v-footer app>
       <v-col class="text-center">© 2025 - User Portal</v-col>
