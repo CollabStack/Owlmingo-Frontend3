@@ -2,7 +2,7 @@
   <div >
     <!-- <HomePage-WellcomeCom /> -->
      <HomePage-Banner />
-    <HomePage-CardCom/>
+    <HomePage-Card/>
     <!-- <HomePage-AiCard /> -->
      <HomePage-CardAi/>
     <HomePage-GetStart />
