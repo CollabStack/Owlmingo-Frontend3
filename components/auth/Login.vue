@@ -59,7 +59,7 @@
     align-items: center;
   }
   
-  .left-side {
+  .left-side { 
     display: flex;
     background-color: #ffffff;
     justify-content: center;

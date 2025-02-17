@@ -33,7 +33,7 @@
 
     <div class="right-side" style="width: 50%; height: 100%;">
         <img src="C:\Owlmingo-Frontend3\public\images\3d-business-man-working-at-laptop-with-robot-assistant.png" alt="" class="image" />
-        
+         
     </div>
   </div>
 </template>

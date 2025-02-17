@@ -29,7 +29,7 @@
       <a href="#" class="icon-link">
         <img src="C:\Owlmingo-Frontend3\public\icons\icons8-github-480.png" alt="GitHub" class="icons"/>
       </a>
-      <a href="#" class="icon-link">
+      <a href="#" class="icon-link"> 
         <img src="hC:\Owlmingo-Frontend3\public\icons\icons8-telegram-144.svg" alt="Telegram" class="icons"/>
       </a>
     </div>
