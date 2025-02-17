@@ -9,7 +9,8 @@
     <p class="text-info">info Color</p>
     <p class="text-success">success Color</p>
     <p class="text-warning">warning Color</p>
-
+    <p>I wanna  change  again</p>
+    
 </template>
 
 <script setup>

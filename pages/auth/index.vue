@@ -1,10 +1,8 @@
 <template>
-
-    <Login />
+    <Auth-SignIn />
+    <!-- <TelegramAuth /> -->
 
 </template>
 <script setup>
-import Login from '~/components/auth/SignIn.vue';
-
 
 </script>

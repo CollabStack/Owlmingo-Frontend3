@@ -34,7 +34,7 @@
                 </v-col>
 
                 <!-- Right: Buttons -->
-                <v-col v-if="isLoggedIn" cols="8" md="3" class="d-none d-md-flex text-right d-flex align-center justify-end gap-x-20">
+                <v-col v-if="!isLoggedIn" cols="8" md="3" class="d-none d-md-flex text-right d-flex align-center justify-end gap-x-20">
                     <div>
                         <v-btn to="/auth">sign in</v-btn>
                         <v-btn to="/auth/sign-up">Sign Up</v-btn>
@@ -57,7 +57,7 @@
                             <v-btn to="/auth">Explore</v-btn>
                             <v-btn to="/auth/sign-up">Upgrade Plan</v-btn>
                             <v-divider></v-divider>
-                            <v-btn color="secondary" to="/auth/sign-up">Sign Out</v-btn>
+                            <v-btn color="secondary" @click="logout">Sign Out</v-btn>
                         </div>
                     </v-menu>
 
@@ -96,11 +96,23 @@ watch(() => route.path, (newPath) => {
     activeTab.value = newPath;
 });
 
+/* ========== MOUNTED ==========*/
+onMounted(() => {
+    authStore.initializeSession();
+});
 /* ========== METHODS ==========*/
 function setActive(tab: string) {
   if (activeTab.value === tab) return; // Prevent redundant navigation
   activeTab.value = tab;
   router.push(tab);
+}
+
+function logout() {
+  authStore.logout();
+  // redirect and reload 
+    router.push('/').then(() => {
+        window.location.reload();
+    });
 }
 
 </script>
