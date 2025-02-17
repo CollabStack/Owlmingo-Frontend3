@@ -5,7 +5,7 @@
                 <p class="enter-code-text">Enter the verification code</p>
                 <div class="otp-input-container">
                     <input type="text" class="otp-input" maxlength="1" />
-                    <input type="text" class="otp-input" maxlength="1" />
+                    <input type="text" class="otp-input" maxlength="1" /> 
                     <input type="text" class="otp-input" maxlength="1" />
                     <input type="text" class="otp-input" maxlength="1" />
                     <input type="text" class="otp-input" maxlength="1" />
