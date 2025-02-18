@@ -3,50 +3,48 @@
       <v-row class="d-flex flex-row justify-center align-center">
         <div class="right-side w-50 ml-16">
           <img 
-            src="C:\Owlmingo-Frontend3\public\images\3d-business-man-working-at-laptop-with-robot-assistant.png" 
+            src= "/images/3d-business-man-working-at-laptop-with-robot-assistant.png" 
             alt="Business Man" 
             class="image" 
             style="width: 400px;" 
           />
         </div>
         <v-col class="d-flex flex-column justify-center align-center w-50" style="align-items: center; margin-left: -20px;">
-          <h2 class="align-center text-center" style="color: skyblue;">New Password</h2>
+          <h2 class="align-center text-center" style="color: var(--v-welcome_title);">New Password</h2>
   
           <v-form class="d-flex flex-column mt-5 " style="width: 350px; align-items: center; margin-left: -20px;">
             <v-text-field class="w-100 rounded-xl " label="New Password"></v-text-field>
-            <v-text-field class="w-100 mb-2" label="Confirm Password" style="border-radius: 24px;"></v-text-field>
+            <v-text-field class="w-100 mb-2" label="Confirm Password" style="border-radius: 24px; height: 70px;"></v-text-field>
   
             <v-row class="d-flex justify-space-between align-center w-100 mb-3">
               <div class="remember-me">
                 <input type="checkbox" id="remember-me" />
-                <label for="remember-me">Remember me</label>
+                <label for="remember-me" style="font-size: 12px;">Remember me</label>
               </div>
-              <a href="#">Forget Password?</a>
+              <a href="#" style="font-size: 12px; text-decoration: none;" >Forget Password?</a>
             </v-row>
 
-            <v-btn class=" w-100 justify-center align-center">login</v-btn>
+            <v-btn class=" w-100 justify-center align-center" style="background-color: var(--v-maya_blue); border-radius: 10px; color: white;">Send</v-btn>
   
             <v-container class="d-flex flex-column justify-center align-center" >
             <div class="rectangle w-100">
               <div class="line w-50">
-                <span class="or-continue">or continue with</span>
+                <span class="or-continue w-50" style="color:var(--v-continue_text);">or continue with</span>
               </div>
             </div>
             <div class="social-icons">
-              <a href="#" class="icon-link">
-                <img src="C:\Owlmingo-Frontend3\public\icons\icons8-google-480.png" alt="Google" class="icons" />
-              </a>
-              <a href="#" class="icon-link">
-                <img src="C:\Owlmingo-Frontend3\public\icons\icons8-github-480.png" alt="GitHub" class="icons" />
-              </a>
-              <a href="#" class="icon-link">
-                <img src="C:\Owlmingo-Frontend3\public\icons\icons8-telegram-144.svg" alt="Telegram" class="icons" />
+              <a
+                v-for="(icon, index) in socialIcons"
+                :key="index"
+                :href="icon.link"
+                class="icon-link"
+              >
+                <img :src="`/icons/${icon.src}`" :alt="icon.alt" class="icons" />
               </a>
             </div>
 
-            <div class="sign-up" style="border: 1px solid black; width: 100%;">
-              <span>Don't have an account?</span>
-              <a href="#" class="sign-up-link">Sign Up</a>
+            <div class="sign-up w-100" style="background-color: var(--v-white_gray);">
+              <span style="color: var(--v-continue_text);">Don't have an account?<a href="#" class="sign-up-link">Sign Up</a></span>
             </div>
           </v-container>
   
@@ -66,8 +64,6 @@
     
     }
   .rectangle {
-      width: 50%;
-      height: 2px;
       position: relative;
       margin-bottom: 20px;
       box-sizing: border-box;
@@ -75,29 +71,20 @@
   }
   
     .line {
-    width: 100%;  /* Full width of the rectangle */
-    height: 30px;
-    height: 1px;
-    background-color: black;
     position: absolute;
     top: 50%;  /* Center the line vertically */
     left: 40px;
-   
+    border: 1px solid var(--v-continue_text);
   }
   
   .or-continue {
-      width: 47%;
       background-color: white;
       position: absolute;
       top: -7px; 
       transform: translateX(-50%); 
       font-size: 9px;
-      color: black;
-      font-weight: bold;
-      left: +80px;
-      padding-left: 5px;
-      padding-right: 1px;
-  
+      left: +80px; 
+      padding-left: 7px;
       }
     
     .social-icons {
@@ -134,6 +121,32 @@
     
     
   </style>
+
+<script>
+export default {
+  data() {
+    return {
+      socialIcons: [
+        {
+          src: 'icons8-google-480.png', // Just the filename
+          alt: 'Google',
+          link: '#',
+        },
+        {
+          src: 'icons8-github-480.png', // Just the filename
+          alt: 'GitHub',
+          link: '#',
+        },
+        {
+          src: 'icons8-telegram-144.svg', // Just the filename
+          alt: 'Telegram',
+          link: '#',
+        },
+      ],
+    };
+  },
+};
+</script>
   
   
   
