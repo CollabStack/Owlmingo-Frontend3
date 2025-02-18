@@ -10,7 +10,6 @@ export default defineNuxtConfig({
   build: {
     transpile: ['vuetify'], // Transpile Vuetify
   },
-
   app: {
     head: {
       title: 'Owlmingo', // App title
@@ -37,6 +36,10 @@ export default defineNuxtConfig({
       USER_PUBLIC_API: process.env.USER_PUBLIC_API,
       ADMIN_PUBLIC_API: process.env.ADMIN_PUBLIC_API,
       ADMIN_PRIVATE_API: process.env.ADMIN_PRIVATE_API,
+      BOT_TOKEN: process.env.TELEGRAM_BOT_TOKEN, // Store in .env
+      BOT_USERNAME: process.env.TELEGRAM_BOT_USERNAME, // Store in .env
+      BOT_ID: process.env.TELEGRAM_BOT_ID, // Store in .env
+      BOT_RETURN_URL: process.env.TELEGRAM_BOT_RETURN_URL, // Store in .env
     },
   },
 
