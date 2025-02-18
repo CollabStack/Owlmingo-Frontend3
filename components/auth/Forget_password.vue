@@ -1,29 +1,30 @@
-
-
-
 <template>
     <v-container class="container fill-height mt-6" >
       <v-row class="d-flex flex-row justify-center align-center">
         <v-col class="d-flex flex-column justify-center align-center ml-16" style="align-items: center; margin-left: -20px;">
-          <h2  style="color: var(--v-welcome_title);">Welcome to Study</h2>
+          <h2 class="align-center" style="color: var(--v-welcome_title);">Forget Password</h2>
   
-          <v-form class="d-flex flex-column mt-5 " style="width: 350px;">
-            <h5 class=" align-left justify-start w-100" style="color: var(--v-welcome_title);">Enter the Verification Code</h5>
+          <v-form class="d-flex flex-column mt-5 " style="width: 350px; align-items: center; margin-left: -20px;">
+            <v-text-field
+              class="w-100 pb-0"
+              style= "height: 60px;"
+              label="Email"
+            ></v-text-field>
+            <v-col class="d-flex justify-end w-100 " style="top: -20px; width: 100%;">
+              <a href="#" style="margin-left: auto; font-size: 12px; text-decoration: none;">Back to Sign</a>
+            </v-col>
 
-            <v-otp-input class="mb-2"></v-otp-input>
-            
-            <v-row class="justify-center w-100 mb-1">
-            <p style="font-size: 10px;">if you didn't Recieve the code, <a href="#" style="text-decoration: none; color: red;"> Resend</a></p>
-          </v-row>
-            
-          <v-btn class= "w-100 justify-center align-center mt-3" style="background-color: var(--v-maya_blue); border-radius: 10px; color: white;">Send</v-btn>            
+
+              <v-btn class=" w-100 justify-center align-center" style="background-color: var(--v-maya_blue); border-radius: 10px; color: white;">Send</v-btn>
+
   
-          <v-container class="d-flex flex-column justify-center align-center" >
-            <div class="rectangle w-100">
-              <div class="line w-50">
-                <span class="or-continue w-50" style="color:var(--v-continue_text);">or continue with</span>
-              </div>
-            </div>
+              <v-container class="d-flex flex-column justify-center align-center" >
+                <div class="rectangle w-100">
+                  <div class="line w-50" >
+                    <span class="or-continue w-50 pl-2"  style="color:var(--v-continue_text);">or continue with</span>
+                  </div>
+                </div>
+
             <div class="social-icons">
               <a
                 v-for="(icon, index) in socialIcons"
@@ -40,6 +41,7 @@
             </div>
           </v-container>
   
+            
           </v-form>
         </v-col>
   
@@ -56,6 +58,9 @@
   </template>
   
   <style>
+  body {
+  font-family: 'Microsoft Sans Serif', sans-serif;
+}
     .container {
       height: 100vh; /* Full viewport height */
     }
@@ -64,10 +69,12 @@
       max-width: 100%; /* Responsive image */
     
     }
-    .rectangle {
+  .rectangle {
       position: relative;
       margin-bottom: 20px;
       box-sizing: border-box;
+      left: +25px;
+     
   }
   
     .line {
@@ -75,7 +82,6 @@
     top: 50%;  /* Center the line vertically */
     left: 40px;
     border: 1px solid var(--v-continue_text);
-
   }
   
   .or-continue {
@@ -85,6 +91,7 @@
       transform: translateX(-50%); 
       font-size: 9px;
       left: +80px;  
+      padding-left: 7px;
       }
     
     .social-icons {
@@ -121,30 +128,29 @@
     
     
   </style>
-  
-  
-  <script>
-  export default {
-    data() {
-      return {
-        socialIcons: [
-          {
-            src: 'icons8-google-480.png', // Just the filename
-            alt: 'Google',
-            link: '#',
-          },
-          {
-            src: 'icons8-github-480.png', // Just the filename
-            alt: 'GitHub',
-            link: '#',
-          },
-          {
-            src: 'icons8-telegram-144.svg', // Just the filename
-            alt: 'Telegram',
-            link: '#',
-          },
-        ],
-      };
-    },
-  };
+
+<script>
+export default {
+  data() {
+    return {
+      socialIcons: [
+        {
+          src: 'icons8-google-480.png', // Just the filename
+          alt: 'Google',
+          link: '#',
+        },
+        {
+          src: 'icons8-github-480.png', // Just the filename
+          alt: 'GitHub',
+          link: '#',
+        },
+        {
+          src: 'icons8-telegram-144.svg', // Just the filename
+          alt: 'Telegram',
+          link: '#',
+        },
+      ],
+    };
+  },
+};
 </script>
