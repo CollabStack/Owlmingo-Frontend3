@@ -11,8 +11,8 @@
             <v-card-text class="text-medium-emphasis">{{ card.subtitle }}</v-card-text>
           </v-card-item>
           <v-card-actions class="justify-center">
-            <NuxtLink to="/about">
-              <v-btn variant="outlined" rounded="xl" color="black" class="ma-2">Explore Features</v-btn>
+            <NuxtLink to="/about" class="text-decoration-none">
+              <v-btn variant="outlined" rounded="xl" color="black" class="ma-2 pa-5 align-center  d-flex justify-center">Explore Features</v-btn>
             </NuxtLink>
           </v-card-actions>
         </v-card>
