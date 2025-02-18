@@ -2,10 +2,10 @@
   <div >
     <!-- <HomePage-WellcomeCom /> -->
      <HomePage-Banner />
-    <HomePage-Card/>
+    <HomePage-Future1/>
     <!-- <HomePage-AiCard /> -->
-     <HomePage-CardAi/>
-    <HomePage-GetStart />
+     <HomePage-Future2/>
+    <HomePage-Future3 />
    
   </div>
 </template>

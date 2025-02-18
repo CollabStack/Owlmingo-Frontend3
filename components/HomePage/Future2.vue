@@ -1,8 +1,8 @@
 <template>
   <v-col cols="12">
-    <v-card  class="banner-card rounded-lg d-flex align-center px-6 py-6">
+    <v-card  class="banner-card rounded-lg d-flex align-center px-6 py-6"  v-motion-slide-visible-bottom>
       
-      <v-img
+      <v-img v-motion-fade-visible
         src="/images/3d-casual-life-chatgpt-robot-in-graduation-cap-1.png"
         height="380" 
         width="380"  

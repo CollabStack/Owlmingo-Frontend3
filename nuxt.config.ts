@@ -1,4 +1,5 @@
 export default defineNuxtConfig({
+  modules: ["@vueuse/motion/nuxt"],
   // Disable SSR if not needed
   ssr: false,
 
