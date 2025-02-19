@@ -21,7 +21,7 @@
                       :href="icon.link"
                       class="text-gray-400 hover:text-white mr-1"
                       style="color: white; text-decoration: none;"
-                    >
+                    > 
                       <svg
                         xmlns="http://www.w3.org/2000/svg"
                         width="28"

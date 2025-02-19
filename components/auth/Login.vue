@@ -26,7 +26,7 @@
 
             <v-btn class= "w-100 justify-center align-center mt-5" style="background-color: var(--v-maya_blue); border-radius: 10px; color: white;">Login</v-btn>
 
-
+ 
             <v-container class="d-flex flex-column justify-center align-center" >
             <div class="rectangle w-100">
               <div class="line w-50">
