@@ -154,3 +154,8 @@ export default {
   },
 };
 </script>
+
+
+
+
+add in new colors in vuetify.js, remove unnecessary component and implement new color and change file: Footer, Forget_password, New_password, Login, Otp, Sign_upped,
