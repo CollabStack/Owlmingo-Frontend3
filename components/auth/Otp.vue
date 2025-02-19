@@ -22,7 +22,7 @@
             <div class="rectangle w-100">
               <div class="line w-50">
                 <span class="or-continue w-50" style="color:var(--v-continue_text);">or continue with</span>
-              </div>
+              </div> 
             </div>
             <div class="social-icons">
               <a
