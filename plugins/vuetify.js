@@ -23,9 +23,11 @@ export default defineNuxtPlugin((nuxtApp) => {
             info: '#2196F3',
             success: '#4CAF50',
             warning: '#FFC107',
-            welcome_title: '#4667E5',
-            continue_text: '#757575',
-            white_gray: '#EBEBEB'
+            royal_blue: '#4667E5',  
+            sonic_silver: '#757575', //continue text
+            mercury: '#EBEBEB',
+            hex: '#b6b2b2',
+            onyx: '#373737',
           },
         },
         dark: {
