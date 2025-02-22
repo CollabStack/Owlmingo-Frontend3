@@ -55,7 +55,7 @@
     
     <style scoped>
     .v-footer {
-    background-color: var(--v-primary); /* Dark background */
+    background-color: var(--v-onyx); /* Dark background */
     }
     .white--text {
     color: var(--v-white)
