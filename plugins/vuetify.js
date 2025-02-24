@@ -35,7 +35,7 @@ export default defineNuxtPlugin((nuxtApp) => {
             pattens_blue: '#e3f2fd',
             aero_blue: '#CAFFD6',
             iceberg: '#D7F0FF',
-            lavender_mist: '#EAE4FF'
+            lavender_mist: '#EAE4FF',
 
             royal_blue: '#4667E5',  
             sonic_silver: '#757575', //continue text
