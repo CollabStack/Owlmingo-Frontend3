@@ -1,6 +1,6 @@
 <template>
   <v-col cols="12">
-    <v-card  class="banner-card rounded-lg d-flex align-center px-6 py-6"  v-motion-slide-visible-bottom>
+    <v-card  class="banner-card rounded-lg d-flex align-center px-6 py-6 bg-maya_blue"  v-motion-slide-visible-bottom>
       
       <v-img v-motion-fade-visible
         src="/images/3d-casual-life-chatgpt-robot-in-graduation-cap-1.png"
@@ -24,7 +24,6 @@
 
 <style scoped>
 .banner-card {
-  background-color: #5bc0f3;
   border-radius: 20px;
   color: white;
   width: 95%;

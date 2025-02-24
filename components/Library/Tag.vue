@@ -77,9 +77,7 @@
     } else {
       // Default colors
       colorNames.value = {
-        "#FF5722": "Orange",
-        "#1976D2": "Blue",
-        "#4CAF50": "Green",
+       
       };
     }
   });
@@ -123,9 +121,7 @@
   // Function to get a color name based on hex value (simple mapping)
   const getColorName = (hex) => {
     const colorNamesMap = {
-      "#FF5722": "Orange",
-      "#1976D2": "Blue",
-      "#4CAF50": "Green",
+     
       // Add more colors as needed
     };
   

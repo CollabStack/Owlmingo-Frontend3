@@ -17,7 +17,7 @@
 
       <!-- Image Box -->
       <v-col cols="10" md="6" class="d-flex justify-center">
-        <div  class="banner-box ml-16 bg-img1" v-motion-pop-visible>
+        <div  class="banner-box ml-16 bg-pattens_blue" v-motion-pop-visible>
           <img
             src="/images/glow-educational-robot-helping-with-studies.png"
             alt="Educational Robot"
@@ -30,7 +30,7 @@
     <v-row justify="center" class="mx-15 my-15" v-motion-slide-visible-bottom>
        <!-- Image Box -->
        <v-col cols="12" md="4" class="d-flex justify-center">
-        <div  class="banner-box mr-16 bg-img2" v-motion-pop-visible>
+        <div  class="banner-box mr-16 bg-aero_blue" v-motion-pop-visible>
           <img
             src="/images/glow-young-man-communicating-with-artificial-intelligence-through-a-computer 1.png"
             alt="Educational Robot"
@@ -68,7 +68,7 @@
 
       <!-- Image Box -->
       <v-col cols="10" md="4" class="d-flex justify-center">
-        <div  class="banner-box ml-16 bg-img3" v-motion-pop-visible>
+        <div  class="banner-box ml-16 bg-iceberg" v-motion-pop-visible>
           <img
             src="/images/sammy-woman-gives-five-to-a-robot-with-artificial-intelligence 1.png"
             alt="Educational Robot"
@@ -81,7 +81,7 @@
     <v-row justify="center" class="mx-15 my-15" v-motion-slide-visible-bottom>
        <!-- Image Box -->
        <v-col cols="12" md="6" class="d-flex justify-center">
-        <div  class="banner-box mr-16 bg-img4" v-motion-pop-visible>
+        <div  class="banner-box mr-16 bg-lavender_mist" v-motion-pop-visible>
           <img
             src="/images/space-delete-confirmation.png"
             alt="Educational Robot"

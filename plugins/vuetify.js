@@ -31,10 +31,10 @@ export default defineNuxtPlugin((nuxtApp) => {
             warning: '#FFC107',
             background: '#F3F3F3',
             //background Card home page
-            img1: '#e3f2fd',
-            img2: '#CAFFD6',
-            img3: '#D7F0FF',
-            img4: '#EAE4FF'
+            pattens_blue: '#e3f2fd',
+            aero_blue: '#CAFFD6',
+            iceberg: '#D7F0FF',
+            lavender_mist: '#EAE4FF'
           },
         },
         dark: {
