@@ -29,12 +29,20 @@ export default defineNuxtPlugin((nuxtApp) => {
             info: '#2196F3',
             success: '#4CAF50',
             warning: '#FFC107',
+
             background: '#F3F3F3',
             //background Card home page
             pattens_blue: '#e3f2fd',
             aero_blue: '#CAFFD6',
             iceberg: '#D7F0FF',
             lavender_mist: '#EAE4FF'
+
+            royal_blue: '#4667E5',  
+            sonic_silver: '#757575', //continue text
+            mercury: '#EBEBEB',
+            hex: '#b6b2b2',
+            onyx: '#373737',
+
           },
         },
         dark: {
