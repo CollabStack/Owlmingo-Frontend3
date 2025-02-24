@@ -53,7 +53,7 @@
                             </v-avatar>
                         </template>
                         <!-- Updated dropdown: vertical layout, transparent, floating -->
-                        <div style="display: flex; flex-direction: column; gap: 10px; background: transparent; position: fixed; top: 0; left: 50%; transform: translateX(-50%); z-index: 1000; margin-top: 20px; margin-right: 200px;">
+                        <div style="display: flex; flex-direction: column; gap: 10px; background: transparent; position: fixed; top: 0; left: 50%; transform: translateX(-50%); z-index: 1000; margin-top: 20px; margin-right: 200px; ">
                             <v-btn to="/auth">Explore</v-btn>
                             <v-btn to="/auth/sign-up">Upgrade Plan</v-btn>
                             <v-divider></v-divider>

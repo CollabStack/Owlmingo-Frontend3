@@ -1,6 +1,6 @@
 <template>
     <v-col cols="12">
-      <v-card color="text-primary" max-width="95%" max-height="70%" class="banner-card rounded-lg d-flex align-center px-6 py-6">
+      <v-card  color="text-primary" max-width="95%" max-height="70%" class="banner-card rounded-lg d-flex align-center px-6 py-6 bg-maya_blue mx-10">
         
         <v-img
           src="/images/3d-business-children-at-a-laptop-with-a-robot-assistant.png"
@@ -24,28 +24,12 @@
 </template>
 
 <style scoped>
-.banner-card {
-  background-color: #5bc0f3;
-  /* border-radius: 20px; */
-  color: white;
-  /* width: 95%;
-  height: 70%; */
-  margin-left: 40px;
-}
+
 .text-content {
   max-width: 980px;
   text-align: center;
 }
 .gap-4 {
   gap: 2rem;
-}
-h2{
-    font-family: sans-serif;
-}
-p{
-    font-family: sans-serif;
-}
-v-btn{
-    font-family: sans-serif;
 }
 </style>

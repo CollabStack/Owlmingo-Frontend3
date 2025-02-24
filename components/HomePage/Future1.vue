@@ -70,7 +70,5 @@ const cards = [
   object-fit: contain; 
 }
 
-/*.text-primary {
-  color: #3E53A1;
-}*/
+
 </style>

@@ -29,7 +29,12 @@ export default defineNuxtPlugin((nuxtApp) => {
             info: '#2196F3',
             success: '#4CAF50',
             warning: '#FFC107',
-            background: '#F3F3F3'
+            background: '#F3F3F3',
+            //background Card home page
+            img1: '#e3f2fd',
+            img2: '#CAFFD6',
+            img3: '#D7F0FF',
+            img4: '#EAE4FF'
           },
         },
         dark: {

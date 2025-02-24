@@ -16,7 +16,7 @@
       <v-row class="mx-15">
         <v-col v-for="(name, hex) in colorNames" :key="hex" cols="3" class="d-flex pa-2">
           
-          <div class="box d-flex align-center justify-space-between rounded-lg px-3">
+          <div class="box d-flex align-center justify-space-between rounded-lg px-3 bg-white">
   <div class="d-flex">
     <div class="box1 rounded-lg fixed" :style="{ backgroundColor: hex, color: getTextColor(hex) }" @click="renameColor(hex)"></div>
     <span class="ml-2">{{ name || hex }}</span>
@@ -144,17 +144,12 @@
   .box1 {
     width: 30px; 
     height: 30px; 
-    /* border-radius: 5px;  */
     margin-right: 15px;
   }
   
   .box {
     width: 100%; 
     height: 50px; 
-    background-color: #FFFFFF;
-    /* border-radius: 5px;  */
-    /* padding: 10px; */
-    /* display: flex; */
     align-items: center;
   }
   

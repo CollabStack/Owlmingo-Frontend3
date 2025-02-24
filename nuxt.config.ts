@@ -1,5 +1,6 @@
 export default defineNuxtConfig({
   modules: ["@vueuse/motion/nuxt"],
+
   // Disable SSR if not needed
   ssr: false,
 
@@ -42,4 +43,8 @@ export default defineNuxtConfig({
   },
 
   compatibilityDate: '2025-02-12',
+
+  devtools: {
+    enabled: true,
+  },
 });
