@@ -24,7 +24,8 @@
                                 required
                             ></v-text-field>
                         </v-form>
-                        <TelegramLoginWidget telegram-login="owlmingo_bot" @callback="testCallback" />
+                        <Auth-TelegramLogin />
+                        
                     </v-card-text>
                     <v-card-actions>
                         <v-spacer></v-spacer>
@@ -37,16 +38,18 @@
 </template>
 
 <script setup>
-import { ref } from 'vue';
+import { ref, onMounted } from 'vue';
 import Swal from 'sweetalert2';
 import { userAuth } from '~/store/userAuth';
 
-// Reactive variables
+const authStore = userAuth();
 const email = ref('');
 const password = ref('');
-const authStore = userAuth();
 
-// Login method
+onMounted(() => {
+    console.log('Sign In mounted');
+});
+
 const login = async () => {
     try {
         await authStore.login(email.value, password.value);
@@ -55,12 +58,9 @@ const login = async () => {
         Swal.fire({
             icon: 'error',
             title: 'Login Failed',
-            text: error.response.data.message || 'Please check your credentials and try again.'
+            text: error.response?.data?.message || 'Please check your credentials and try again.'
         });
     }
 };
 
-const testCallback = (data) => {
-    console.log(data);
-}
 </script>

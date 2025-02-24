@@ -28,9 +28,14 @@ export const userAuth = defineStore('userAuth', {
             const {$UserPublicAxios} = useNuxtApp(); // Use full Nuxt app instance
             try{
                 const response = await $UserPublicAxios.post('/login', {email, password});
+                if (response.status !== 200) {
+                    throw new Error(`Error: Received status code ${response.status}`);
+                }
                 const token = response.data.data['token'];
+                this.setUser(response.data.data['user']);
                 this.setToken(token);  
                 this.refreshToken(); 
+                this.isLoggedIn = true;
                 return response.data; 
             } catch (error){
                 throw error;
@@ -40,6 +45,26 @@ export const userAuth = defineStore('userAuth', {
             this.token = null;
             this.user = null;
             Cookies.remove('token'); // Updated to remove token using Cookies.remove
+        },
+        async telegramOAuth(data) {
+            const {$UserPublicAxios} = useNuxtApp(); // Use full Nuxt app instance
+            try {
+            const {first_name, last_name, username} = data;
+            const telegram_id = data.id;
+            const response = await $UserPublicAxios.post('/telegram-oauth', {first_name, last_name, username, telegram_id});
+            if (response.status !== 200) {
+                throw new Error(`Error: Received status code ${response.status}`);
+            }
+            console.log("response OAuth", response);
+            const token = response.data.data['token'];
+            this.setUser(response.data.data['user']);
+            this.setToken(token);
+            this.refreshToken();
+            this.isLoggedIn = true;
+            return response;
+            } catch (error) {
+            throw error;
+            }
         },
         async refreshToken() {
             try{
@@ -73,12 +98,23 @@ export const userAuth = defineStore('userAuth', {
                 this.logout(); // Token expired, log out the user
                 return false;
               }
-          
+              this.isLoggedIn = true;
               return true; // Token is valid
             } catch (error) {
               this.logout(); // Logout on invalid token
               return false;
             }
         },
+        initializeSession() {
+            if (!this.token) {
+                this.logout();
+                return;
+            }
+            this.checkTokenExpired().then(isValid => {
+                if (isValid) {
+                    this.refreshToken();
+                }
+            });
+        }
     }
 });
