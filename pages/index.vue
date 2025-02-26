@@ -1,10 +1,14 @@
 <template>
-  <v-container>
-    <v-btn color="#4667E5">
-      Testing
-    </v-btn>
-  </v-container>
+    <div class="mt-5">
+      <home-page-banner />
+      <home-page-future1 />
+      <!-- <home-page-aicard /> -->
+      <home-page-future2 />
+      <home-page-future3 />
+     
+    </div>
 </template>
+
 
 <script setup>
 // template
