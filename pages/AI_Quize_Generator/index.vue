@@ -7,7 +7,7 @@
 </template>
 
 <script>
-import { QuizeGeneraterQuizegenerator } from '#components';
+
 
 
 </script>

@@ -25,6 +25,8 @@
     "vuetify": "^3.7.13"
   },
   "devDependencies": {
-    "@nuxt/devtools": "^1.7.0"
+    "@nuxt/devtools": "^1.7.0",
+    "esbuild": "^0.25.0",
+    "typescript": "^5.1.6"
   }
 }

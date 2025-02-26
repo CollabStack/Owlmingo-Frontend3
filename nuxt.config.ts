@@ -11,6 +11,7 @@ export default defineNuxtConfig({
   build: {
     transpile: ['vuetify'], // Transpile Vuetify
   },
+
   app: {
     head: {
       title: 'Owlmingo', // App title
@@ -44,8 +45,9 @@ export default defineNuxtConfig({
     },
   },
 
-
   devtools: {
     enabled: true,
   },
+
+  compatibilityDate: '2025-02-25',
 });

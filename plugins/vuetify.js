@@ -19,41 +19,38 @@ export default defineNuxtPlugin((nuxtApp) => {
         light: {
           colors: {
             // #7BCBFC
-            primary: '#3E53A1',
-            secondary: '#9D7BFC',
-            maya_blue: '#7BCBFC',
-            accent: '#82B1FF',
-            white: '#FFFFFF',
-            black: '#000000',
-            error: '#DF3131',
-            info: '#2196F3',
-            success: '#4CAF50',
-            warning: '#FFC107',
-
-            background: '#F3F3F3',
-            //background Card home page
-            pattens_blue: '#e3f2fd',
-            aero_blue: '#CAFFD6',
-            iceberg: '#D7F0FF',
+            primary      : '#3E53A1',
+            secondary    : '#9D7BFC',
+            maya_blue    : '#7BCBFC',
+            accent       : '#82B1FF',
+            white        : '#FFFFFF',
+            black        : '#000000',
+            error        : '#DF3131',
+            info         : '#2196F3',
+            success      : '#4CAF50',
+            warning      : '#FFC107',
+            background   : '#F3F3F3',
+            pattens_blue : '#e3f2fd',
+            aero_blue    : '#CAFFD6',
+            iceberg      : '#D7F0FF',
             lavender_mist: '#EAE4FF',
-
-            royal_blue: '#4667E5',  
-            sonic_silver: '#757575', //continue text
-            mercury: '#EBEBEB',
-            hex: '#b6b2b2',
-            onyx: '#373737',
-
+            royal_blue   : '#4667E5',
+            sonic_silver : '#757575',   //continue text
+            mercury      : '#EBEBEB',
+            hex          : '#b6b2b2',
+            onyx         : '#373737',
+            
           },
         },
         dark: {
           colors: {
-            primary: '#90CAF9',
+            primary  : '#90CAF9',
             secondary: '#424242',
-            accent: '#82B1FF',
-            error: '#FF5252',
-            info: '#2196F3',
-            success: '#4CAF50',
-            warning: '#FFC107',
+            accent   : '#82B1FF',
+            error    : '#FF5252',
+            info     : '#2196F3',
+            success  : '#4CAF50',
+            warning  : '#FFC107',
           },
         },
       },

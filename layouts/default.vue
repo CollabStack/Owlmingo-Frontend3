@@ -22,7 +22,5 @@
 </script>
 
 <style scoped>
-/* *{
-    background-color: #F4F5FC;
-} */
+
 </style>

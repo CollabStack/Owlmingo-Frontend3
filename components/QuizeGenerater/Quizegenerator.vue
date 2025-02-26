@@ -9,7 +9,7 @@
     <!-- Tabs and Options -->
     <v-row class="align-center">
       <v-col cols="9">
-        <v-tabs v-model="tab" max-width="600vh" bg-color="white" class="px-1 py-2 custom-tabs d-flix align-center justyfy-center h-40 rounded-xl w-50" color="primary">
+        <v-tabs v-model="tab" max-width="600vh" bg-color="white" class="px-1 py-2 custom-tabs d-flix align-center justyfy-center h-40 rounded-xl w-50" color="primary" mandatory>
           <v-tab rounded="xl" color="primary" v-for="(option, index) in options" :key="index" :value="option.value" class="custom-tab">
             {{ option.label }}
           </v-tab>
