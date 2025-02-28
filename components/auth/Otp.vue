@@ -1,10 +1,7 @@
-<script setup lang="ts">
+<script setup>
 import Socialicon from './Socialicon.vue';
 
 </script>
-
-
-
 
 <template>
     <v-container class="container h-100" >
