@@ -1,7 +1,7 @@
 <template>
     <!-- <v-container app fixed class="d-flex justify-space-between align-center app-bar"> -->
         <v-app-bar app fixed class="d-flex justify-space-between align-center app-bar">
-        <v-container fluid class="mx-2 mx-sm-2 mx-md-12 mx-lg-16">
+        <v-container fluid class="mx-2 mx-sm-2 mx-md-12 mx-lg-16" >
             <v-row align="center" justify="space-between" class="d-flex" no-gutters>
                 <!-- Left: Navigation Tabs -->
                 <v-col class="d-none d-lg-flex align-center">
@@ -57,7 +57,7 @@
                             <v-btn to="/auth">Explore</v-btn>
                             <v-btn to="/auth/sign-up">Upgrade Plan</v-btn>
                             <v-divider></v-divider>
-                            <v-btn color="secondary" to="/auth/sign-up">Sign Out</v-btn>
+                            <v-btn color="secondary" @click="logout">Sign Out</v-btn>
                         </div>
                     </v-menu>
 
@@ -98,14 +98,21 @@ watch(() => route.path, (newPath) => {
 
 /* ========== MOUNTED ==========*/
 onMounted(() => {
-    console.log('Navbar mounted');
-    console.log('isLoggedIn', isLoggedIn.value);
+    authStore.initializeSession();
 });
 /* ========== METHODS ==========*/
 function setActive(tab: string) {
   if (activeTab.value === tab) return; // Prevent redundant navigation
   activeTab.value = tab;
   router.push(tab);
+}
+
+function logout() {
+  authStore.logout();
+  // redirect and reload 
+    router.push('/').then(() => {
+        window.location.reload();
+    });
 }
 
 </script>
@@ -125,7 +132,7 @@ function setActive(tab: string) {
 }
 
 .app-bar {
-    background-color: var(--v-theme-primary);
+    /* background-color: var(--v-theme-primary); */
     box-shadow: none;
     border-bottom: 1px solid #e0e0e0;
 }
