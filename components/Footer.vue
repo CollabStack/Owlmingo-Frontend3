@@ -15,6 +15,7 @@
               <h4 class="ml-n2" style="font-size: 24px;">Social Media</h4>
                <v-row class="justify-start mt-1">
                   <div class="flex">
+
                     <a
                       v-for="(icon, index) in icons"
                       :key="index"
@@ -23,10 +24,11 @@
                       style="color: white; text-decoration: none;"
                     > 
                       <svg
-                        xmlns="http://www.w3.org/2000/svg"
+
                         width="40"
                         height="40"
                         viewBox="0 0 25 25"
+
                         v-html="getSvg(icon.name)"
                       ></svg>
                     </a>

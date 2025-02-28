@@ -40,12 +40,10 @@ import Socialicon from './Socialicon.vue';
             <v-btn class="justify-center align-center " style="width: 504px; height: 73px; background-color: var(--v-maya_blue); border-radius: 10px; color: white;  font-size: 24px;">Login</v-btn>
 
  
-            <Socialicon />
-  
+            <Socialicon />  
           </v-form>
         </v-col>
       </v-row>
     </v-container>
   </template>
-  
  

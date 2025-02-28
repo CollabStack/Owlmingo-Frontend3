@@ -1,3 +1,4 @@
+
 <script setup lang="ts">
 import Socialicon from './Socialicon.vue';
 
@@ -11,6 +12,7 @@ import Socialicon from './Socialicon.vue';
             src= "/images/3d-business-man-working-at-laptop-with-robot-assistant.png" 
             alt="Business Man" 
             class="image" 
+
             style="width: 602px; height: 828px;" 
           />
         </div>
@@ -47,9 +49,4 @@ import Socialicon from './Socialicon.vue';
       </v-row>
     </v-container>
   </template>
-  
-
-
-  
-  
   

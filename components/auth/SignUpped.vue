@@ -49,4 +49,3 @@ import Socialicon from './Socialicon.vue';
     </v-container>
   </template>
   
-  

@@ -1,3 +1,4 @@
+
 <script setup lang="ts">
 import Socialicon from './Socialicon.vue';
 
@@ -7,6 +8,7 @@ import Socialicon from './Socialicon.vue';
 
 
 <template>
+
     <v-container class="container h-100" >
       <v-row class="d-flex flex-row justify-center align-center">
         <v-col class="d-flex flex-column align-center" style="height: 780px;">
@@ -24,8 +26,7 @@ import Socialicon from './Socialicon.vue';
             
               <v-btn class="justify-center align-center mb-4" style="width: 504px; height: 73px; background-color: var(--v-maya_blue); border-radius: 10px; color: white; font-size: 24px;">Send</v-btn>
   
-          <Socialicon />
-  
+          <Socialicon />  
           </v-form>
         </v-col>
   
@@ -34,7 +35,9 @@ import Socialicon from './Socialicon.vue';
             src= "/images/3d-business-man-working-at-laptop-with-robot-assistant.png" 
             alt="Business Man" 
             class="image" 
+
             style="width: 602px; height: 828px;" 
+
           />
         </div>
       </v-row>
