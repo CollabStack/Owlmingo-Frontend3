@@ -3,7 +3,9 @@
     <AuthForgetPassword />
     <AuthNewPassword />
     <AuthOtp />
-    
+    <AuthSignUp />
+    <AuthSignIn />
+
 
 </template>
 

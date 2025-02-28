@@ -1,5 +1,28 @@
 <script setup>
-import Socialicon from './Socialicon.vue';
+import Socialicon from './Social.vue';
+import Swal from 'sweetalert2';
+import { userAuth } from '~/store/userAuth';
+
+const authStore = userAuth();
+const email = ref('');
+const password = ref('');
+
+onMounted(() => {
+    console.log('Sign In mounted');
+});
+
+const login = async () => {
+    try {
+        await authStore.login(email.value, password.value);
+        navigateTo("/");
+    } catch (error) {
+        Swal.fire({
+            icon: 'error',
+            title: 'Login Failed',
+            text: error.response?.data?.message || 'Please check your credentials and try again.'
+        });
+    }
+};
 
 </script>
 
@@ -16,16 +39,24 @@ import Socialicon from './Socialicon.vue';
         <v-col class="d-flex flex-column align-center w-50" style="height: 780px;">
           <p style= "color: var(--v-royal_blue);  width: 569px; text-align: center; font-size: 40px;">Login to Continue Your Learning Journey</p>
   
-          <v-form class="d-flex flex-column mt-5 " style="width: 504px; height: 350px; align-items: center; ">
+          <v-form class="d-flex flex-column align-center mt-5 " style="width: 504px; height: 350px; align-items: center;">
             <v-text-field
               class="w-100 pb-0"
-              style= "height: 65px;"
+              v-model="email"
               label="Email" variant="outlined"
+              prepend-icon="mdi-email"
+              type="email"
+              required    
+
             ></v-text-field>
             <v-text-field
               class="w-100 pb-0"
-              style= "height: 65px;"
+              v-model="password"
               label="Password" variant="outlined"
+              prepend-icon="mdi-lock"
+              type="password"
+              required
+
             ></v-text-field>
   
             <v-row class="d-flex justify-space-between align-center w-100 mt-4 mb-4">
@@ -33,10 +64,10 @@ import Socialicon from './Socialicon.vue';
                 <input type="checkbox" id="remember-me"/>
                 <label for="remember-me"  style="font-size: 16px; padding-left: 5px;">Remember me</label>
               </div>
-              <a href="#" style="font-size: 16px; text-decoration: none;">Forget Password?</a>
+              <a href="./ForgetPassword.vue" style="font-size: 16px; text-decoration: none;">Forget Password?</a>
             </v-row>
 
-            <v-btn class="justify-center align-center " style="width: 504px; height: 73px; background-color: var(--v-maya_blue); border-radius: 10px; color: white;  font-size: 24px;">Login</v-btn>
+            <v-btn @click="login" class="justify-center align-center " style="width: 504px; height: 73px; background-color: var(--v-maya_blue); border-radius: 10px; color: white;  font-size: 24px;">Login</v-btn>
 
  
             <Socialicon />

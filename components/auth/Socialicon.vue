@@ -16,7 +16,7 @@
               </a>
             </v-row>
   
-            <div class="sign-up">
+            <div v-if="showSignUp" class="sign-up">
               <span style="color: var(--v-sonic_silver); font-size: 20px;">
                     Don't have an account ? 
                 <a href="#" class="sign-up-link">Sign Up</a>
@@ -51,6 +51,12 @@
   
   <script>
 export default {
+  props: {
+  showSignUp: {
+      type: Boolean,
+      default: true // Change this to false in the file you don't want to display it
+    }
+  },
   data() {
     return {
       socialIcons: [
