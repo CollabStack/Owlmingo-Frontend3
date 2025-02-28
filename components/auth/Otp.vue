@@ -29,7 +29,7 @@ import Socialicon from './Socialicon.vue';
           </v-form>
         </v-col>
   
-        <div class="right-side w-50 mr-n9">
+        <div class="w-50 d-flex justify-center">
           <img 
             src= "/images/3d-business-man-working-at-laptop-with-robot-assistant.png" 
             alt="Business Man" 

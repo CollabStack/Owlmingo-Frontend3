@@ -6,7 +6,7 @@ import Socialicon from './Socialicon.vue';
 <template>
     <v-container class="container fill-height mt-6" >
       <v-row class="d-flex flex-row justify-center align-center">
-        <div class="right-side w-50 ml-16">
+        <div class="w-50 d-flex justify-center">
           <img 
             src= "/images/3d-business-man-working-at-laptop-with-robot-assistant.png" 
             alt="Business Man" 

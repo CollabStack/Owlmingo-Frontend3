@@ -10,7 +10,6 @@ import Socialicon from './Socialicon.vue';
           <img 
             src= "/images/3d-business-man-working-at-laptop-with-robot-assistant.png" 
             alt="Business Man" 
-            class="image" 
             style="width: 602px; height: 828px;" 
           />
         </div>
