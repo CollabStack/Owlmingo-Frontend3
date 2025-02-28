@@ -1,6 +1,6 @@
 <template>
   <v-footer class="white--text" style = "height: 529px;">
-    <v-container minWidth="1400px">
+    <v-container min-width= 80%>
       <v-row >
         <!-- First Container -->
         <v-col style="flex: 1.5; ">
