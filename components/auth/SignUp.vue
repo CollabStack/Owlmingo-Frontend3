@@ -1,5 +1,5 @@
 <script setup>
-import Socialicon from './Socialicon.vue';
+import Socialicon from './Social.vue';
 
 </script>
 
@@ -13,26 +13,37 @@ import Socialicon from './Socialicon.vue';
             <v-text-field
               class="w-100 pb-0"
               style= "height: 65px;"
+              
+              v-model="username"
               label="Username" variant="outlined"
+              required
             ></v-text-field>
             <v-text-field
               class="w-100 pb-0"
               style= "height: 65px;"
               label="Email" variant="outlined"
+
+              v-model="email"
+              required
+              type="email"
             ></v-text-field>
             <v-text-field
               class="w-100 pb-0"
               style= "height: 65px;"
               label="Password" variant="outlined"
+
+              v-model="password"
+              required
+              type="password"
             ></v-text-field>
   
             <v-col class="d-flex justify-end w-100 " style="top: -20px; width: 100%;">
-              <a href="#" style="margin-left: auto; font-size: 16px; text-decoration: none;">Back to Sign</a>
+              <a href="./SignIn.vue" style="margin-left: auto; font-size: 16px; text-decoration: none;">Back to Sign In</a>
             </v-col>
   
-            <v-btn class="justify-center align-center " style="width: 504px; height: 73px; background-color: var(--v-maya_blue); border-radius: 10px; color: white; font-size: 24px;">Send</v-btn>
+            <v-btn @click="signUp" class="justify-center align-center " style="width: 504px; height: 73px; background-color: var(--v-maya_blue); border-radius: 10px; color: white; font-size: 24px;">Sign Up</v-btn>
 
-            <Socialicon />
+            <Socialicon :showSignUp="false" />
   
           </v-form>
         </v-col>

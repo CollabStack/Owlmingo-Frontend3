@@ -1,5 +1,5 @@
 <script setup>
-import Socialicon from './Socialicon.vue';
+import Socialicon from './Social.vue';
 
 </script>
 
@@ -16,7 +16,7 @@ import Socialicon from './Socialicon.vue';
               label="Email" variant="outlined"
             ></v-text-field>
             <v-col class="d-flex justify-end w-100 " style="top: -20px; width: 100%;">
-              <a href="#" style="margin-left: auto; font-size: 16px; text-decoration: none;">Back to Sign</a>
+              <a href="./SignIn.vue" style="margin-left: auto; font-size: 16px; text-decoration: none;">Back to Sign In</a>
             </v-col>
 
 

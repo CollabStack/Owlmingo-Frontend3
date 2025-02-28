@@ -11,14 +11,14 @@
                         <v-form>
                             <v-text-field
                                 v-model="email"
-                                label="Email"
+                                label="Email" 
                                 prepend-icon="mdi-email"
                                 type="email"
                                 required
                             ></v-text-field>
                             <v-text-field
                                 v-model="password"
-                                label="Password"
+                                label="Password" 
                                 prepend-icon="mdi-lock"
                                 type="password"
                                 required
