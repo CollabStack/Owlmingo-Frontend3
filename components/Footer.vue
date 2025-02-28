@@ -1,20 +1,20 @@
 <template>
-  <v-footer class="white--text">
-    <v-container style="margin-left: 200px;">
-      <v-row class="d-flex justify-space-between">
+  <v-footer class="white--text" style = "height: 529px;">
+    <v-container minWidth="1400px">
+      <v-row >
         <!-- First Container -->
-        <v-col>
+        <v-col style="flex: 1.5; ">
           <v-row class="align-center">
-            <v-avatar size="100" class="mr-2 ml-2">
-              <img src="/logo/icon-no-bg.svg" alt="Owlmingo Logo" style="width: 99px; background-color: var(--v-white);"/>
+            <v-avatar size="116">
+              <img src="/logo/icon-no-bg.svg" alt="Owlmingo Logo" style="width: 116px; background-color: var(--v-white);"/>
             </v-avatar>
-            <h3 class="ml-4">Owlmingo</h3>
+            <h3 class="ml-4" style="font-size: 24px;">Owlmingo</h3>
           </v-row>
           <div class="mt-13">
             <v-col>
-              <h4 class="ml-n2">Social Media</h4>
+              <h4 class="ml-n2" style="font-size: 24px;">Social Media</h4>
                <v-row class="justify-start mt-1">
-                  <div class="flex space-x-4">
+                  <div class="flex">
                     <a
                       v-for="(icon, index) in icons"
                       :key="index"
@@ -24,9 +24,9 @@
                     > 
                       <svg
                         xmlns="http://www.w3.org/2000/svg"
-                        width="28"
-                        height="28"
-                        viewBox="0 0 24 24"
+                        width="40"
+                        height="40"
+                        viewBox="0 0 25 25"
                         v-html="getSvg(icon.name)"
                       ></svg>
                     </a>
@@ -36,17 +36,17 @@
           </div>
         </v-col>
 
-        <v-col class="mb-4 flex-grow-2" style="margin-left: 100px;" v-for="(section, index) in sections" :key="index">
-          <h3 class="mb-3">{{ section.title }}</h3>
-          <div class="text-gray-400 space-y-2">
-            <p class="mb-1" v-for="(link, linkIndex) in section.links" :key="linkIndex">
+        <v-col class="mb-4" v-for="(section, index) in sections" :key="index">
+          <h3 class="mb-3" style="font-size: 20px;">{{ section.title }}</h3>
+          <div class="text-gray-400">
+            <p class="mb-1" style="font-size: 20px;" v-for="(link, linkIndex) in section.links" :key="linkIndex">
               <a href="#" class="hover:text-white" style="color: white; text-decoration: none;">{{ link }}</a>
             </p>
           </div>
         </v-col>
       </v-row>
 
-      <v-divider></v-divider>
+      <v-divider minwidth="1445px"></v-divider>
       <p class="text-center mt-5">© 2024 Owlmingo. All Rights Reserved.</p>
     </v-container>
   </v-footer>
