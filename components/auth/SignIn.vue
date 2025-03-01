@@ -1,5 +1,5 @@
 <script setup>
-import Socialicon from './Social.vue';
+import Socialicon from './Socialicon.vue';
 import Swal from 'sweetalert2';
 import { userAuth } from '~/store/userAuth';
 
