@@ -1,7 +1,7 @@
 <template>
     <!-- <v-container app fixed class="d-flex justify-space-between align-center app-bar"> -->
         <v-app-bar app fixed class="d-flex justify-space-between align-center app-bar">
-        <v-container fluid class="mx-2 mx-sm-2 mx-md-12 mx-lg-16">
+        <v-container fluid class="mx-2 mx-sm-2 mx-md-12 mx-lg-16" >
             <v-row align="center" justify="space-between" class="d-flex" no-gutters>
                 <!-- Left: Navigation Tabs -->
                 <v-col class="d-none d-lg-flex align-center">
