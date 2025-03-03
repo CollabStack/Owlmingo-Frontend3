@@ -90,22 +90,6 @@ onMounted(() => {
 .outfit-medium { font-weight: 500; }
 .outfit-bold { font-weight: 700; }
 
-onMounted(() => {
-  setTimeout(() => {
-    isVisible.value = true;
-  }, 300);
-  
-  // Animated bounce effect every 5 seconds
-  setInterval(() => {
-    isHovered.value = true;
-    setTimeout(() => {
-      isHovered.value = false;
-    }, 1000);
-  }, 5000);
-});
-</script>
-
-<style scoped>
 .text-content {
   max-width: 650px;
   text-align: left;
