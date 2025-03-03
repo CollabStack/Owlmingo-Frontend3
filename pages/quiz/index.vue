@@ -1,6 +1,6 @@
 <template>
 
-    <p>Quiz page</p>
+    <Quiz-QuizeGenerator />
 
 </template>
 
