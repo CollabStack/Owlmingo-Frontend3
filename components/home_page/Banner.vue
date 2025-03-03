@@ -17,31 +17,35 @@
         ></v-img>
         
         <div class="text-content" :class="{ 'fade-in': isVisible }">
-          <h2 class="text-h4 font-weight-bold mb-4 gradient-text">Experience a new way of learning with the power of AI</h2>
-            <p class="text-body-1 mb-6 text-grey-lighten-4">For students, teachers, and professionals</p>
+          <h2 class="text-h4 font-weight-bold mb-4 gradient-text outfit outfit-bold">Experience a new way of learning with the power of AI</h2>
+          <p class="text-body-1 mb-6 text-grey-lighten-4 outfit outfit-regular">For students, teachers, and professionals</p>
           <div class="d-flex gap-4">
             <NuxtLink to="/library">
               <v-btn 
                 rounded="xl" 
                 variant="outlined" 
                 color="white" 
-                class="text-white btn-hover-effect"
-                elevation="2"
-                prepend-icon="mdi-book-open-page-variant"
+                class="text-white animated-btn outfit outfit-medium"
+                height="48"
               >
-                AI Flashcard
+                <span class="d-flex align-center">
+                  AI Flashcard
+                  <v-icon class="ms-2 btn-icon">mdi-book-open-page-variant</v-icon>
+                </span>
               </v-btn>
             </NuxtLink> 
             <NuxtLink to="/about">
-                <v-btn 
+              <v-btn 
                 rounded="xl" 
                 variant="outlined" 
                 color="white" 
-                class="text-white btn-hover-effect"
-                elevation="2"
-                prepend-icon="mdi-robot"
+                class="text-white animated-btn-alt outfit outfit-medium"
+                height="48"
               >
-                AI Quizzes
+                <span class="d-flex align-center">
+                  AI Quizzes
+                  <v-icon class="ms-2 btn-icon">mdi-robot</v-icon>
+                </span>
               </v-btn>
             </NuxtLink>
           </div>
@@ -73,6 +77,20 @@ onMounted(() => {
 </script>
 
 <style scoped>
+/* Import Outfit font */
+@import url('https://fonts.googleapis.com/css2?family=Outfit:wght@100..900&display=swap');
+
+/* Outfit font classes */
+.outfit {
+  font-family: "Outfit", sans-serif;
+  font-optical-sizing: auto;
+  font-style: normal;
+}
+
+.outfit-regular { font-weight: 400; }
+.outfit-medium { font-weight: 500; }
+.outfit-bold { font-weight: 700; }
+
 .text-content {
   max-width: 650px;
   text-align: left;
@@ -100,32 +118,49 @@ onMounted(() => {
   transform: translateY(-5px);
 }
 
-.btn-hover-effect {
+/* Updated button hover styles to match Future2.vue */
+.animated-btn, .animated-btn-alt {
   transition: all 0.3s ease;
   border-width: 2px;
   position: relative;
   overflow: hidden;
+  min-width: 160px;
+  padding: 0 20px !important;
+  box-shadow: none;
 }
 
-.btn-hover-effect:hover {
-  transform: translateY(-3px);
-  box-shadow: 0 7px 14px rgba(0, 0, 0, 0.12);
-}
-
-.btn-hover-effect::before {
-  content: "";
+.animated-btn::before {
+  content: '';
   position: absolute;
   top: 0;
   left: -100%;
   width: 100%;
   height: 100%;
-  background: rgba(255, 255, 255, 0.2);
-  transition: 0.5s;
-  pointer-events: none;
+  background: linear-gradient(90deg, transparent, rgba(255,255,255,0.2), transparent);
+  transition: all 0.6s ease;
 }
 
-.btn-hover-effect:hover::before {
+.animated-btn:hover::before {
   left: 100%;
+}
+
+.animated-btn:hover {
+  background-color: rgba(255, 255, 255, 0.15);
+  transform: translateY(-3px);
+}
+
+.animated-btn-alt:hover {
+  background-color: white;
+  color: #1A237E !important;
+  transform: translateY(-3px);
+}
+
+.btn-icon {
+  transition: transform 0.3s ease;
+}
+
+.animated-btn:hover .btn-icon, .animated-btn-alt:hover .btn-icon {
+  transform: translateX(5px);
 }
 
 .gradient-text {
