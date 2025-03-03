@@ -75,7 +75,7 @@ import { userAuth } from '~/store/userAuth';
 
     
 /* ========== DATA ==========*/
-const route = useRoute();
+const route = useRoute();    
 const router = useRouter();
 const tabs = [
     { label: 'Home', route: '/' },
