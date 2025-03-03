@@ -23,7 +23,7 @@
     </v-card>
   </v-col>
     
-  
+          
       <!-- Mission Section -->
   <v-col cols="12">
   <v-card-text class="mission_section text-center rounded-lg mx-15 px-0 py-1 my-10">
