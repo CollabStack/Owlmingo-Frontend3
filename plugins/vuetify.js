@@ -29,7 +29,7 @@ export default defineNuxtPlugin((nuxtApp) => {
             info     : '#2196F3',
             success  : '#4CAF50',
             warning  : '#FFC107',
-
+            
             background: '#F3F3F3',
                 //background Card home page
             pattens_blue : '#e3f2fd',
@@ -42,7 +42,7 @@ export default defineNuxtPlugin((nuxtApp) => {
             mercury     : '#EBEBEB',
             hex         : '#b6b2b2',
             onyx        : '#373737',
-
+            black_cow   : '#4B4B4B',
           },
         },
         dark: {

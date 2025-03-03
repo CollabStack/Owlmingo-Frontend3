@@ -12,6 +12,7 @@
         <p class="text-warning">warning Color</p>
         <p class="text-background">Backgroun color</p>
         <p>I wanna  change  again</p>
+         
     </div>
 </template>
 

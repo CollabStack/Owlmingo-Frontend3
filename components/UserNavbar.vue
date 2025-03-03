@@ -80,7 +80,7 @@ const router = useRouter();
 const tabs = [
     { label: 'Home', route: '/' },
     { label: 'Flashcard', route: '/flashcard' },
-    { label: 'Quiz', route: '/AI_Quize_Generator' },
+    { label: 'Quiz', route: '/Quiz' },
     { label: 'About', route: '/about' },
 ];
 const activeTab = ref(route.path);
