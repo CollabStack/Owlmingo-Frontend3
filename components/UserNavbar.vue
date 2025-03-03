@@ -82,6 +82,7 @@ const tabs = [
     { label: 'Flashcard', route: '/flashcard' },
     { label: 'Quiz', route: '/quiz' },
     { label: 'About', route: '/about' },
+    { label: 'ColorView', route: '/color'},
 ];
 const activeTab = ref(route.path);
 const authStore = userAuth();
