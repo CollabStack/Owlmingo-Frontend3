@@ -13,13 +13,13 @@
     <div v-motion :initial="{ opacity: 0, scale: 0.95 }" :enter="{ opacity: 1, scale: 1, transition: { delay: 200, duration: 500 } }">
       <v-btn-toggle v-model="selectedTab" class="mt-3 bg-grey-lighten-3 rounded-pill pa-1 toggle-container" density="compact" mandatory>
         <v-btn value="school" class="rounded-pill toggle-btn" :class="{
-            'bg-deep-purple-lighten-3 text-black toggle-btn-active': selectedTab === 'school',
+            'bg-secondary text-white toggle-btn-active': selectedTab === 'school',
             'bg-transparent text-black': selectedTab !== 'school'
         }" size="small">
           School
         </v-btn>
         <v-btn value="work" class="rounded-pill toggle-btn" :class="{
-            'bg-deep-purple-lighten-3 text-black toggle-btn-active': selectedTab === 'work',
+            'bg-secondary text-white toggle-btn-active': selectedTab === 'work',
             'bg-transparent text-black': selectedTab !== 'work'
         }" size="small">
           Work
