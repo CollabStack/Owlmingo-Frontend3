@@ -19,7 +19,7 @@
             <div v-if="showSignUp" class="sign-up">
               <span style="color: var(--v-sonic_silver); font-size: 20px;">
                     Don't have an account ? 
-                <a href="#" class="sign-up-link">Sign Up</a>
+                <nuxt-link to="sign-up" class="sign-up-link">Sign Up</nuxt-link>
               </span>
             </div>
             </v-container>
