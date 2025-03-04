@@ -252,6 +252,9 @@ const isFeedbackVisible = ref(false);
 const isTeamVisible = ref(false);
 const showScrollTop = ref(false);
 
+// Add new refs for feedback animation
+const feedbackAnimationActive = ref(true);
+
 // Section refs
 const missionSection = ref(null);
 const whySection = ref(null);
@@ -306,6 +309,29 @@ const scrollToTop = () => {
   window.scrollTo({
     top: 0,
     behavior: 'smooth'
+  });
+};
+
+// Function to animate feedback cards with alternating motion
+const animateFeedbackCards = () => {
+  // Only animate if the feedback section is visible
+  if (!isFeedbackVisible.value) return;
+  
+  // Get all feedback cards and animate them with delays
+  const cards = document.querySelectorAll('.feedback-card');
+  cards.forEach((card, index) => {
+    // Skip animation if card is not visible
+    if (!card.offsetParent) return;
+    
+    // Apply animation class based on odd/even index
+    setTimeout(() => {
+      card.classList.add(index % 2 === 0 ? 'animate-slide-right' : 'animate-slide-left');
+      
+      // Remove animation class after animation completes
+      setTimeout(() => {
+        card.classList.remove('animate-slide-right', 'animate-slide-left');
+      }, 1500); // Animation duration plus a little buffer
+    }, index * 150); // Stagger start times
   });
 };
 
@@ -364,6 +390,13 @@ onMounted(() => {
     }, 1000);
   }, 5000);
 
+  // Add feedback animation interval
+  const feedbackAnimationInterval = setInterval(() => {
+    if (feedbackAnimationActive.value) {
+      animateFeedbackCards();
+    }
+  }, 5000); // Run animation every 5 seconds
+
   // Setup observers after a slight delay to ensure DOM is ready
   setTimeout(() => {
     setupIntersectionObservers();
@@ -372,10 +405,17 @@ onMounted(() => {
   // Add scroll event listener
   window.addEventListener('scroll', checkScroll);
   
+  // Stop animations when user leaves the tab/window
+  document.addEventListener('visibilitychange', () => {
+    feedbackAnimationActive.value = !document.hidden;
+  });
+  
   // Clean up on unmount
   onUnmounted(() => {
     clearInterval(bounceInterval);
+    clearInterval(feedbackAnimationInterval);
     window.removeEventListener('scroll', checkScroll);
+    document.removeEventListener('visibilitychange', () => {});
   });
 });
 </script>
@@ -486,6 +526,7 @@ onMounted(() => {
   box-shadow: 0 4px 10px rgba(0, 0, 0, 0.05);
   background-color: #f8f9fa;
   border-left: 3px solid transparent;
+  position: relative;
 }
 
 .feedback-card:hover {
@@ -494,10 +535,37 @@ onMounted(() => {
   border-left: 3px solid #1A237E;
 }
 
+/* New feedback card animations */
+@keyframes slideRight {
+  0% { transform: translateX(0); }
+  15% { transform: translateX(10px); }
+  30% { transform: translateX(0); }
+  45% { transform: translateX(10px); }
+  60% { transform: translateX(0); }
+}
+
+@keyframes slideLeft {
+  0% { transform: translateX(0); }
+  15% { transform: translateX(-10px); }
+  30% { transform: translateX(0); }
+  45% { transform: translateX(-10px); }
+  60% { transform: translateX(0); }
+}
+
+.animate-slide-right {
+  animation: slideRight 2s ease-in-out;
+}
+
+.animate-slide-left {
+  animation: slideLeft 2s ease-in-out;
+}
+
+/* Improve feedback card visuals */
 .feedback-text {
   line-height: 1.7;
   font-style: italic;
   position: relative;
+  transition: all 0.3s ease;
 }
 
 .feedback-text::before {
@@ -507,6 +575,18 @@ onMounted(() => {
   position: absolute;
   top: -1.5rem;
   left: -0.5rem;
+  transition: all 0.3s ease;
+}
+
+/* Add subtle hover effect to quote mark */
+.feedback-card:hover .feedback-text::before {
+  color: rgba(26, 35, 126, 0.15);
+  transform: scale(1.1);
+}
+
+/* Optional: Add a subtle shadow highlight when card animates */
+.animate-slide-right, .animate-slide-left {
+  box-shadow: 0 8px 20px rgba(26, 35, 126, 0.15);
 }
 
 /* Team member cards */
