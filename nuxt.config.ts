@@ -6,6 +6,7 @@ export default defineNuxtConfig({
     'vuetify/styles', // Include Vuetify styles
     '@mdi/font/css/materialdesignicons.min.css', // Include MDI CSS
     '~/assets/css/main.css', // Add global CSS
+    '~/assets/css/global.css' // Add global CSS
   ],
 
   build: {
