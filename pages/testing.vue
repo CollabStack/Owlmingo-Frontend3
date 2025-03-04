@@ -1,10 +1,11 @@
 <template>
     <Footer />
     <AuthForgetPassword />
-    <AuthNewPassword />
-    <AuthOtp />
-    <AuthSignUp />
     <AuthSignIn />
+    <AuthSignUp />
+    <AuthOtp />
+    <AuthNewPassword />
+
 
 
 </template>

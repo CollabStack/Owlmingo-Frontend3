@@ -1,16 +1,16 @@
 <script setup>
-import Socialicon from './Socialicon.vue';
+import Socialicon from './SocialIcon.vue';
 
 </script>
 
 <template>
-    <v-container class="container h-100" >
+    <v-container class="container fill-height mt-6" >
       <v-row class="d-flex flex-row justify-center align-center">
-        <v-col class="d-flex flex-column align-center" style="height: 780px;">
+        <v-col class="d-flex flex-column align-center w-50" style="height: 780px;">
           <p  style= "color: var(--v-royal_blue);  width: 350px; align-items: center; font-size: 40px;">Welcome to Study</p>
 
   
-          <v-form class="d-flex flex-column mt-5 " style="width: 504px; height: 500px; align-items: center;">
+          <v-form class="d-flex flex-column mt-5 " style="width: 425px; height: 500px; align-items: center;">
             <h5 class=" align-left justify-start w-100" style="color: var(--v-royal_blue); font-size: 20px;">Enter the Verification Code</h5>
 
             <v-otp-input class="mb-4 mt-4 max-width" min-width="422px" min-height="62px"></v-otp-input>
@@ -31,7 +31,7 @@ import Socialicon from './Socialicon.vue';
             src= "/images/3d-business-man-working-at-laptop-with-robot-assistant.png" 
             alt="Business Man" 
             class="image" 
-            style="width: 602px; height: 828px;" 
+            style="width: 525px; height: 44%;" 
           />
         </div>
       </v-row>

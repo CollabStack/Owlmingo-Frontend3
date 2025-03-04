@@ -1,18 +1,18 @@
 <template>
         <v-container class="d-flex flex-column justify-center align-center">
-              <v-row class="d-flex flex-row w-100 align-center pt-3">
+              <v-row class="d-flex flex-row w-100 align-center pt-3 mt-3">
                   <v-divider class="border-opacity-100" style="flex: 2; color: var(--v-sonic_silver);"></v-divider>
                   <span class=" pl-1 pr-1" style="font-size: 16px; color: var(--v-sonic_silver);">Or continue with</span>
                   <v-divider class="border-opacity-100" style="flex: 2; color: var(--v-sonic_silver);"></v-divider>
                 </v-row>
               
-              <v-row class="mt-6 justify-center justify-space-between" style = "width: 198px; height: 92px;">
+              <v-row class="mt-6 justify-center justify-space-between" style = "width: 160px; height: 92px;">
               <a
                 v-for="(icon, index) in socialIcons"
                 :key="index"
                 :href="icon.link"
               >
-                <img :src="`/icons/${icon.src}`" :alt="icon.alt" style="width: 52px; height: 52px; padding: auto;"/>
+                <img :src="`/icons/${icon.src}`" :alt="icon.alt" style="width: 40px; padding: auto;"/>
               </a>
             </v-row>
   

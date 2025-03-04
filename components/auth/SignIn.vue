@@ -1,5 +1,5 @@
 <script setup>
-import Socialicon from './Socialicon.vue';
+import Socialicon from './SocialIcon.vue';
 import Swal from 'sweetalert2';
 import { userAuth } from '~/store/userAuth';
 
@@ -33,18 +33,17 @@ const login = async () => {
           <img 
             src= "/images/3d-business-man-working-at-laptop-with-robot-assistant.png" 
             alt="Business Man" 
-            style="width: 602px; height: 828px;" 
+            style="width: 525px; height: 44%;"  
           />
         </div>
         <v-col class="d-flex flex-column align-center w-50" style="height: 780px;">
           <p style= "color: var(--v-royal_blue);  width: 569px; text-align: center; font-size: 40px;">Login to Continue Your Learning Journey</p>
   
-          <v-form class="d-flex flex-column align-center mt-5 " style="width: 504px; height: 350px; align-items: center;">
+          <v-form class="d-flex flex-column align-center mt-5 " style="width: 425px; height: 350px; align-items: center;">
             <v-text-field
               class="w-100 pb-0"
               v-model="email"
               label="Email" variant="outlined"
-              prepend-icon="mdi-email"
               type="email"
               required    
 
@@ -53,7 +52,6 @@ const login = async () => {
               class="w-100 pb-0"
               v-model="password"
               label="Password" variant="outlined"
-              prepend-icon="mdi-lock"
               type="password"
               required
 
@@ -64,7 +62,7 @@ const login = async () => {
                 <input type="checkbox" id="remember-me"/>
                 <label for="remember-me"  style="font-size: 16px; padding-left: 5px;">Remember me</label>
               </div>
-              <a href="./ForgetPassword.vue" style="font-size: 16px; text-decoration: none;">Forget Password?</a>
+              <a href="./ForgetPassword" style="font-size: 16px; text-decoration: none;">Forget Password?</a>
             </v-row>
 
             <v-btn @click="login" class="justify-center align-center " style="width: 504px; height: 73px; background-color: var(--v-maya_blue); border-radius: 10px; color: white;  font-size: 24px;">Login</v-btn>

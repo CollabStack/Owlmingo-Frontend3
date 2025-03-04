@@ -1,19 +1,20 @@
 <script setup>
-import Socialicon from './Socialicon.vue';
+import Socialicon from './SocialIcon.vue';
 
 </script>
 
 <template>
     <v-container class="container fill-height" >
-      <v-row class="d-flex flex-row justify-center align-center">
-        <v-col class="d-flex flex-column align-center" style="height: 780px;">
-          <p  style= "color: var(--v-royal_blue);  width: 569px; text-align: center; font-size: 40px;">Sign Up to Begin Your Leaning Journey</p>
+      <v-row class="d-flex flex-row align-center mt-16">
+        <v-container class="w-50">
+          <v-col class="d-flex flex-column align-center" style="height: 700px;">
+          <p  style= "color: var(--v-royal_blue);  width: 535px; text-align: center; font-size: 40px;">Sign Up to Begin Your Leaning Journey</p>
 
-          <v-form class="d-flex flex-column mt-5 " style="width: 504px; height: 350px; align-items: center; ">
+          <v-form class="d-flex flex-column mt-5 " style="width: 425px; height: 350px; align-items: center; ">
             <v-text-field
               class="w-100 pb-0"
               style= "height: 65px;"
-              
+              bg-color= #EFF2FE
               v-model="username"
               label="Username" variant="outlined"
               required
@@ -38,22 +39,24 @@ import Socialicon from './Socialicon.vue';
             ></v-text-field>
   
             <v-col class="d-flex justify-end w-100 " style="top: -20px; width: 100%;">
-              <a href="./SignIn.vue" style="margin-left: auto; font-size: 16px; text-decoration: none;">Back to Sign In</a>
-            </v-col>
+              <NuxtLink :to="/SignIn" style="margin-left: auto; font-size: 16px; text-decoration: none;">Back to Sign In</NuxtLink>            </v-col>
   
-            <v-btn @click="signUp" class="justify-center align-center " style="width: 504px; height: 73px; background-color: var(--v-maya_blue); border-radius: 10px; color: white; font-size: 24px;">Sign Up</v-btn>
+            <v-btn @click="signUp" class="justify-center align-center mt-4" style="width: 504px; height: 65px; background-color: var(--v-maya_blue); border-radius: 10px; color: white; font-size: 20px;">Sign Up</v-btn>
 
             <Socialicon :showSignUp="false" />
   
           </v-form>
         </v-col>
+
+        </v-container>
+        
   
         <div class="right-side w-50 mr-n9">
           <img 
             src= "/images/3d-business-man-working-at-laptop-with-robot-assistant.png" 
             alt="Business Man" 
             class="image" 
-            style="width: 602px; height: 828px;" 
+            style="width: 525px; height: 44%;" 
           />
         </div>
       </v-row>

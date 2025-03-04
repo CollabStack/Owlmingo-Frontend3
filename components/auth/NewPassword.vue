@@ -1,5 +1,5 @@
 <script setup>
-import Socialicon from './Socialicon.vue';
+import Socialicon from './SocialIcon.vue';
 
 </script>
 
@@ -11,13 +11,13 @@ import Socialicon from './Socialicon.vue';
             src= "/images/3d-business-man-working-at-laptop-with-robot-assistant.png" 
             alt="Business Man" 
             class="image" 
-            style="width: 602px; height: 828px;" 
+            style="width: 525px; height: 44%;" 
           />
         </div>
         <v-col class="d-flex flex-column align-center" style="height: 780px;">
           <p  style= "color: var(--v-royal_blue);  width: 301px; align-items: center; font-size: 40px;">New Password</p>
 
-          <v-form class="d-flex flex-column mt-5 " style="width: 504px; height: 350px; align-items: center; ">
+          <v-form class="d-flex flex-column mt-5 " style="width: 425px; height: 350px; align-items: center; ">
             <v-text-field
               class="w-100 pb-0"
               style= "height: 65px;"
