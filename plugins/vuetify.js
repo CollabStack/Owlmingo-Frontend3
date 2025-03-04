@@ -13,7 +13,7 @@ export default defineNuxtPlugin((nuxtApp) => {
         light: {
           colors: {
               // #7BCBFC
-            primary     : '#3E53A1',
+            primary     : '#4635B1',
             secondary   : '#9D7BFC',
             maya_blue   : '#7BCBFC',
             accent      : '#82B1FF',
