@@ -157,7 +157,7 @@ onMounted(() => {
 
 .animated-btn-alt:hover {
   background-color: white;
-  color: #1A237E !important;
+  color: #69247C !important;
   transform: translateY(-3px);
 }
 
