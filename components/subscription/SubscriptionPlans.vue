@@ -180,9 +180,9 @@ const plans = {
         "200 pages per document upload",
         "150,000 characters per text upload"
       ],
-      colorClass: "text-primary",
-      iconColor: "primary",
-      buttonColor: "primary",
+      colorClass: "secondary",
+      iconColor: "secondary",
+      buttonColor: "secondary",
     },
     {
       name: "Monthly",
@@ -194,9 +194,9 @@ const plans = {
         "200 pages per document upload",
         "150,000 characters per text upload"
       ],
-      colorClass: "text-error",
-      iconColor: "error",
-      buttonColor: "error",
+      colorClass: "gold",
+      iconColor: "gold",
+      buttonColor: "gold",
     },
   ],
   work: [
