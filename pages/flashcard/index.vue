@@ -126,7 +126,7 @@
             clearable
             clear-icon="mdi-close-circle"
             label="Notes"
-            placeholder="Start typing here to create flashcards..."
+            placeholder="Paste your study notes here..."
             hide-details="auto"
             class="clean-textarea"
             v-model="textContent"
@@ -134,7 +134,7 @@
             bg-color="white"
             color="secondary"
             counter="4000"
-            variant="outlined"
+            variant="plain"
           >
           </v-textarea>
           <div class="button-container">
@@ -481,5 +481,12 @@ const processContent = () => {
 /* Update the clean-textarea margin */
 :deep(.clean-textarea) {
   margin-bottom: 0 !important;
+}
+
+/* Remove any conflicting textarea styles */
+:deep(.v-field--focused),
+:deep(.v-field--active) {
+  box-shadow: none !important;
+  transform: none !important;
 }
 </style>
