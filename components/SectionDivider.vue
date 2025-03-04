@@ -20,7 +20,7 @@ const props = defineProps({
   },
   iconSize: {
     type: String,
-    default: 'small'
+    default: '28px'
   }
 });
 </script>
