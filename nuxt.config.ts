@@ -4,6 +4,8 @@ export default defineNuxtConfig({
 
   css: [
     'vuetify/styles', // Include Vuetify styles
+    '@mdi/font/css/materialdesignicons.min.css', // Include MDI CSS
+    '~/assets/css/main.css', // Add global CSS
   ],
 
   build: {
@@ -21,6 +23,10 @@ export default defineNuxtConfig({
       ],
       link: [
         { rel: 'icon', type: 'image/x-icon', href: '/logo/icon-no-bg.svg' }, // Favicon
+        {
+          rel: 'stylesheet',
+          href: 'https://fonts.googleapis.com/css2?family=Outfit:wght@100..900&display=swap'
+        }
       ],
     },
   },

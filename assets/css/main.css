@@ -1,0 +1,37 @@
+/* Global font classes */
+.outfit {
+  font-family: "Outfit", sans-serif;
+  font-optical-sizing: auto;
+  font-style: normal;
+}
+
+.outfit-thin { font-weight: 100; }
+.outfit-light { font-weight: 300; }
+.outfit-regular { font-weight: 400; }
+.outfit-medium { font-weight: 500; }
+.outfit-semibold { font-weight: 600; }
+.outfit-bold { font-weight: 700; }
+.outfit-black { font-weight: 900; }
+
+/* Global font settings */
+body {
+  font-family: 'Outfit', sans-serif;
+}
+
+h1, h2, h3, h4, h5, h6 {
+  font-family: 'Outfit', sans-serif;
+}
+
+/* Default text styles */
+.text-body-1, 
+.text-body-2,
+.text-subtitle-1,
+.text-subtitle-2,
+p {
+  font-family: 'Outfit', sans-serif;
+}
+
+/* Button text */
+.v-btn {
+  font-family: 'Outfit', sans-serif;
+}
