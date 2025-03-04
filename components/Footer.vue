@@ -111,7 +111,7 @@
               <v-btn 
                 type="submit" 
                 block 
-                color="primary" 
+                color="royal_blue"   
                 class="mt-2 subscribe-btn outfit outfit-medium" 
                 rounded="xl"
                 height="40"
