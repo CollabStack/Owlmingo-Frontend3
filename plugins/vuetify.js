@@ -26,7 +26,7 @@ export default defineNuxtPlugin((nuxtApp) => {
             royal_blue  : '#4667E5',
             sonic_silver: '#757575',   //continue text
             mercury     : '#EBEBEB',
-            hex         : '#b6b2b2',
+            hex         : '#b6b2b2', 
             onyx        : '#373737',
             water       : '#EFF2FE',
           },
