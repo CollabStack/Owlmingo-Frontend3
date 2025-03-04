@@ -7,9 +7,12 @@
           <!-- Brand Section -->
           <v-col cols="12" md="4" lg="3" class="brand-section pe-md-6">
             <v-row class="align-center mb-4">
-              <v-avatar size="60" class="gradient-border me-3">
-                <img src="/logo/icon-no-bg.svg" alt="Owlmingo Logo" class="logo-image"/>
-              </v-avatar>
+                  <v-icon 
+                  icon="mdi-owl" 
+                  size="40" 
+                  class="gradient-text me-3"
+                  color="white" 
+                  ></v-icon>
               <h3 class="text-h5 font-weight-bold gradient-text outfit outfit-bold">Owlmingo</h3>
             </v-row>
             

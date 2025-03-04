@@ -243,10 +243,13 @@
     class="scroll-top-btn"
     @click="scrollToTop"
   ></v-btn>
+  <Footer />
 </template>
+<
 
 <script setup>
 import { ref, onMounted, onUnmounted } from 'vue';
+import Footer from '~/components/Footer.vue';
 
 // Animation states
 const isVisible = ref(false);

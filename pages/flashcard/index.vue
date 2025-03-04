@@ -204,11 +204,13 @@
       </template>
     </v-snackbar>
   </v-container>
+  <Footer />
 </template>
 
 <script setup>
 import { ref } from 'vue';
 import FileUploader from '../../components/common/FileUploader.vue';
+import Footer from '~/components/Footer.vue';
 
 const tab = ref('document'); // Default tab
 const sheet = ref(false);
