@@ -186,34 +186,39 @@
                   transform: isTeamVisible ? 'translateY(0)' : 'translateY(20px)'
                 }"
               >
-                <v-img 
-                  :src="member.image" 
-                  :alt="member.name" 
-                  height="280" 
-                  cover
-                  class="team-image"
-                >
-                  <template v-slot:placeholder>
-                    <v-row
-                      class="fill-height ma-0"
-                      align="center"
-                      justify="center"
-                    >
-                      <v-progress-circular
-                        indeterminate
-                        color="grey-lighten-5"
-                      ></v-progress-circular>
-                    </v-row>
-                  </template>
-                </v-img>
-                <div class="team-overlay" :class="{ 'show-overlay': isHovering }">
-                  <div class="team-info">
-                    <h3 class="text-h6 font-weight-bold outfit outfit-medium">{{ member.name }}</h3>
-                    <p class="text-subtitle-1 outfit outfit-regular">{{ member.role }}</p>
-                    <div class="mt-4 d-flex justify-center">
-                      <v-btn icon="mdi-linkedin" variant="text" color="white" size="small" class="mx-1"></v-btn>
-                      <v-btn icon="mdi-twitter" variant="text" color="white" size="small" class="mx-1"></v-btn>
-                      <v-btn icon="mdi-github" variant="text" color="white" size="small" class="mx-1"></v-btn>
+                <div class="team-image-container">
+                  <v-img 
+                    :src="member.image" 
+                    :alt="member.name" 
+                    height="320"  
+                    class="team-image"
+                    cover
+                  >
+                    <template v-slot:placeholder>
+                      <v-row
+                        class="fill-height ma-0"
+                        align="center"
+                        justify="center"
+                      >
+                        <v-progress-circular
+                          indeterminate
+                          color="grey-lighten-5"
+                        ></v-progress-circular>
+                      </v-row>
+                    </template>
+                  </v-img>
+                  <div 
+                    class="team-overlay" 
+                    :class="{ 'show-overlay': isHovering }"
+                  >
+                    <div class="team-info">
+                      <h3 class="text-h6 font-weight-bold outfit outfit-medium mb-2 team-name">{{ member.name }}</h3>
+                      <p class="text-subtitle-1 outfit outfit-regular mb-4 team-role">{{ member.role }}</p>
+                      <div class="mt-4 d-flex justify-center">
+                        <v-btn icon="mdi-linkedin" variant="text" color="white" size="small" class="mx-1 social-btn"></v-btn>
+                        <v-btn icon="mdi-twitter" variant="text" color="white" size="small" class="mx-1 social-btn"></v-btn>
+                        <v-btn icon="mdi-github" variant="text" color="white" size="small" class="mx-1 social-btn"></v-btn>
+                      </div>
                     </div>
                   </div>
                 </div>
@@ -492,7 +497,7 @@ onMounted(() => {
   transform: translateX(-50%);
   width: 60px;
   height: 3px;
-  background: linear-gradient(90deg, #1A237E, #3949AB);
+  background: linear-gradient(90deg, #737ef8, #3949AB);
   border-radius: 3px;
 }
 
@@ -508,7 +513,7 @@ onMounted(() => {
 .feature-card:hover {
   transform: translateY(-5px);
   box-shadow: 0 10px 25px rgba(0, 0, 0, 0.1);
-  border-bottom: 3px solid #1A237E;
+  border-bottom: 3px solid #69247C;
 }
 
 .feature-icon {
@@ -524,7 +529,7 @@ onMounted(() => {
   transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
   border-radius: 12px;
   box-shadow: 0 4px 10px rgba(0, 0, 0, 0.05);
-  background-color: #f8f9fa;
+  background-color: #FBFBFB;
   border-left: 3px solid transparent;
   position: relative;
 }
@@ -532,7 +537,7 @@ onMounted(() => {
 .feedback-card:hover {
   transform: translateY(-5px) translateX(3px);
   box-shadow: 0 10px 25px rgba(0, 0, 0, 0.1);
-  border-left: 3px solid #1A237E;
+  border-left: 3px solid purple;
 }
 
 /* New feedback card animations */
@@ -591,17 +596,36 @@ onMounted(() => {
 
 /* Team member cards */
 .team-member-card {
-  transition: all 0.5s cubic-bezier(0.4, 0, 0.2, 1);
+  transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
   border-radius: 12px;
   overflow: hidden;
   position: relative;
-  height: 350px;
-  box-shadow: 0 4px 10px rgba(0, 0, 0, 0.05);
+  height: 400px;
+  box-shadow: 0 8px 20px rgba(0, 0, 0, 0.08);
+}
+
+.team-member-card:hover {
+  transform: translateY(-8px);
+  box-shadow: 0 15px 30px rgba(26, 35, 126, 0.15);
+}
+
+.team-image-container {
+  position: relative;
+  overflow: hidden;
 }
 
 .team-image {
-  height: 100%;
-  transition: all 0.5s ease;
+  transition: all 0.6s ease;
+}
+
+.team-member-card:hover .team-image {
+  transform: scale(1.05);
+}
+
+/* Make sure portrait focus is strong by using deep selectors */
+.team-image :deep(.v-img__img) {
+  object-position: top center !important;
+  object-fit: cover !important;
 }
 
 .team-overlay {
@@ -610,22 +634,64 @@ onMounted(() => {
   left: 0;
   width: 100%;
   height: 100%;
-  background: linear-gradient(to top, rgba(26, 35, 126, 0.85), rgba(26, 35, 126, 0.5));
+  background: linear-gradient(to top, 
+    rgba(105, 36, 124, 0.75), 
+    rgba(26, 35, 126, 0.55)
+  );
+  backdrop-filter: blur(3px);
   display: flex;
   align-items: center;
   justify-content: center;
   opacity: 0;
-  transition: all 0.3s ease;
+  transform: translateY(20px);
+  transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
 }
 
 .show-overlay {
   opacity: 1;
+  transform: translateY(0);
 }
 
 .team-info {
   color: white;
   text-align: center;
   padding: 1rem;
+  transform: translateY(15px);
+  opacity: 0;
+  transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+  transition-delay: 0.1s;
+}
+
+.show-overlay .team-info {
+  transform: translateY(0);
+  opacity: 1;
+}
+
+.team-name {
+  transform: translateY(5px);
+  transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+  transition-delay: 0.1s;
+}
+
+.team-role {
+  transform: translateY(5px);
+  transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+  transition-delay: 0.2s;
+}
+
+.social-btn {
+  transition: all 0.3s ease;
+  transform: scale(0);
+  transition-delay: 0.3s;
+}
+
+.show-overlay .social-btn {
+  transform: scale(1);
+}
+
+.social-btn:hover {
+  background-color: rgba(255, 255, 255, 0.2);
+  transform: scale(1.2);
 }
 
 .team-member-info {
@@ -635,10 +701,33 @@ onMounted(() => {
   width: 100%;
   background-color: white;
   transition: all 0.3s ease;
+  border-top: 3px solid transparent;
+}
+
+.team-member-card:hover .team-member-info:not(.info-hidden) {
+  border-top: 3px solid rgba(105, 36, 124, 0.6);
+  background-color: #fbfbfb;
 }
 
 .info-hidden {
   opacity: 0;
+}
+
+/* Responsive adaptations for team cards */
+@media (max-width: 960px) {
+  .team-member-card {
+    height: 350px;
+  }
+}
+
+@media (max-width: 600px) {
+  .team-member-card {
+    height: 320px;
+  }
+  
+  .team-image {
+    height: 250px !important;
+  }
 }
 
 /* Button styling */
