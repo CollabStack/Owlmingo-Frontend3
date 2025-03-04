@@ -214,9 +214,9 @@ const plans = {
         "500 responses per month",
         "Revisely Branding on Quizzes"
       ],
-      colorClass: "text-primary",
-      iconColor: "primary",
-      buttonColor: "primary",
+      colorClass: "secondary",
+      iconColor: "secondary",
+      buttonColor: "secondary",
     },
     {
       name: "Business",
@@ -232,9 +232,9 @@ const plans = {
         "Unlimited responses",
         "No Revisely branding"
       ],
-      colorClass: "text-error",
-      iconColor: "error",
-      buttonColor: "error",
+      colorClass: "gold",
+      iconColor: "gold",
+      buttonColor: "gold",
     },
   ],
 };

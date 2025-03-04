@@ -60,7 +60,7 @@
   <!-- Section Divider -->
   <div class="section-divider">
     <div class="divider-line"></div>
-    <v-icon icon="mdi-owl" color="primary" size="small"></v-icon>
+    <v-icon icon="mdi-owl" color="secondary" size="small"></v-icon>
     <div class="divider-line"></div>
   </div>
 
@@ -71,8 +71,8 @@
       :style="{ opacity: isMissionVisible ? 1 : 0, transform: isMissionVisible ? 'translateY(0)' : 'translateY(20px)' }"
     >
       <v-card-text class="text-center px-6">
-        <h2 class="text-h4 font-weight-bold mb-6 gradient-text-alt outfit outfit-bold section-header">Our Mission</h2>
-        <p class="text-body-1 outfit outfit-regular section-text">
+        <h2 class="text-h4 text-royal_blue font-weight-bold mb-6 gradient-text-alt outfit outfit-bold section-header">Our Mission</h2>
+        <p class="text-body-1  outfit outfit-regular section-text">
           At Owlmigo AI, we believe that every student deserves a study experience that is efficient, engaging,
           and tailored to their needs. Traditional learning methods can be time-consuming and overwhelming, 
           but with the power of AI, we aim to transform the way students absorb knowledge.
@@ -84,7 +84,7 @@
   <!-- Section Divider -->
   <div class="section-divider">
     <div class="divider-line"></div>
-    <v-icon icon="mdi-owl" color="primary" size="small"></v-icon>
+    <v-icon icon="mdi-owl" color="secondary" size="small"></v-icon>
     <div class="divider-line"></div>
   </div>
 
@@ -95,7 +95,7 @@
       :style="{ opacity: isWhyVisible ? 1 : 0, transform: isWhyVisible ? 'translateY(0)' : 'translateY(20px)' }"
     >
       <v-card-text class="text-center px-6">
-        <h2 class="text-h4 font-weight-bold mb-6 gradient-text-alt outfit outfit-bold section-header">Why Owlmingo is the Best?</h2>
+        <h2 class="text-royal_blue text-h4 font-weight-bold mb-6 gradient-text-alt outfit outfit-bold section-header">Why Owlmingo is the Best?</h2>
         
         <v-row class="mt-8">
           <v-col cols="12" md="4" v-for="(feature, index) in features" :key="index">
@@ -104,10 +104,11 @@
               :style="{ 
                 transitionDelay: `${index * 150}ms`,
                 opacity: isWhyVisible ? 1 : 0,
-                transform: isWhyVisible ? 'translateY(0)' : 'translateY(20px)'
+                transform: isWhyVisible ? 'translateY(0)' : 'translateY(20px)',
+                borderBottomColor: feature.color
               }"
             >
-              <v-icon :icon="feature.icon" size="x-large" color="primary" class="feature-icon mb-4"></v-icon>
+              <v-icon :icon="feature.icon" size="x-large" color="secondary" class="feature-icon mb-4"></v-icon>
               <h3 class="text-h6 font-weight-bold mb-2 outfit outfit-medium">{{ feature.title }}</h3>
               <p class="outfit outfit-regular">{{ feature.description }}</p>
             </v-card>
@@ -120,7 +121,7 @@
   <!-- Section Divider -->
   <div class="section-divider">
     <div class="divider-line"></div>
-    <v-icon icon="mdi-owl" color="primary" size="small"></v-icon>
+    <v-icon icon="mdi-owl" color="secondary" size="small"></v-icon>
     <div class="divider-line"></div>
   </div>
 
@@ -131,7 +132,7 @@
       :style="{ opacity: isFeedbackVisible ? 1 : 0, transform: isFeedbackVisible ? 'translateY(0)' : 'translateY(20px)' }"
     >
       <v-card-text class="px-6">
-        <h2 class="text-h4 font-weight-bold mb-6 gradient-text-alt outfit outfit-bold text-center section-header">What Our Users Say</h2>
+        <h2 class="text-royal_blue text-h4 font-weight-bold mb-6 gradient-text-alt outfit outfit-bold text-center section-header">What Our Users Say</h2>
         
         <v-row class="mt-8">
           <v-col cols="12" sm="6" md="4" v-for="(feedback, index) in feedbackData" :key="index">
@@ -161,7 +162,7 @@
   <!-- Section Divider -->
   <div class="section-divider">
     <div class="divider-line"></div>
-    <v-icon icon="mdi-owl" color="primary" size="small"></v-icon>
+    <v-icon icon="mdi-owl" color="secondary" size="small"></v-icon>
     <div class="divider-line"></div>
   </div>
 
@@ -172,7 +173,7 @@
       :style="{ opacity: isTeamVisible ? 1 : 0, transform: isTeamVisible ? 'translateY(0)' : 'translateY(20px)' }"
     >
       <v-card-text class="text-center px-6">
-        <h2 class="text-h4 font-weight-bold mb-6 gradient-text-alt outfit outfit-bold section-header">Meet Our Team</h2>
+        <h2 class="text-royal_blue text-h4 font-weight-bold mb-6 gradient-text-alt outfit outfit-bold section-header">Meet Our Team</h2>
         
         <v-row class="mt-8">
           <v-col cols="12" sm="6" md="4" v-for="(member, index) in teamMembers" :key="index">
@@ -231,21 +232,22 @@
           </v-col>
         </v-row>
       </v-card-text>
-    </v-card>
+    </v-card> 
   </v-col>
+  
 
   <!-- Scroll to top button -->
   <v-btn
     v-show="showScrollTop"
     icon="mdi-arrow-up"
-    color="primary"
+    color="secondary"
     size="large"
     class="scroll-top-btn"
     @click="scrollToTop"
   ></v-btn>
   <Footer />
 </template>
-<
+
 
 <script setup>
 import { ref, onMounted, onUnmounted } from 'vue';
@@ -274,17 +276,20 @@ const features = [
   { 
     icon: 'mdi-rocket-launch', 
     title: 'Fast Learning', 
-    description: 'Our AI-powered study tools help you learn faster and more efficiently by focusing on what matters most.' 
+    description: 'Our AI-powered study tools help you learn faster and more efficiently by focusing on what matters most.',
+    color: '#4CAF50'  // Changed from #b6b2b2 to green
   },
   { 
     icon: 'mdi-lightbulb-on', 
     title: 'Engaging Experience', 
-    description: 'Transform your study materials into interactive learning aids that keep you engaged and motivated.' 
+    description: 'Transform your study materials into interactive learning aids that keep you engaged and motivated.',
+    color: '#2196F3'  // Changed from #b6b2b2 to blue
   },
   { 
     icon: 'mdi-account-group', 
     title: 'Tailored to Your Needs', 
-    description: 'Personalize your study experience to suit your learning style, pace, and specific educational goals.' 
+    description: 'Personalize your study experience to suit your learning style, pace, and specific educational goals.',
+    color: '#FF9800'  // Changed from #b6b2b2 to orange
   }
 ];
 
