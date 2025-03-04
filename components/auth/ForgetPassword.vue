@@ -20,7 +20,7 @@ import Socialicon from './SocialIcon.vue';
               required
             ></v-text-field>
             <v-col class="d-flex justify-end w-100 " style="top: -20px; width: 100%;">
-              <a href="./SignIn.vue" style="margin-left: auto; font-size: 16px; text-decoration: none;">Back to Sign In</a>
+              <nuxt-link to="/auth/" style="margin-left: auto; font-size: 16px; text-decoration: none;">Back to Sign In</nuxt-link >
             </v-col>
 
 

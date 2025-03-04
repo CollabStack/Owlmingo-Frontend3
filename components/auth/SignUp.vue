@@ -39,7 +39,7 @@ import Socialicon from './SocialIcon.vue';
             ></v-text-field>
   
             <v-col class="d-flex justify-end w-100 " style="top: -20px; width: 100%;">
-              <NuxtLink to="/SignIn" style="margin-left: auto; font-size: 16px; text-decoration: none;">Back to Sign In</NuxtLink>            
+              <nuxt-link to="/auth/" style="margin-left: auto; font-size: 16px; text-decoration: none;">Back to Sign In</nuxt-link>            
             </v-col>
   
             <v-btn @click="signUp" class="justify-center align-center mt-4" style="width: 504px; height: 65px; background-color: var(--v-maya_blue); border-radius: 10px; color: white; font-size: 20px;">Sign Up</v-btn>

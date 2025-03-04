@@ -64,7 +64,7 @@ const login = async () => {
                 <input type="checkbox" id="remember-me"/>
                 <label for="remember-me"  style="font-size: 16px; padding-left: 5px;">Remember me</label>
               </div>
-              <a href="./ForgetPassword" style="font-size: 16px; text-decoration: none;">Forget Password?</a>
+              <nuxt-link to="/auth/forget-password" style="font-size: 16px; text-decoration: none;">Forget Password?</nuxt-link>
             </v-row>
 
             <v-btn @click="login" class="justify-center align-center " style="width: 504px; height: 73px; background-color: var(--v-maya_blue); border-radius: 10px; color: white;  font-size: 24px;">Login</v-btn>
