@@ -12,17 +12,6 @@
             hide-details 
             class="mt-2 rounded-lg bg-blue-lighten-5"
         />
-            
-        <!-- Visibility Select -->
-        <v-label class="mt-5">Visibility</v-label>
-        <v-select 
-            v-model="visibility" 
-            :items="['Public', 'Private']" 
-            variant="flat" 
-            density="compact" 
-            hide-details 
-            class="mt-2 rounded-lg bg-blue-lighten-5"
-        />
 
         <!-- Checkbox Options -->
         <v-row class="mt-2">
@@ -92,7 +81,6 @@ import { ref } from 'vue';
 
 // Reactive State
 const name = ref('Lesson Name');
-const visibility = ref('Public');
 const hour = ref(0);
 const minute = ref(0);
 
@@ -105,9 +93,5 @@ const options = ref([
 </script>
 
 <style scoped>  
-.container {
-    display: flex;
-    flex-direction: column;
-    height: 40vh; /* Adjust the height as needed */
-}
+
 </style>
