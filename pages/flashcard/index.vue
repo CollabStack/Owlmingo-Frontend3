@@ -210,7 +210,6 @@
     @tabChange="handleTabChange"
     @linkClick="navigateToPlansPage"
   />
-  <Footer />
 </template>
 
 <script setup>
