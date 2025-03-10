@@ -1,5 +1,5 @@
 <script setup>
-import Socialicon from './Socialicon.vue';
+// import Socialicon from './Socialicon.vue';
 
 </script>
 
