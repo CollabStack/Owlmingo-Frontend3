@@ -1,22 +1,21 @@
 <template>
     <v-col cols="12" class="d-flex flex-row justify-center mt-10">
-            <v-card-text class="image-banner d-flex justify-center">
-                    <v-img 
-                    width="400px"
-                    aspect-ratio="16/9"
-                    src="/images/Image-Banner-Signin.png"
-                    ></v-img>
-            </v-card-text>
-            <v-card-text class="sign-in-form d-flex justify-center align-center">
-                
-        <v-form class="signup">
-                <h2 class="headline text-center text-blue-darken-2">
+        <v-card-text class="image-banner d-flex justify-center">
+            <v-img 
+                width="400px"
+                aspect-ratio="16/9"
+                src="/images/Image-Banner-Signin.png"
+                ></v-img>
+        </v-card-text>
+        <v-card-text class="sign-in-form d-flex flex-column justify-center align-center">
+            <h2 class="headline text-center text-blue-darken-2" style="font-size: xx-large;">
                     Log in to continue your learning journey
-                </h2>
-                <v-text-field
+            </h2>
+            <v-form class="signup d-flex flex-column justify-center align-center">
+                <v-text-field 
                     v-model="email"
                     label="Email"
-                    type="password"
+                    type="email"
                     variant="outlined"
                     rounded
                     class="custom-text-field"
@@ -32,7 +31,7 @@
                 ></v-text-field>
 
                 <div class="d-flex justify-end">
-                    <a href="#" class="text-caption text-decoration-none text-black">
+                    <a to="/page/auth/sign-up.vue" class="text-caption d-flex justify-end text-decoration-none text-black font-weight-bold" style="margin-left: 288px;">
                         forgot password?
                     </a>
                 </div>
@@ -41,73 +40,66 @@
                     Login
                 </v-btn>
 
-                <p class="text-center mt-4 text-grey-darken-1">Or continue with</p>
+                <p class="text-center mt-10 text-grey-darken-1">Other Log in Option</p>
 
-                <div class="icon d-flex justify-center mt-2">
-                    <v-img style="margin-right: -50px;"
-                    width="50px"
-                    height="50px"
-                    src="/icons/icons8-google-480.png"
-                    ></v-img>
-                    <v-img style="margin-left: -50px; margin-right: -50px;"
-                    width="50px"
-                    height="50px"
-                    src="/icons/icons8-github-480.png"
-                    ></v-img>
-                    <v-img style="margin-left: -50px;"
-                    width="50px"
-                    height="50px"
-                    src="/icons/icons8-telegram-480.png"
-                    >
-                    </v-img>
+                <div class="icon d-flex flex-row justify-center mt-5">
+                    <v-btn icon="" class="icon-button">
+                        <v-img
+                            width="50px"
+                            height="50px"
+                            src="/icons/icons8-google-logo.png"
+                        ></v-img>
+                    </v-btn>
+                    <v-btn icon="" class="icon-button">
+                        <v-img
+                            width="50px"
+                            height="50px"
+                            src="/icons/icons8-github-logo.png"
+                        ></v-img>
+                    </v-btn>
+                    <v-btn icon="" class="icon-button">
+                        <v-img
+                            width="50px"
+                            height="50px"
+                            src="/icons/icons8-telegram-app-100.png"
+                        ></v-img>
+                    </v-btn>
+                </div>
+                <div class="sign-up-option d-flex flex-row justify-center align-center mt-10">
+                    <p class="text-center text-grey-darken-1">Don't have an account?</p>
+                    <a href="#" class="text-caption text-decoration-none text-black font-weight-bold">
+                        Sign Up
+                    </a>
                 </div>
             </v-form>
+            
             </v-card-text>
+            
         </v-col>
     </template>
-
-<script setup>
-import { ref, onMounted } from 'vue';
-import Swal from 'sweetalert2';
-import { userAuth } from '~/store/userAuth';
-
-const authStore = userAuth();
-const email = ref('');
-const password = ref('');
-
-onMounted(() => {
-    console.log('Sign In mounted');
-});
-
-const login = async () => {
-    try {
-        await authStore.login(email.value, password.value);
-        navigateTo("/");
-    } catch (error) {
-        Swal.fire({
-            icon: 'error',
-            title: 'Login Failed',
-            text: error.response?.data?.message || 'Please check your credentials and try again.'
-        });
-    }
-};
-
-</script>
-<style scoped>
+    
+    <script setup> 
+    import { ref } from 'vue';
+    const email = ref('');
+    </script>
+    <style scoped>
     .image-banner {
+        margin-right: -120px;
         width: 600px;
         height: 600px;
     }
     .sign-in-form {
+        margin-left: -120px;
         width: 600px;
         height: 600px; 
     }
     .headline {
-        margin-bottom: 30px;
+        margin-bottom: 18px;
+        width: 400px;
     }
     .custom-text-field {
-        /* background-color: rgb(231, 204, 239); */
-        border-radius: 10px;
+        width: 400px;
+        height: 80px;
     }
     .custom-text-field :deep(.v-field) {
         background-color: #EFF2FE !important;
@@ -115,7 +107,7 @@ const login = async () => {
     }
     .custom-text-field :deep(.v-field__control) {
         background-color: #EFF2FE !important;
-        border-radius: 10px !important;
+        border-radius: 12px !important;
         padding: 14px;
         border: 1px solid #EFF2FE !important;
     }
@@ -124,7 +116,7 @@ const login = async () => {
         font-weight: 500;
     }
     .custom-text-field :deep(.v-field__outline) {
-        border-radius: 10px !important;
+        border-radius: 12px !important;
         border: none !important;
         color: #EFF2FE !important;
     }
@@ -133,17 +125,61 @@ const login = async () => {
     }
     .custom-text-field :deep(.v-field__input) {
         background-color: #EFF2FE !important;
-        border-radius: 10px !important;
+        border-radius: 12px !important;
         padding: 14px;
     }
     .custom-text-field :deep(.v-text-field__slot) {
         background-color: #EFF2FE !important;
     }
     .sign-in-btt {
-        border-radius: 20px !important;
+        border-radius: 12px !important;
+        width: 400px;
+        height: 50px;
     }
     .icon {
         gap: 20px;
+    }
+    .icon-button {
+        cursor: pointer;
+        position: relative;
+        overflow: hidden;
+        transition: background-color 0.3s, transform 0.3s;
+    }
+    .icon-button::before {
+        content: "";
+        position: absolute;
+        background-color: rgba(255, 255, 255, 0.1);
+        top: 50%;
+        left: 50%;
+        transform: translate(-50%, -50%) scale(0);
+        transition: transform 0.6s ease-out;
+    }
+    .icon-button:hover::before {
+        transform: translate(-50%, -50%) scale(3);
+    }
+    .icon-button:active::before {
+        transform: scale(0.9);
+    }
+    .icon-button:hover {
+        animation:  bounce 1s infinite;
+    }
+    @keyframes bounce {
+
+        0%,
+        100% {
+        transform: translateY(0);
+        }
+
+        50% {
+        transform: translateY(-10px);
+        }
+    }
+    .sign-up-option {
+        background-color: #EBEBEB;
+        gap: 10px;
+        width: 300px;
+        height: 50px;
+        border-radius: 15px;
     }
     
     </style>
