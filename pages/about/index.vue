@@ -58,10 +58,13 @@
   </v-col>
 
   <!-- Section Divider -->
-  <div class="section-divider">
+  <!-- <div class="section-divider">
     <div class="divider-line"></div>
     <v-icon icon="mdi-owl" color="secondary" size="small"></v-icon>
     <div class="divider-line"></div>
+  </div> -->
+  <div class="ma-0 pa-0">
+    <SectionDivider />
   </div>
 
   <!-- Mission Section -->
@@ -245,7 +248,6 @@
     class="scroll-top-btn"
     @click="scrollToTop"
   ></v-btn>
-  <Footer />
 </template>
 
 

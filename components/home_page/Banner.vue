@@ -56,7 +56,9 @@
     </v-col>
 
     <!-- Add section divider below the banner -->
-    <SectionDivider />
+     <div class="mt-8 mx-10">
+      <SectionDivider />
+     </div>
   </div>
 </template>
 
