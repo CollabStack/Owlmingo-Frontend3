@@ -10,13 +10,12 @@
         </div>
       </transition>
     </v-main>
-    <!-- <v-footer app>
-      <v-col class="text-center">© 2025 - User Portal</v-col>
-    </v-footer> -->
-    <Footer />
-
+    <!-- Footer -->
+    <Footer v-if="!hideFooter" />
   </v-app>
 </template>
 <script setup lang="ts">
-
+import { useRoute } from 'vue-router';
+const route = useRoute();
+const hideFooter = computed(() => route.path === '/auth' || route.path === '/auth/sign-up');
 </script>
