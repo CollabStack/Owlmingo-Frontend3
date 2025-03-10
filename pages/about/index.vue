@@ -46,7 +46,7 @@
         </div>
         
         <v-img
-          src="/images/3d-casual-life-chatgpt-robot-in-graduation-cap-1.png"
+          src="/images/ab.png"
           height="280"
           width="280"
           class="banner-image"

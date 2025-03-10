@@ -12,9 +12,8 @@
             src="/images/3d-business-children-at-a-laptop-with-a-robot-assistant.png"
             height="220"
             width="220"
-            class="mb-4 mb-md-0 mr-md-6 banner-image"
+            class="mb-4 mb-md-0 mr-md-6 banner-image floating-image"
             contain
-            :class="{ 'animate-bounce': isHovered }"
           ></v-img>
           
           <div class="text-content" :class="{ 'fade-in': isVisible }">
@@ -68,19 +67,11 @@ import { ref, onMounted } from 'vue';
 import SectionDivider from '../SectionDivider.vue';
 
 const isVisible = ref(false);
-const isHovered = ref(false);
+
 onMounted(() => {
   setTimeout(() => {
     isVisible.value = true;
   }, 300);
-  
-  // Animated bounce effect every 5 seconds
-  setInterval(() => {
-    isHovered.value = true;
-    setTimeout(() => {
-      isHovered.value = false;
-    }, 1000);
-  }, 5000);
 });
 </script>
 
@@ -119,6 +110,16 @@ onMounted(() => {
 
 .banner-image {
   transition: transform 0.5s ease;
+}
+
+.floating-image {
+  animation: float 6s ease-in-out infinite;
+}
+
+@keyframes float {
+  0% { transform: translateY(0px); }
+  50% { transform: translateY(-10px); }
+  100% { transform: translateY(0px); }
 }
 
 .banner-card:hover {
@@ -183,18 +184,9 @@ onMounted(() => {
   animation: fadeIn 0.8s ease-in;
 }
 
-.animate-bounce {
-  animation: bounce 1s ease;
-}
-
 @keyframes fadeIn {
   from { opacity: 0; transform: translateY(20px); }
   to { opacity: 1; transform: translateY(0); }
-}
-
-@keyframes bounce {
-  0%, 100% { transform: translateY(0); }
-  50% { transform: translateY(-15px); }
 }
 
 @media (max-width: 960px) {
