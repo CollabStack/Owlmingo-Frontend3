@@ -92,9 +92,7 @@
                     <v-icon :color="plan.iconColor" class="checkmark-icon">mdi-check-circle</v-icon>
                   </div>
                 </template>
-                <v-list-item-content>
-                  <v-list-item-title class="outfit outfit-regular">{{ feature }}</v-list-item-title>
-                </v-list-item-content>
+                <v-list-item-title class="outfit outfit-regular">{{ feature }}</v-list-item-title>
               </v-list-item>
             </v-list>
 
@@ -114,8 +112,8 @@
               class="mt-4 rounded-lg animated-btn outfit outfit-medium"
               rounded 
               :variant="getButtonVariant(plan.name)"
-              @click="$emit('subscribe', { plan, type: selectedTab, billing: selectedTab === 'work' ? selectedTypes[plan.name] : plan.name.toLowerCase() })"
-            >
+              @click="handleSubscription(plan)"
+              >
               <span class="d-flex align-center">
                 {{ buttonText }}
                 <v-icon class="ms-2 btn-icon">mdi-check-circle</v-icon>
@@ -133,7 +131,7 @@
 </template>
 
 <script setup>
-import { ref, computed, watch } from "vue";
+import { ref, computed } from "vue";
 
 const props = defineProps({
   title: {
@@ -157,8 +155,6 @@ const props = defineProps({
     default: "school"
   }
 });
-
-const emit = defineEmits(['subscribe', 'tabChange', 'linkClick']);
 
 const selectedTab = ref(props.initialTab);
 
@@ -251,10 +247,10 @@ const getButtonVariant = (planName) => {
   }
 };
 
-// Emit tab changes
-watch(selectedTab, (newValue) => {
-  emit('tabChange', newValue);
-});
+const handleSubscription = (plan) => {
+  console.log('Subscription data:', plan);
+};
+
 </script>
 
 <style scoped>
