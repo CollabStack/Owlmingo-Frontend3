@@ -11,7 +11,7 @@
             <h2 class="headline text-center text-blue-darken-2" style="font-size: xx-large;">
                     Log in to continue your learning journey
             </h2>
-            <v-form class="signup">
+            <v-form class="signup d-flex flex-column justify-center align-center">
                 <v-text-field
                     v-model="username"
                     label="Username"
@@ -39,7 +39,7 @@
                 ></v-text-field>
 
                 <div class="d-flex justify-end">
-                <a href="#" class="text-caption text-decoration-none text-black font-weight-bold"> 
+            <a href="#" class="text-caption text-decoration-none text-black font-weight-bold" style="margin-left: 288px;"> 
                         forgot password?
                     </a>
                 </div>

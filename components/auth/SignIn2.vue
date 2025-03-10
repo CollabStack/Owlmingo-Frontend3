@@ -11,7 +11,7 @@
             <h2 class="headline text-center text-blue-darken-2" style="font-size: xx-large;">
                     Log in to continue your learning journey
             </h2>
-            <v-form class="signup">
+            <v-form class="signup d-flex flex-column justify-center align-center">
                 <v-text-field 
                     v-model="email"
                     label="Email"
@@ -31,7 +31,7 @@
                 ></v-text-field>
 
                 <div class="d-flex justify-end">
-                    <a href="#" class="text-caption text-decoration-none text-black font-weight-bold">
+                    <a to="/page/auth/sign-up.vue" class="text-caption d-flex justify-end text-decoration-none text-black font-weight-bold" style="margin-left: 288px;">
                         forgot password?
                     </a>
                 </div>
@@ -65,13 +65,22 @@
                         ></v-img>
                     </v-btn>
                 </div>
+                <div class="sign-up-option d-flex flex-row justify-center align-center mt-10">
+                    <p class="text-center text-grey-darken-1">Don't have an account?</p>
+                    <a href="#" class="text-caption text-decoration-none text-black font-weight-bold">
+                        Sign Up
+                    </a>
+                </div>
             </v-form>
+            
             </v-card-text>
+            
         </v-col>
     </template>
     
     <script setup> 
-    
+    import { ref } from 'vue';
+    const email = ref('');
     </script>
     <style scoped>
     .image-banner {
@@ -164,6 +173,13 @@
         50% {
         transform: translateY(-10px);
         }
+    }
+    .sign-up-option {
+        background-color: #EBEBEB;
+        gap: 10px;
+        width: 300px;
+        height: 50px;
+        border-radius: 15px;
     }
     
     </style>
