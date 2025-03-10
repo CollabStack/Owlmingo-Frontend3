@@ -5,7 +5,6 @@
       <!-- <home-page-aicard /> -->
       <home-page-future2 />
       <home-page-future3 />
-      <Footer />
     </div>
 </template>
 

@@ -30,8 +30,8 @@ const props = defineProps({
   display: flex;
   align-items: center;
   justify-content: center;
-  margin: 3rem auto;
-  width: 80%;
+  /* margin: 3rem auto; */
+  /* width: 80%; */
 }
 
 .divider-line {

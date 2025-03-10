@@ -1,16 +1,14 @@
 <template>
-
-    <Quiz-QuizeGenerator />
+ 
+  <Quiz-QuizeGenerator />
+  <div class="mt-8 mx-16 mb-8">
     <SectionDivider />
-    <SubscriptionPlans 
+  </div>  
+  <SubscriptionPlans 
     @subscribe="handleSubscription"
     @tabChange="handleTabChange"
     @linkClick="navigateToPlansPage"
   />
-   
-    <Footer />
-
-
 </template>
 
 <script setup>
