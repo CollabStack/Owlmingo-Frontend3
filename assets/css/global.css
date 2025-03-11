@@ -1,0 +1,159 @@
+/* Import Outfit font */
+@import url('https://fonts.googleapis.com/css2?family=Outfit:wght@100..900&display=swap');
+
+/* Outfit font classes */
+.outfit {
+  font-family: "Outfit", sans-serif;
+  font-optical-sizing: auto;
+  font-style: normal;
+}
+
+.outfit-regular { font-weight: 400; }
+.outfit-medium { font-weight: 500; }
+.outfit-semibold { font-weight: 600; }
+.outfit-bold { font-weight: 700; }
+
+/* Button animation - shared styles */
+.animated-btn {
+  transition: all 0.3s ease;
+  position: relative;
+  overflow: hidden;
+  border-width: 2px;
+}
+
+.animated-btn::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: -100%;
+  width: 100%;
+  height: 100%;
+  background: linear-gradient(90deg, transparent, rgba(255,255,255,0.2), transparent);
+  transition: all 0.6s ease;
+}
+
+.animated-btn:hover::before {
+  left: 100%;
+}
+
+.animated-btn:hover {
+  transform: translateY(-3px);
+  box-shadow: 0 5px 15px rgba(0, 0, 0, 0.1);
+}
+
+.btn-icon {
+  transition: transform 0.3s ease;
+}
+
+.animated-btn:hover .btn-icon {
+  transform: translateX(5px);
+}
+
+/* Floating animation */
+.floating {
+  animation: float 6s ease-in-out infinite;
+}
+
+@keyframes float {
+  0% { transform: translateY(0px); }
+  50% { transform: translateY(-10px); }
+  100% { transform: translateY(0px); }
+}
+
+/* Clean Textarea Styles - Simplified and Improved */
+.clean-textarea {
+  font-family: 'Outfit', sans-serif !important;
+  border-radius: 8px !important;
+  margin-bottom: 8px;
+  position: relative;
+}
+
+/* Basic field styling */
+.clean-textarea .v-field {
+  background-color: white !important;
+  border: 1px solid #e0e0e0 !important;
+  border-radius: 8px !important;
+  box-shadow: none !important;
+}
+
+.clean-textarea .v-field:hover {
+  border-color: #9D7BFC !important;
+}
+
+.clean-textarea .v-field--focused {
+  border-color: #9D7BFC !important;
+}
+
+.clean-textarea .v-field__outline {
+  display: none !important;
+}
+
+/* Input area styling */
+.clean-textarea .v-field__input {
+  background-color: white !important;
+  font-family: 'Outfit', sans-serif !important;
+  padding: 24px 12px 8px 12px !important;
+  font-size: 1rem !important;
+  color: #333 !important;
+}
+
+/* Simple, clean label styling */
+.clean-textarea .v-label {
+  font-family: 'Outfit', sans-serif !important;
+  color: #666 !important;
+  font-size: 0.85rem !important;
+  margin-left: 12px !important;
+  top: 6px !important;
+  opacity: 0.8;
+  transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1) !important;
+}
+
+/* Label positions */
+.clean-textarea .v-field--focused .v-label,
+.clean-textarea .v-field--active .v-label {
+  font-size: 0.75rem !important;
+  color: #9D7BFC !important;
+  top: 6px !important;
+  transform: none !important;
+}
+
+/* Counter and icons */
+.clean-textarea .v-field__count {
+  bottom: 6px !important;
+  right: 8px !important;
+  font-size: 0.75rem !important;
+  color: #777 !important;
+  opacity: 0.7;
+}
+
+.clean-textarea .v-field__clearable {
+  align-self: flex-start !important;
+  padding-top: 6px !important;
+}
+
+/* Simple scrollbar */
+.clean-textarea .v-field__input::-webkit-scrollbar {
+  width: 4px;
+}
+
+.clean-textarea .v-field__input::-webkit-scrollbar-track {
+  background: #f5f5f5;
+}
+
+.clean-textarea .v-field__input::-webkit-scrollbar-thumb {
+  background: #dadada;
+  border-radius: 4px;
+}
+
+/* Text content */
+.clean-textarea textarea {
+  line-height: 1.6 !important;
+  white-space: pre-wrap !important;
+  margin-top: 4px !important;
+}
+
+/* Consistent icon positioning */
+.clean-textarea .v-field__prepend-inner,
+.clean-textarea .v-field__append-inner {
+  padding-top: 6px !important;
+}

@@ -5,22 +5,13 @@
       <!-- <home-page-aicard /> -->
       <home-page-future2 />
       <home-page-future3 />
-     
     </div>
 </template>
 
 
 <script setup>
-// template
+import Footer from '../components/Footer.vue';
 
-
-// script
-// Testing Git commit
-
-// data
-
-
-// methods
   definePageMeta({
     layout: 'default',
   });

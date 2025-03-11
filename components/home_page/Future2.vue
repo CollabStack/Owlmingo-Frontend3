@@ -16,14 +16,14 @@
       <div class="text-content text-center">
         <h2 
           class="text-h4 font-weight-bold mb-4 animated-title"
-          style="color: #EDE7F6;"
+          style="color: white;"
           v-motion
           :initial="{ opacity: 0, y: 30 }"
           :enter="{ opacity: 1, y: 0, transition: { delay: 200, duration: 600 } }"
         >Three Powerful Tools, Unlimited Possibilities!</h2>
         
         <p 
-          class="text-body-1 mb-6 animated-text text-white-darken-1"
+          class="text-body-1 mb-6 animated-text text-white"
           v-motion
           :initial="{ opacity: 0, y: 30 }"
           :enter="{ opacity: 1, y: 0, transition: { delay: 400, duration: 600 } }"
