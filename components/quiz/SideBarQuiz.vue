@@ -35,44 +35,14 @@
                     </template>
                 </v-checkbox>
             </v-col>
-          
-            <!-- Show time inputs when "Time Limit" checkbox is checked -->
-            <v-row v-if="options[2].model">
-                <v-col>
-                    <v-label class="ml-14 text-h8">Hour</v-label>
-                    <v-text-field 
-                        v-model="hour" 
-                        type="number"
-                        variant="flat" 
-                        density="compact" 
-                        hide-details 
-                        class="mt-2 rounded-lg bg-blue-lighten-5 ml-4"
-                        style="max-width: 90%;"
-                    />
-                </v-col>
-                <v-col>
-                    <v-label class="ml-9 text-h8">Minute</v-label>
-                    <v-text-field 
-                        v-model="minute" 
-                        type="number"
-                        variant="flat" 
-                        density="compact" 
-                        hide-details 
-                        class="mt-2 rounded-lg bg-blue-lighten-5"
-                        style="max-width: 90%;"
-                    />
-                </v-col>
-            </v-row>
         </v-row>
-
-        <v-spacer></v-spacer>
          
-        <v-row class="ml-2 mt-12">
-            <v-btn variant="outlined" color="blue">
+        <div class="container">
+            <v-spacer></v-spacer>
+            <v-btn variant="outlined" color="blue" class="w-100 mb-3 bottom-button rounded-lg">
                 Completions & Responses
             </v-btn>
-        </v-row>
-
+        </div>
     </v-navigation-drawer>
 </template>
 
@@ -81,17 +51,18 @@ import { ref } from 'vue';
 
 // Reactive State
 const name = ref('Lesson Name');
-const hour = ref(0);
-const minute = ref(0);
 
 // Checkboxes reactive
 const options = ref([
     { model: ref(true), label: "Show Answers", tooltip: "Toggle to show correct answers after submission." },
-    { model: ref(false), label: "Shuffle Questions", tooltip: "Randomizes the order of questions in the quiz." },
-    { model: ref(false), label: "Time Limit", tooltip: "Set a time limit for the quiz." } // Index 2
+    { model: ref(false), label: "Shuffle Questions", tooltip: "Randomizes the order of questions in the quiz." }
 ]);
 </script>
 
 <style scoped>  
-
+ .container {
+    display: flex;
+    flex-direction: column;
+    height: 57vh; 
+    }
 </style>
