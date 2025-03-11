@@ -106,19 +106,42 @@
             </p>
 
             <!-- Subscribe Button with animation like home page -->
-            <v-btn 
+            <v-dialog max-width="500">
+              <template v-slot:activator="{ props: activatorProps }">
+                <v-btn
+                  block 
+                  v-bind="activatorProps"
+                  :color="plan.buttonColor" 
+                  class="mt-4 rounded-lg animated-btn outfit outfit-medium"
+                  rounded 
+                  :variant="getButtonVariant(plan.name)"
+                  @click="checkout(plan)"
+                  >
+                  <span class="d-flex align-center">
+                    {{ buttonText }}
+                    <v-icon class="ms-2 btn-icon">mdi-check-circle</v-icon>
+                  </span>
+                </v-btn>
+              </template>
+
+              <template v-slot:default="{ isActive }">
+                <!-- <p>Helooo</p> -->
+                <AbaPayment></AbaPayment>
+              </template>
+            </v-dialog>
+            <!-- <v-btn 
               block 
               :color="plan.buttonColor" 
               class="mt-4 rounded-lg animated-btn outfit outfit-medium"
               rounded 
               :variant="getButtonVariant(plan.name)"
-              @click="handleSubscription(plan)"
+              @click="checkout(plan)"
               >
               <span class="d-flex align-center">
                 {{ buttonText }}
                 <v-icon class="ms-2 btn-icon">mdi-check-circle</v-icon>
               </span>
-            </v-btn>
+            </v-btn> -->
           </v-card>
         </div>
       </v-col>
@@ -128,12 +151,40 @@
       Visit our <a href="#" class="text-decoration-none link-hover" style="color: blue;" @click="$emit('linkClick')">plans page</a> to compare all features.
     </p>
   </v-container>
+  <!-- <v-dialog max-width="500">
+    <template v-slot:activator="{ props: activatorProps }">
+      <v-btn
+        v-bind="activatorProps"
+        color="surface-variant"
+        text="Open Dialog"
+        variant="flat"
+      ></v-btn>
+    </template>
+
+    <template v-slot:default="{ isActive }">
+      <v-card title="Dialog">
+        <v-card-text>
+          Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua.
+        </v-card-text>
+
+        <v-card-actions>
+          <v-spacer></v-spacer>
+
+          <v-btn
+            text="Close Dialog"
+            @click="isActive.value = false"
+          ></v-btn>
+        </v-card-actions>
+      </v-card>
+    </template>
+  </v-dialog> -->
+  
 </template>
 
 <script setup>
-import { ref, computed } from "vue";
-
-const props = defineProps({
+import { ref, computed} from "vue";
+import AbaPayment from "./AbaPayment.vue";
+const props = defineProps({ 
   title: {
     type: String,
     default: "Subscribe to Generate Unlimited Quizzes"
@@ -157,7 +208,7 @@ const props = defineProps({
 });
 
 const selectedTab = ref(props.initialTab);
-
+let scriptLoaded = ref(false);
 // Stores selection state for Professional & Business plans separately
 const selectedTypes = ref({
   Professional: "annual",
@@ -238,6 +289,10 @@ const plans = {
 // Reactive plans based on selected tab
 const activePlans = computed(() => plans[selectedTab.value]);
 
+// mounted 
+onMounted(() => {
+  loadAbaPaywayScript();
+});
 // Determine button variant
 const getButtonVariant = (planName) => {
   if (selectedTab.value === "school") {
@@ -247,9 +302,31 @@ const getButtonVariant = (planName) => {
   }
 };
 
-const handleSubscription = (plan) => {
-  console.log('Subscription data:', plan);
-};
+const checkout = (plan) =>{
+  console.log("Subscribe: ", plan);
+}
+
+// const loadAbaPaywayScript = () => {
+//   if (!scriptLoaded) {
+//     const script = document.createElement("script");
+//     script.src = "https://checkout.payway.com.kh/plugins/checkout2-0.js";
+//     script.onload = () => {
+//       scriptLoaded = true;
+//     };
+//     document.head.appendChild(script);
+//   }
+// }
+const loadAbaPaywayScript = () => {
+if (!scriptLoaded) {
+    const script = document.createElement("script");
+    script.src = "https://checkout.payway.com.kh/plugins/checkout2-0.js";
+    script.onload = () => {
+      scriptLoaded = true;
+      console.log("AbaPayway script loaded");
+    };
+    document.head.appendChild(script);
+  }
+}
 
 </script>
 
