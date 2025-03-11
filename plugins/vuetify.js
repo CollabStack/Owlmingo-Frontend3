@@ -13,7 +13,7 @@ export default defineNuxtPlugin((nuxtApp) => {
         light: {
           colors: {
               // #7BCBFC
-            primary     : '#3E53A1',
+            primary     : '#4635B1',
             secondary   : '#9D7BFC',
             maya_blue   : '#7BCBFC',
             accent      : '#82B1FF',
@@ -29,6 +29,10 @@ export default defineNuxtPlugin((nuxtApp) => {
             hex         : '#b6b2b2',
             onyx        : '#373737',
             water       : '#EFF2FE',
+            purple      : '#69247C',
+            pink        : '#DA498D',
+            gold        : '#FAC67A',
+            cream       : '#F9E6CF',
           },
         },
         dark: {
@@ -40,6 +44,10 @@ export default defineNuxtPlugin((nuxtApp) => {
             info     : '#2196F3',
             success  : '#4CAF50',
             warning  : '#FFC107',
+            purple   : '#69247C',
+            pink     : '#DA498D',
+            gold     : '#FAC67A',
+            cream    : '#F9E6CF',
           },
         },
       },

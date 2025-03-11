@@ -10,7 +10,7 @@
           :enter="{ opacity: 1, x: 0, transition: { duration: 800, ease: 'easeOut' } }"
           class="feature-content"
         >
-          <h3 class="text-h4 font-weight-bold mb-3 animated-title">AI Flashcard Generator</h3>
+          <h3 class="text-h4 font-weight-bold mb-3 animated-title text-primary">AI Flashcard Generator</h3>
           <p class="mb-5 text-body-1 animated-text">
             Save hours by instantly generating flashcards with AI-powered tools that help you efficiently test and strengthen your knowledge.
           </p>
@@ -73,7 +73,7 @@
           :enter="{ opacity: 1, x: 0, transition: { duration: 800, ease: 'easeOut' } }"
           class="feature-content"
         >
-          <h3 class="text-h4 font-weight-bold mb-3 animated-title">AI Quiz Generator</h3>
+          <h3 class="text-h4 font-weight-bold mb-3 animated-title text-primary">AI Quiz Generator</h3>
           <p class="mb-5 text-body-1 animated-text">
             Effortlessly create quizzes with AI that understands your material and evaluates answers to enhance both learning and teaching experiences.
           </p>
@@ -104,7 +104,7 @@
           :enter="{ opacity: 1, x: 0, transition: { duration: 800, ease: 'easeOut' } }"
           class="feature-content"
         >
-          <h3 class="text-h4 font-weight-bold mb-3 animated-title">AI Summary Generator</h3>
+          <h3 class="text-h4 font-weight-bold mb-3 animated-title text-primary">AI Summary Generator</h3>
           <p class="mb-5 text-body-1 animated-text">
             Quickly condense complex materials into clear, concise summaries that capture key concepts and save valuable study time.
           </p>
@@ -167,7 +167,7 @@
           :enter="{ opacity: 1, x: 0, transition: { duration: 800, ease: 'easeOut' } }"
           class="feature-content"
         >
-          <h3 class="text-h4 font-weight-bold mb-3 animated-title">AI Study Assistant</h3>
+          <h3 class="text-h4 font-weight-bold mb-3 animated-title text-primary">AI Study Assistant</h3>
           <p class="mb-5 text-body-1 animated-text">
             Get personalized learning support with an AI assistant that adapts to your learning style and provides targeted help when you need it.
           </p>
