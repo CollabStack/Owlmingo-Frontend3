@@ -31,9 +31,9 @@
                 ></v-text-field>
 
                 <div class="d-flex justify-end">
-                    <a to="/page/auth/sign-up.vue" class="text-caption d-flex justify-end text-decoration-none text-black font-weight-bold" style="margin-left: 288px;">
-                        forgot password?
-                    </a>
+                    <span class="text-caption d-flex justify-end text-decoration-none text-black font-weight-bold" style="margin-left: 288px;" @click="gotoForgotPassword">
+                        forgot password
+                    </span>
                 </div>
 
                 <v-btn block color="blue-lighten-2" class="sign-in-btt mt-4 py-3 text-white">
@@ -67,7 +67,7 @@
                 </div>
                 <div class="sign-up-option d-flex flex-row justify-center align-center mt-10">
                     <p class="text-center text-grey-darken-1">Don't have an account?</p>
-                    <a href="#" class="text-caption text-decoration-none text-black font-weight-bold">
+                    <a @click="gotoSignUp" class="text-caption text-decoration-none text-black font-weight-bold">
                         Sign Up
                     </a>
                 </div>
@@ -80,7 +80,18 @@
     
     <script setup> 
     import { ref } from 'vue';
-    const email = ref('');
+    const email = ref('');import { useRouter } from 'vue-router';
+    const router = useRouter();
+
+    const gotoForgotPassword = () => {
+        console.log('gotoForgotPassword');
+        router.push('/auth/forgot-password');
+    }
+    const gotoSignUp = () => {
+        console.log('gotoSignUp');
+        router.push('/auth/sign-up');  
+    }
+
     </script>
     <style scoped>
     .image-banner {

@@ -1,46 +1,122 @@
 <script setup>
-// import Socialicon from './Socialicon.vue';
+import { ref } from 'vue';
+import { useRouter } from 'vue-router';
+const router = useRouter();
+const gotoSignUp = () => {
+    console.log('gotoSignUp');
+    router.push('/auth/sign-up');  
+}
 
 </script>
 
 <template>
-    <v-container class="container h-100" >
-      <v-row class="d-flex flex-row justify-center align-center">
-        <v-col class="d-flex flex-column align-center" style="height: 780px;">
-          <p  style= "color: var(--v-royal_blue);  width: 350px; align-items: center; font-size: 40px;">Welcome to Study</p>
+  <v-col cols="12" class="d-flex flex-row justify-center align-center mt-20">
+    <v-card-text class="left-section-otp d-flex flex-column justify-center align-center mx-15  px-25">
+      <h2 class="mt-10 text-info">Verification</h2>
+      <p class="mt-5 text-info">Enter the verification code sent to your email</p>
+      <v-otp-input class="mb-4 mt-5 max-width" min-width="422px" min-height="62px"></v-otp-input>
+      <p class="mt-5">If you didn’t receive a code, Resend</p>
+      <v-btn to="/auth/new-password" color="blue-lighten-2" class="send-btt mt-5 py-3 text-white">
+          Send
+          </v-btn>
 
-  
-          <v-form class="d-flex flex-column mt-5 " style="width: 504px; height: 500px; align-items: center;">
-            <h5 class=" align-left justify-start w-100" style="color: var(--v-royal_blue); font-size: 20px;">Enter the Verification Code</h5>
+      <p class="text-center mt-10 text-grey-darken-1">Other Log in Option</p>
 
-            <v-otp-input class="mb-4 mt-4 max-width" min-width="422px" min-height="62px"></v-otp-input>
-            
-            <v-row class="justify-center w-100 ">
-            <p style="font-size: 16px;">if you didn't Recieve the code, <a href="#" style="text-decoration: none; color: red;"> Resend</a></p>
-          </v-row>
-            
-              <v-btn class="justify-center align-center mb-4" style="width: 504px; height: 73px; background-color: var(--v-maya_blue); border-radius: 10px; color: white; font-size: 24px;">Send</v-btn>
-  
-          <Socialicon />
-  
-          </v-form>
-        </v-col>
-  
-        <div class="w-50 d-flex justify-center">
-          <img 
-            src= "/images/3d-business-man-working-at-laptop-with-robot-assistant.png" 
-            alt="Business Man" 
-            class="image" 
-            style="width: 602px; height: 828px;" 
-          />
+      <div class="icon d-flex flex-row justify-center mt-5">
+        <v-btn icon="" class="icon-button-con">
+            <v-img
+              width="50px"
+              height="50px"
+              src="/icons/icons8-google-logo.png"
+              ></v-img>
+          </v-btn>
+        <v-btn icon="" class="icon-button">
+             <v-img
+              width="50px"
+              height="50px"
+              src="/icons/icons8-github-logo.png"
+              ></v-img>
+        </v-btn>
+        <v-btn icon="" class="icon-button">
+            <v-img
+              width="50px"
+              height="50px"
+              src="/icons/icons8-telegram-app-100.png"
+              ></v-img>
+          </v-btn>
         </div>
-      </v-row>
-    </v-container>
+        <div class="sign-up-option d-flex flex-row justify-center align-center mt-10">
+            <p class="text-center text-grey-darken-1">Don't have an account?</p>
+              <a @click="gotoSignUp" class="text-caption text-decoration-none text-black font-weight-bold">
+                Sign Up
+              </a>
+        </div>
+    </v-card-text>
+    <v-card-text class="right-section-img-bg mr-n10">
+      <v-img 
+          width="400px"
+          aspect-ratio="16/9"
+          src="/images/Image-Banner-Signin.png"
+          ></v-img>
+    </v-card-text>
+  </v-col>
   </template>
   
-<style>
-v-otp-input:nth-child(n){
-  width: 42px;
-  height: 62px;
+<style scoped>
+.left-section-otp {
+  width: 45%;
+  height: 600px;
 }
+.right-section-img-bg {
+  width: 45%;
+  height: 600px;
+}
+.send-btt {
+  border-radius: 12px !important;
+  width: 400px;
+  height: 40px;
+}
+.icon {
+  gap: 20px;
+}
+.icon-button-con {
+  cursor: pointer;
+  position: relative;
+  overflow: hidden;
+  transition: background-color 0.3s, transform 0.3s;
+ }
+  .icon-button-con::before {
+  content: "";
+  position: absolute;
+  background-color: rgba(255, 255, 255, 0.1);
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%) scale(0);
+   transition: transform 0.6s ease-out;
+}
+.icon-button-con:hover::before {
+  transform: translate(-50%, -50%) scale(3);
+}
+.icon-button-con:active::before {
+  transform: scale(0.9);
+ }
+.con-button-con:hover {
+  animation:  bounce 1s infinite;
+}
+@keyframes bounce {
+  0%,
+  100% {
+  transform: translateY(0);
+  }
+  50% {
+  transform: translateY(-10px);
+  }
+}
+.sign-up-option {
+  background-color: #EBEBEB;
+  gap: 10px;
+  width: 300px;
+  height: 50px;
+  border-radius: 15px;
+   }
 </style>
