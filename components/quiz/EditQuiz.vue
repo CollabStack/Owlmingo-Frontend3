@@ -1,135 +1,133 @@
 <template>
-  <!-- Question Card -->
   <v-card class="pa-4 mt-6 rounded-lg elevation-2">
-      <v-row align="center" justify="space-between">
-          <v-col cols="auto">
-              <h3 class="text-h6">Question</h3>
-          </v-col>
-          <v-col cols="auto">
-              <img src="/icons/icons8-delete-button.svg" alt="Icon" class="icon-size mt-2" @click="deleteQuestion" />
-          </v-col>
+    <v-row align="center" justify="space-between">
+      <v-col cols="auto">
+        <h3 class="text-h6">Question</h3>
+      </v-col>
+      <v-col cols="auto">
+        <img
+          src="/icons/icons8-delete-button.svg"
+          alt="Delete"
+          class="icon-size mt-2"
+          @click="$emit('delete')"
+        />
+      </v-col>
+    </v-row>
+
+    <!-- Question Type Selection -->
+    <v-label class="mt-4">Question Type</v-label>
+    <v-select
+      v-model="localQuestion.type"
+      :items="questionTypes"
+      item-title="text"
+      item-value="value"
+      variant="flat"
+      class="mt-2 rounded bg-blue-lighten-5 w-25"
+      density="compact"
+      hide-details
+      @update:modelValue="resetAnswers"
+    />
+
+    <!-- Question Input -->
+    <v-label class="mt-4">Question</v-label>
+    <v-textarea
+      v-model="localQuestion.text"
+      class="mt-2 rounded-lg bg-blue-lighten-5 w-75"
+      variant="flat"
+      auto-grow
+      rows="2"
+      hide-details
+      placeholder="Enter your question"
+    />
+
+    <!-- Answer Options -->
+    <v-label class="mt-4">Options</v-label>
+
+    <!-- Single Choice (Radio Buttons) -->
+    <v-radio-group v-if="!localQuestion.type" v-model="localQuestion.selectedAnswer" class="mt-2">
+      <v-row dense>
+        <v-col v-for="(option, index) in localQuestion.options" :key="index" cols="12" class="mt-4">
+          <v-row align="center" no-gutters>
+            <v-col cols="auto">
+              <v-radio :value="option.value" color="blue" />
+            </v-col>
+            <v-col>
+              <v-text-field
+                v-model="option.text"
+                variant="flat"
+                hide-details
+                class="rounded-lg bg-blue-lighten-5"
+                placeholder="Enter answer"
+              />
+            </v-col>
+          </v-row>
+        </v-col>
       </v-row>
+    </v-radio-group>
 
-      <!-- Question Type Selection -->
-      <v-label class="mt-4">Question Type</v-label>
-      <v-select
-          v-model="selectedType"
-          :items="questionTypes"
-          item-title="text"
-          item-value="value"
-          variant="flat"
-          class="mt-2 rounded bg-blue-lighten-5 w-25"
-          density="compact"
-          hide-details
-          @update:modelValue="handleTypeChange"
-      />
-
-      <!-- Question Input -->
-      <v-label class="mt-4">Question</v-label>
-      <v-textarea
-          v-model="questionText"
-          class="mt-2 rounded-lg bg-blue-lighten-5"
-          max-width="90%"
-          variant="flat"
-          auto-grow
-          rows="2"
-          hide-details
-      />  
-
-      <!-- Answer Options -->
-      <v-label class="mt-4">Choose Answer</v-label>
-
-      <!-- Single Choice (false) -->
-      <v-radio-group v-if="selectedType === false" v-model="question.selectedAnswer" class="mt-4">
-          <v-row dense>
-              <v-col v-for="(option, index) in question.options" :key="index" cols="12">
-                  <v-row align="center" no-gutters class="mb-5">
-                      <v-col cols="auto">
-                          <v-radio :value="option.value" color="blue" />
-                      </v-col>
-                      <v-col>
-                          <v-text-field v-model="option.text" variant="flat" hide-details class="rounded-lg bg-blue-lighten-5" />
-                      </v-col>
-                  </v-row>
-              </v-col>
+    <!-- Multiple Choice (Checkboxes) -->
+    <div v-else class="mt-6">
+      <v-row dense>
+        <v-col v-for="(option, index) in localQuestion.options" :key="index" cols="12">
+          <v-row no-gutters>
+            <v-col cols="auto">
+              <v-checkbox v-model="localQuestion.selectedAnswers" :value="option.value" color="blue" />
+            </v-col>
+            <v-col>
+              <v-text-field
+                v-model="option.text"
+                variant="flat"
+                hide-details
+                class="rounded-lg bg-blue-lighten-5"
+                placeholder="Enter answer"
+              />
+            </v-col>
           </v-row>
-      </v-radio-group>
-
-      <!-- Multiple Choice (true) -->
-      <div v-else class="mt-4">
-          <v-row dense>
-              <v-col v-for="(option, index) in question.options" :key="index" cols="12">
-                  <v-row no-gutters>
-                      <v-col cols="auto">
-                          <v-checkbox v-model="question.selectedAnswers" :value="option.value" color="blue" />
-                      </v-col>
-                      <v-col>
-                          <v-text-field v-model="option.text" variant="flat" hide-details class="rounded-lg bg-blue-lighten-5" />
-                      </v-col>
-                  </v-row>
-              </v-col>
-          </v-row>
-      </div>
+        </v-col>
+      </v-row>
+    </div>
   </v-card>
 </template>
 
 <script setup>
-import { ref, computed } from "vue";
+import { defineProps, defineEmits, ref, watch } from 'vue';
 
-// Corrected: Ensure items have both text and value properties
-const questionTypes = [
-  { text: "Single Choice", value: false },
-  { text: "Multiple Choice", value: true }
-];
+const emit = defineEmits(['delete']);
 
-// Default selection (Single Choice = false)
-const selectedType = ref(false);
-
-const questionText = ref("What is the primary focus of the session objectives?");
-
-// Question data structure
-const questionData = ref({
-  false: {
-      options: [
-          { text: "Lifecycle function", value: "a" },
-          { text: "Event function", value: "b" },
-          { text: "Attributes & Inspector", value: "c" },
-          { text: "All of the above", value: "d" }
-      ],
-      selectedAnswer: ""
-  },
-  true: {
-      options: [
-          { text: "Lifecycle function", value: "a" },
-          { text: "Event function", value: "b" },
-          { text: "Attributes & Inspector", value: "c" },
-          { text: "All of the above", value: "d" }
-      ],
-      selectedAnswers: []
-  }
+const props = defineProps({
+  question: Object,
 });
 
-// Computed property to get the correct question object
-const question = computed(() => questionData.value[selectedType.value]);
+// Use a local ref to avoid modifying props directly
+const localQuestion = ref({ ...props.question });
 
-// Handle type change correctly
-const handleTypeChange = (newType) => {
-  selectedType.value = newType;  // Update boolean value
+const questionTypes = [
+  { text: 'Single Choice', value: false },
+  { text: 'Multiple Choice', value: true },
+];
 
-  // Reset answer selections
-  if (newType) {
-      question.value.selectedAnswers = [];
-  } else {
-      question.value.selectedAnswer = "";
-  }
+// Watch for changes in props and update local ref
+watch(
+  () => props.question,
+  (newQuestion) => {
+    localQuestion.value = { ...newQuestion };
+  },
+  { deep: true, immediate: true }
+);
+
+// Reset answers when question type changes
+const resetAnswers = () => {
+  localQuestion.value.selectedAnswer = '';
+  localQuestion.value.selectedAnswers = [];
+  localQuestion.value.options = generateDefaultOptions();
 };
 
-// Delete question
-const deleteQuestion = () => {
-  question.value.options = [];
-  question.value.selectedAnswer = "";
-  question.value.selectedAnswers = [];
-  console.log("Question deleted:", question.value);
+// Generate default options (ensuring correct reactivity)
+const generateDefaultOptions = () => {
+  return Array.from({ length: 4 }, (_, index) => ({
+    value: `${index + 1}`,
+    text: ''
+  }));
 };
 </script>
 
@@ -137,5 +135,6 @@ const deleteQuestion = () => {
 .icon-size {
   width: 30px;
   height: 30px;
+  cursor: pointer;
 }
 </style>
