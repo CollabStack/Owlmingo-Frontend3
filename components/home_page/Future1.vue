@@ -86,10 +86,12 @@ const cards = [
   border-radius: 10%;
   position: relative;
   overflow: hidden;
+  will-change: transform;
 }
 
 .animate-pulse {
   position: relative;
+  overflow: hidden;
 }
 
 .animate-pulse::after {
@@ -99,14 +101,33 @@ const cards = [
   left: 0;
   right: 0;
   bottom: 0;
-  background: linear-gradient(225deg, rgba(255,255,255,0) 0%, rgba(255,255,255,0.7) 50%, rgba(255,255,255,0) 100%);
-  transform: translateX(-100%);
-  animation: pulse 3s infinite;
+  background: linear-gradient(
+    135deg, 
+    rgba(255,255,255,0) 0%, 
+    rgba(255,255,255,0.2) 50%, 
+    rgba(255,255,255,0) 100%
+  );
+  transform: translateX(-100%) translateY(100%);
+  animation: shine 6s infinite cubic-bezier(0.4, 0.0, 0.2, 1);
+  will-change: transform;
 }
 
-@keyframes pulse {
-  0% { transform: translateX(-100%); }
-  50%, 100% { transform: translateX(100%); }
+@keyframes shine {
+  0% { 
+    transform: translateX(-150%) translateY(150%); 
+    opacity: 0;
+  }
+  15% { 
+    opacity: 0.4;
+  }
+  25% { 
+    transform: translateX(100%) translateY(-100%); 
+    opacity: 0;
+  }
+  100% { 
+    transform: translateX(100%) translateY(-100%); 
+    opacity: 0;
+  }
 }
 
 .icon-img {
@@ -131,14 +152,20 @@ const cards = [
   position: absolute;
   top: 0;
   left: -100%;
-  width: 100%;
+  width: 70%;
   height: 100%;
-  background: linear-gradient(90deg, transparent, rgba(255,255,255,0.2), transparent);
-  transition: all 0.4s ease;
+  background: linear-gradient(
+    90deg, 
+    rgba(255,255,255,0) 0%,
+    rgba(255,255,255,0.15) 50%,
+    rgba(255,255,255,0) 100%
+  );
+  transition: all 0.6s cubic-bezier(0.4, 0.0, 0.2, 1);
+  will-change: transform;
 }
 
 .button-hover:hover::before {
-  left: 100%;
+  left: 130%;
 }
 
 .button-hover:hover .button-icon {

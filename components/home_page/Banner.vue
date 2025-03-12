@@ -1,62 +1,71 @@
 <template>
-  <v-col cols="12">
-    <v-card 
-      color="text-primary" 
-      max-width="95%" 
-      class="banner-card rounded-lg bg-maya_blue mx-auto py-6"
-      :style="{ opacity: isVisible ? 1 : 0, transform: isVisible ? 'translateY(0)' : 'translateY(20px)' }"
-    >
-      <div class="d-flex align-center justify-space-between flex-wrap px-3">
-        <v-img
-          src="/images/3d-business-children-at-a-laptop-with-a-robot-assistant.png"
-          height="220"
-          width="220"
-          class="mb-4 mb-md-0 mr-md-6 banner-image"
-          contain
-          :class="{ 'animate-bounce': isHovered }"
-        ></v-img>
-        
-        <div class="text-content" :class="{ 'fade-in': isVisible }">
-          <h2 class="text-h4 font-weight-bold mb-4 gradient-text outfit outfit-bold">Experience a new way of learning with the power of AI</h2>
-          <p class="text-body-1 mb-6 text-grey-lighten-4 outfit outfit-regular">For students, teachers, and professionals</p>
-          <div class="d-flex gap-4">
-            <NuxtLink to="/library">
-              <v-btn 
-                rounded="xl" 
-                variant="outlined" 
-                color="white" 
-                class="text-white animated-btn outfit outfit-medium"
-                height="48"
-              >
-                <span class="d-flex align-center">
-                  AI Flashcard
-                  <v-icon class="ms-2 btn-icon">mdi-book-open-page-variant</v-icon>
-                </span>
-              </v-btn>
-            </NuxtLink> 
-            <NuxtLink to="/about">
-              <v-btn 
-                rounded="xl" 
-                variant="outlined" 
-                color="white" 
-                class="text-white animated-btn-alt outfit outfit-medium"
-                height="48"
-              >
-                <span class="d-flex align-center">
-                  AI Quizzes
-                  <v-icon class="ms-2 btn-icon">mdi-robot</v-icon>
-                </span>
-              </v-btn>
-            </NuxtLink>
+  <div>
+    <v-col cols="12">
+      <v-card 
+        color="text-primary" 
+        max-width="95%" 
+        class="banner-card rounded-lg bg-maya_blue mx-auto py-6"
+        :style="{ opacity: isVisible ? 1 : 0, transform: isVisible ? 'translateY(0)' : 'translateY(20px)' }"
+      >
+        <div class="d-flex align-center justify-space-between flex-wrap px-3">
+          <v-img
+            src="/images/3d-business-children-at-a-laptop-with-a-robot-assistant.png"
+            height="220"
+            width="220"
+            class="mb-4 mb-md-0 mr-md-6 banner-image"
+            contain
+            :class="{ 'animate-bounce': isHovered }"
+          ></v-img>
+          
+          <div class="text-content" :class="{ 'fade-in': isVisible }">
+            <h2 class="text-h4 font-weight-bold mb-4 gradient-text outfit outfit-bold">Experience a new way of learning with the power of AI</h2>
+            <p class="text-body-1 mb-6 text-grey-lighten-4 outfit outfit-regular">For students, teachers, and professionals</p>
+            <div class="d-flex gap-4">
+              <NuxtLink to="/library">
+                <v-btn 
+                  rounded="xl" 
+                  variant="outlined" 
+                  color="white" 
+                  class="text-white animated-btn outfit outfit-medium"
+                  height="48"
+                >
+                  <span class="d-flex align-center">
+                    AI Flashcard
+                    <v-icon class="ms-2 btn-icon">mdi-book-open-page-variant</v-icon>
+                  </span>
+                </v-btn>
+              </NuxtLink> 
+              <NuxtLink to="/about">
+                <v-btn 
+                  rounded="xl" 
+                  variant="outlined" 
+                  color="white" 
+                  class="text-white animated-btn-alt outfit outfit-medium"
+                  height="48"
+                >
+                  <span class="d-flex align-center">
+                    AI Quizzes
+                    <v-icon class="ms-2 btn-icon">mdi-robot</v-icon>
+                  </span>
+                </v-btn>
+              </NuxtLink>
+            </div>
           </div>
         </div>
-      </div>
-    </v-card>
-  </v-col>
+      </v-card>
+    </v-col>
+
+    <!-- Add section divider below the banner -->
+     <div class="mt-8 mx-10">
+      <SectionDivider />
+     </div>
+  </div>
 </template>
+
 
 <script setup>
 import { ref, onMounted } from 'vue';
+import SectionDivider from '../SectionDivider.vue';
 
 const isVisible = ref(false);
 const isHovered = ref(false);
@@ -150,7 +159,7 @@ onMounted(() => {
 
 .animated-btn-alt:hover {
   background-color: white;
-  color: #1A237E !important;
+  color: #69247C !important;
   transform: translateY(-3px);
 }
 
