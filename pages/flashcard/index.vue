@@ -19,7 +19,7 @@
           <v-file-input class="mt-2" label="Choose a file" outlined></v-file-input>
         </v-card>
         
-        <v-btn class="mt-4" variant="outlined">Options</v-btn>
+        <nuxt-link to="/flashcard/library"><v-btn class="mt-4" variant="outlined">Options</v-btn></nuxt-link>
       </v-container>
     </v-app>
   </template>
