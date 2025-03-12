@@ -11,6 +11,8 @@
   },
   "dependencies": {
     "@mdi/font": "^7.4.47",
+    "@tiptap/starter-kit": "^2.11.5",
+    "@tiptap/vue-3": "^2.11.5",
     "@vueuse/motion": "^2.2.6",
     "axios": "^1.7.9",
     "dotenv": "^16.4.7",
@@ -20,7 +22,8 @@
     "sweetalert2": "^11.6.13",
     "vue": "latest",
     "vue-router": "latest",
-    "vue-telegram-login": "^2.1.0"
+    "vue-telegram-login": "^2.1.0",
+    "vuedraggable": "^2.24.3"
   },
   "devDependencies": {
     "vite-plugin-vuetify": "^2.1.0",
