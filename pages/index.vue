@@ -1,16 +1,16 @@
 <template>
   <v-col cols="12">
-    <!-- <banner />
+    <banner />
     <home-page-future1/>
     <home-page-future2/>
     <home-page-future3/>
-    <Future3/> -->
+    <Future3/>
   </v-col>
 </template>
 <script setup>
 
   definePageMeta({
-    layout: 'admin',
+    layout: 'default',
   });
 
   const TestingFunc = () => {
