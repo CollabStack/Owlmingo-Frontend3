@@ -1,19 +1,16 @@
 <template>
-    <div class="mt-5">
-      <home-page-banner />
-      <home-page-future1 />
-      <!-- <home-page-aicard /> -->
-      <home-page-future2 />
-      <home-page-future3 />
-    </div>
+  <v-col cols="12">
+    <!-- <banner />
+    <home-page-future1/>
+    <home-page-future2/>
+    <home-page-future3/>
+    <Future3/> -->
+  </v-col>
 </template>
-
-
 <script setup>
-import Footer from '../components/Footer.vue';
 
   definePageMeta({
-    layout: 'default',
+    layout: 'admin',
   });
 
   const TestingFunc = () => {
