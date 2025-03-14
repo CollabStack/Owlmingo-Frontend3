@@ -1,5 +1,49 @@
+<template>
+  <v-col cols="12" class="d-flex flex-row justify-center align-center mt-20">
+    <v-card-text class="left-section-otp d-flex flex-column justify-center align-center mx-15 px-25">
+      <h2 class="mt-10 text-info">Verification</h2>
+      <p class="mt-5 text-info">Enter the verification code sent to your email</p>
+      
+      <!-- OTP Input Bound to State -->
+      <v-otp-input v-model="otp" class="mb-4 mt-5 max-width" min-width="422px" min-height="62px"></v-otp-input>
+
+      <p class="mt-5">If you didn’t receive a code, <a @click="resendOtp" class="text-blue">Resend</a></p>
+
+      <!-- Submit Button with Loading State -->
+      <v-btn @click="handleSubmit" :loading="otpStore.loading" color="blue-lighten-2" class="send-btt mt-5 py-3 text-white">
+        Send
+      </v-btn>
+
+      <p class="text-center mt-10 text-grey-darken-1">Other Log in Option</p>
+
+      <div class="icon d-flex flex-row justify-center mt-5">
+        <v-btn icon class="icon-button-con">
+          <v-img width="50px" height="50px" src="/icons/icons8-google-logo.png"></v-img>
+        </v-btn>
+        <v-btn icon class="icon-button">
+          <v-img width="50px" height="50px" src="/icons/icons8-github-logo.png"></v-img>
+        </v-btn>
+        <v-btn icon class="icon-button">
+          <v-img width="50px" height="50px" src="/icons/icons8-telegram-app-100.png"></v-img>
+        </v-btn>
+      </div>
+
+      <div class="sign-up-option d-flex flex-row justify-center align-center mt-10">
+        <p class="text-center text-grey-darken-1">Don't have an account?</p>
+        <a @click="gotoSignUp" class="text-caption text-decoration-none text-black font-weight-bold">Sign Up</a>
+      </div>
+    </v-card-text>
+
+    <v-card-text class="right-section-img-bg mr-n10">
+      <v-img width="400px" aspect-ratio="16/9" src="/images/Image-Banner-Signin.png"></v-img>
+    </v-card-text>
+  </v-col>
+</template>
+
 <script setup>
 import { ref } from 'vue';
+import { useOtpStore } from '~/store/otp';
+//============ router =======================
 import { useRouter } from 'vue-router';
 const router = useRouter();
 const gotoSignUp = () => {
@@ -7,60 +51,28 @@ const gotoSignUp = () => {
     router.push('/auth/sign-up');  
 }
 
+//===================== Data ======================
+const otpStore = useOtpStore();
+const email = ref('');
+const otp = ref('');
+const newPassword = ref('');
+
+//======================== Method ==========================
+
+const handleSubmit = async () => {
+console.log("fuck you")
+}
+
+// Resend OTP method
+const resendOtp = async () => {
+  if (email.value) {
+    await otpStore.sendOtp(email.value);
+  } else {
+    alert('Please enter your email first.');
+  }
+};
+
 </script>
-
-<template>
-  <v-col cols="12" class="d-flex flex-row justify-center align-center mt-20">
-    <v-card-text class="left-section-otp d-flex flex-column justify-center align-center mx-15  px-25">
-      <h2 class="mt-10 text-info">Verification</h2>
-      <p class="mt-5 text-info">Enter the verification code sent to your email</p>
-      <v-otp-input class="mb-4 mt-5 max-width" min-width="422px" min-height="62px"></v-otp-input>
-      <p class="mt-5">If you didn’t receive a code, Resend</p>
-      <v-btn to="/auth/new-password" color="blue-lighten-2" class="send-btt mt-5 py-3 text-white">
-          Send
-          </v-btn>
-
-      <p class="text-center mt-10 text-grey-darken-1">Other Log in Option</p>
-
-      <div class="icon d-flex flex-row justify-center mt-5">
-        <v-btn icon="" class="icon-button-con">
-            <v-img
-              width="50px"
-              height="50px"
-              src="/icons/icons8-google-logo.png"
-              ></v-img>
-          </v-btn>
-        <v-btn icon="" class="icon-button">
-             <v-img
-              width="50px"
-              height="50px"
-              src="/icons/icons8-github-logo.png"
-              ></v-img>
-        </v-btn>
-        <v-btn icon="" class="icon-button">
-            <v-img
-              width="50px"
-              height="50px"
-              src="/icons/icons8-telegram-app-100.png"
-              ></v-img>
-          </v-btn>
-        </div>
-        <div class="sign-up-option d-flex flex-row justify-center align-center mt-10">
-            <p class="text-center text-grey-darken-1">Don't have an account?</p>
-              <a @click="gotoSignUp" class="text-caption text-decoration-none text-black font-weight-bold">
-                Sign Up
-              </a>
-        </div>
-    </v-card-text>
-    <v-card-text class="right-section-img-bg mr-n10">
-      <v-img 
-          width="400px"
-          aspect-ratio="16/9"
-          src="/images/Image-Banner-Signin.png"
-          ></v-img>
-    </v-card-text>
-  </v-col>
-  </template>
   
 <style scoped>
 .left-section-otp {
