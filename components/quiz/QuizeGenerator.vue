@@ -111,7 +111,20 @@
           @file-removed="handleFileRemoved('document')"
           @error="showSnackbar"
         />
-        <p class="mt-2 animated-link">Looking for flashcards instead? Try the <nuxt-link to="/" style="text-decoration: none;"> AI Flashcard Generator</nuxt-link></p>
+      
+        <v-row class="mt-2" align="center">
+          <v-col class="d-flex">
+            <p class="animated-link">Looking for flashcards instead? Try the 
+              <nuxt-link to="/" style="text-decoration: none;"> AI Flashcard Generator</nuxt-link>
+            </p>
+          </v-col>
+          <!-- Conditionally render the 'Next' button -->
+          <v-col class="d-flex justify-end">
+            <v-btn class="text-blue rounded-xl" variant = "outlined" @click = "generateQuiz">
+              Next
+            </v-btn>
+          </v-col>
+        </v-row>
       </v-window-item>
 
       <!-- Text Upload -->
@@ -169,7 +182,19 @@
           @file-removed="handleFileRemoved('image')"
           @error="showSnackbar"
         />
-        <p class="mt-2 animated-link">Looking for flashcards instead? Try the <nuxt-link to="/" style="text-decoration: none;"> AI Flashcard Generator</nuxt-link></p>
+        <v-row class="mt-2" align="center">
+          <v-col class="d-flex">
+            <p class="animated-link">Looking for flashcards instead? Try the 
+              <nuxt-link to="/" style="text-decoration: none;"> AI Flashcard Generator</nuxt-link>
+            </p>
+          </v-col>
+          <!-- Conditionally render the 'Next' button -->
+          <v-col class="d-flex justify-end">
+            <v-btn class="text-blue rounded-xl" variant = "outlined" @click = "generateQuiz">
+              Next
+            </v-btn>
+          </v-col>
+        </v-row>
       </v-window-item>
 
       <!-- Video Upload -->
@@ -186,7 +211,19 @@
           @file-removed="handleFileRemoved('video')"
           @error="showSnackbar"
         />
-        <p class="mt-2 animated-link">Looking for flashcards instead? Try the <nuxt-link to="/" style="text-decoration: none;"> AI Flashcard Generator</nuxt-link></p>
+        <v-row class="mt-2" align="center">
+          <v-col class="d-flex">
+            <p class="animated-link">Looking for flashcards instead? Try the 
+              <nuxt-link to="/" style="text-decoration: none;"> AI Flashcard Generator</nuxt-link>
+            </p>
+          </v-col>
+          <!-- Conditionally render the 'Next' button -->
+          <v-col class="d-flex justify-end">
+            <v-btn class="text-blue rounded-xl" variant = "outlined" @click = "generateQuiz">
+              Next
+            </v-btn>
+          </v-col>
+        </v-row>
       </v-window-item>
     </v-window>
 
@@ -222,6 +259,9 @@
 <script setup>
 import { ref } from 'vue';
 import FileUploader from '../common/FileUploader.vue';
+import { useRouter } from 'vue-router'; // Import useRouter
+  
+const router = useRouter(); // Initialize router
 
 const tab = ref('document'); // Default tab
 const sheet = ref(false);
@@ -262,6 +302,10 @@ const handleFileRemoved = (type) => {
   }
 };
 
+const generateQuiz = () => {
+    router.push('/quiz/review-quiz');
+};
+
 // Show snackbar with custom message
 const showSnackbar = (message) => {
   snackbarMessage.value = message;
@@ -269,15 +313,15 @@ const showSnackbar = (message) => {
 };
 
 // Generate Quiz
-const generateQuiz = () => {
-  loading.value = true;
+// const generateQuiz = () => {
+//   loading.value = true;
   
-  // Simulate API call with timeout
-  setTimeout(() => {
-    loading.value = false;
-    showSnackbar('Quiz generated successfully!');
-  }, 2000);
-};
+//   // Simulate API call with timeout
+//   setTimeout(() => {
+//     loading.value = false;
+//     showSnackbar('Quiz generated successfully!');
+//   }, 2000);
+// };
 </script>
 
 <style scoped>
