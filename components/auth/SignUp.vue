@@ -1,6 +1,5 @@
 <script setup>
 // import Socialicon from './Social.vue';
-
 </script>
 
 <template>

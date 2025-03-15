@@ -44,8 +44,8 @@
                     </a>
                 </div>
 
-                <v-btn block color="blue-lighten-2" class="sign-in-btt mt-4 py-3 text-white">
-                    Sign In
+                <v-btn @click = "signUp" block color="blue-lighten-2" class="sign-in-btt mt-4 py-3 text-white">
+                    Sign Up
                 </v-btn>
 
                 <p class="text-center mt-10 text-grey-darken-1">Other Log in Option</p>
@@ -79,8 +79,43 @@
     </template>
     
     <script setup> 
-    
-    </script>
+import Swal from 'sweetalert2';
+import { ref, onMounted } from 'vue';
+import { userAuth } from '~/store/userAuth';
+
+const authStore = userAuth();
+const username = ref('');
+const email = ref('');
+const password = ref('');
+
+onMounted(() => {
+    console.log('Sign Up mounted');
+});
+
+const signUp = async () => {
+   try {
+       await authStore.signUp(username.value, email.value, password.value);
+       
+       // Store email in localStorage for OTP verification
+       localStorage.setItem('signupEmail', email.value);
+       
+       Swal.fire({
+        title: 'Success',
+        text: 'You have been successfully signed up',
+        icon: 'success',
+        timer: 2000,
+        showConfirmButton: false
+        });
+        navigateTo("/auth/otp");
+   } catch (error) {
+       Swal.fire({
+           icon: 'error',
+           title: 'Sign Up Failed',
+           text: error.response?.data?.message || 'Please check your credentials and try again.'
+       });
+   }
+}
+</script>
     <style scoped>
     .image-banner {
         margin-right: -120px;
