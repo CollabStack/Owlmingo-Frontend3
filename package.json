@@ -17,7 +17,6 @@
     "dotenv": "^16.4.7",
     "js-cookie": "^3.0.5",
     "nuxt": "^3.15.4",
-    "nuxt-app": "file:",
     "pinia": "^2.0.36",
     "sweetalert2": "^11.6.13",
     "three": "^0.174.0",
