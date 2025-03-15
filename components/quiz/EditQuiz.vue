@@ -14,7 +14,6 @@
       </v-col>
     </v-row>
 
-    <!-- Question Type Selection -->
     <v-label class="mt-4">Question Type</v-label>
     <v-select
       v-model="localQuestion.type"
@@ -28,7 +27,6 @@
       @update:modelValue="resetAnswers"
     />
 
-    <!-- Question Input -->
     <v-label class="mt-4">Question</v-label>
     <v-textarea
       v-model="localQuestion.text"
@@ -38,13 +36,12 @@
       rows="2"
       hide-details
       placeholder="Enter your question"
+      @update:modelValue="emitUpdatedQuestion"
     />
 
-    <!-- Answer Options -->
     <v-label class="mt-4">Options</v-label>
 
-    <!-- Single Choice (Radio Buttons) -->
-    <v-radio-group v-if="!localQuestion.type" v-model="localQuestion.selectedAnswer" class="mt-2">
+    <v-radio-group v-if="!localQuestion.type" v-model="localQuestion.selectedOption" class="mt-2">
       <v-row dense>
         <v-col v-for="(option, index) in localQuestion.options" :key="index" cols="12" class="mt-4">
           <v-row align="center" no-gutters>
@@ -52,20 +49,13 @@
               <v-radio :value="option.value" color="blue" />
             </v-col>
             <v-col>
-              <v-text-field
-                v-model="option.text"
-                variant="flat"
-                hide-details
-                class="rounded-lg bg-blue-lighten-5"
-                placeholder="Enter answer"
-              />
+              <v-text-field v-model="option.text" variant="flat" hide-details class="rounded-lg bg-blue-lighten-5" placeholder="Enter answer" @update:modelValue="emitUpdatedQuestion" />
             </v-col>
           </v-row>
         </v-col>
       </v-row>
     </v-radio-group>
 
-    <!-- Multiple Choice (Checkboxes) -->
     <div v-else class="mt-6">
       <v-row dense>
         <v-col v-for="(option, index) in localQuestion.options" :key="index" cols="12">
@@ -74,13 +64,7 @@
               <v-checkbox v-model="localQuestion.selectedAnswers" :value="option.value" color="blue" />
             </v-col>
             <v-col>
-              <v-text-field
-                v-model="option.text"
-                variant="flat"
-                hide-details
-                class="rounded-lg bg-blue-lighten-5"
-                placeholder="Enter answer"
-              />
+              <v-text-field v-model="option.text" variant="flat" hide-details class="rounded-lg bg-blue-lighten-5" placeholder="Enter answer" @update:modelValue="emitUpdatedQuestion" />
             </v-col>
           </v-row>
         </v-col>
@@ -92,21 +76,19 @@
 <script setup>
 import { defineProps, defineEmits, ref, watch } from 'vue';
 
-const emit = defineEmits(['delete']);
+const emit = defineEmits(['delete', 'update-question']);
 
 const props = defineProps({
-  question: Object,
+  question: Object
 });
 
-// Use a local ref to avoid modifying props directly
 const localQuestion = ref({ ...props.question });
 
 const questionTypes = [
   { text: 'Single Choice', value: false },
-  { text: 'Multiple Choice', value: true },
+  { text: 'Multiple Choice', value: true }
 ];
 
-// Watch for changes in props and update local ref
 watch(
   () => props.question,
   (newQuestion) => {
@@ -115,21 +97,26 @@ watch(
   { deep: true, immediate: true }
 );
 
-// Reset answers when question type changes
 const resetAnswers = () => {
-  localQuestion.value.selectedAnswer = '';
+  localQuestion.value.selectedOption = null;
   localQuestion.value.selectedAnswers = [];
   localQuestion.value.options = generateDefaultOptions();
+  emitUpdatedQuestion();
 };
 
-// Generate default options (ensuring correct reactivity)
 const generateDefaultOptions = () => {
   return Array.from({ length: 4 }, (_, index) => ({
     value: `${index + 1}`,
     text: ''
   }));
 };
+
+const emitUpdatedQuestion = () => {
+  emit('update-question', localQuestion.value);
+};
 </script>
+
+
 
 <style scoped>
 .icon-size {
