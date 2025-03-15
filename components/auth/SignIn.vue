@@ -1,28 +1,28 @@
 <script setup>
 // import Socialicon from './Social.vue';
-import Swal from 'sweetalert2';
-import { userAuth } from '~/store/userAuth';
+// import Swal from 'sweetalert2';
+// import { userAuth } from '~/store/userAuth';
 
-const authStore = userAuth();
-const email = ref('');
-const password = ref('');
+// const authStore = userAuth();
+// const email = ref('');
+// const password = ref('');
 
-onMounted(() => {
-    console.log('Sign In mounted');
-});
+// onMounted(() => {
+//     console.log('Sign In mounted');
+// });
 
-const login = async () => {
-    try {
-        await authStore.login(email.value, password.value);
-        navigateTo("/");
-    } catch (error) {
-        Swal.fire({
-            icon: 'error',
-            title: 'Login Failed',
-            text: error.response?.data?.message || 'Please check your credentials and try again.'
-        });
-    }
-};
+// const login = async () => {
+//     try {
+//         await authStore.login(email.value, password.value);
+//         navigateTo("/");
+//     } catch (error) {
+//         Swal.fire({
+//             icon: 'error',
+//             title: 'Login Failed',
+//             text: error.response?.data?.message || 'Please check your credentials and try again.'
+//         });
+//     }
+// };
 
 </script>
 
