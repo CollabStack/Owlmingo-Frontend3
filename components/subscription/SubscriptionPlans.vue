@@ -289,10 +289,41 @@ const plans = {
 // Reactive plans based on selected tab
 const activePlans = computed(() => plans[selectedTab.value]);
 
-// mounted 
+// // mounted 
 onMounted(() => {
   loadAbaPaywayScript();
 });
+
+const loadAbaPaywayScript = () => {
+  if (document.querySelector("script[src='https://checkout.payway.com.kh/plugins/checkout2-0.js']")) {
+    console.log("✅ AbaPayway script already loaded.");
+    scriptLoaded.value = true;
+    return;
+  }
+
+  const script = document.createElement("script");
+  script.src = "https://checkout.payway.com.kh/plugins/checkout2-0.js";
+  script.async = true;
+  script.onload = () => {
+    scriptLoaded.value = true;
+    console.log("✅ AbaPayway script loaded.");
+  };
+  script.onerror = () => {
+    console.error("❌ Failed to load AbaPayway.");
+  };
+  document.head.appendChild(script);
+};
+// loadAbaPaywayScript() {
+//       if (!this.scriptLoaded) {
+//         const script = document.createElement("script");
+//         script.src = "https://checkout.payway.com.kh/plugins/checkout2-0.js";
+//         script.onload = () => {
+//           this.scriptLoaded = true;
+//           console.log("AbaPayway script loaded");
+//         };
+//         document.head.appendChild(script);
+//       }
+//     },
 // Determine button variant
 const getButtonVariant = (planName) => {
   if (selectedTab.value === "school") {
@@ -305,29 +336,6 @@ const getButtonVariant = (planName) => {
 const checkout = (plan) =>{
   console.log("Subscribe: ", plan);
 }
-
-// const loadAbaPaywayScript = () => {
-//   if (!scriptLoaded) {
-//     const script = document.createElement("script");
-//     script.src = "https://checkout.payway.com.kh/plugins/checkout2-0.js";
-//     script.onload = () => {
-//       scriptLoaded = true;
-//     };
-//     document.head.appendChild(script);
-//   }
-// }
-const loadAbaPaywayScript = () => {
-if (!scriptLoaded) {
-    const script = document.createElement("script");
-    script.src = "https://checkout.payway.com.kh/plugins/checkout2-0.js";
-    script.onload = () => {
-      scriptLoaded = true;
-      console.log("AbaPayway script loaded");
-    };
-    document.head.appendChild(script);
-  }
-}
-
 </script>
 
 <style scoped>
