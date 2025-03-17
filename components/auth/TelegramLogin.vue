@@ -75,7 +75,6 @@ onMounted(async () => {
     height: 50px;
 }
 </style> -->
-
 <template>
     <div class="custom-telegram-button" @click="redirectToTelegramAuth">
         <!-- <button class="custom-telegram-button" @click="redirectToTelegramAuth"> -->
@@ -86,13 +85,12 @@ onMounted(async () => {
 
 <script setup>
 import { useRoute } from "#imports"; // ✅ Correct import for Nuxt
-import Swal from "sweetalert2";
 import { onMounted } from "vue";
-import { userAuth } from "~/store/userAuth";
+
 // Telegram Bot ID
-const botId = useRuntimeConfig().public.BOT_ID;
-const returnTo = useRuntimeConfig().public.BOT_RETURN_URL;
-const userAuthStore = userAuth();
+const botId = "8103176938"; // Replace with your actual bot ID
+const returnTo = "https://owlmingo.space/auth"; // Redirect after login
+
 // Redirect to Telegram authentication
 const redirectToTelegramAuth = () => {
     const authUrl = `https://oauth.telegram.org/auth?bot_id=${botId}&origin=${encodeURIComponent(window.location.origin)}&embed=1&request_access=write&return_to=${encodeURIComponent(returnTo)}`;
@@ -102,7 +100,6 @@ const redirectToTelegramAuth = () => {
 // Function to decode Base64
 const decodeBase64 = (str) => {
     try {
-        console.log("Decoding Base64:", str);
         return JSON.parse(atob(str));
     } catch (error) {
         console.error("Failed to decode Telegram Auth Result:", error);
@@ -111,30 +108,22 @@ const decodeBase64 = (str) => {
 };
 
 // Extract Telegram authentication data
-onMounted(async () => {
+onMounted(() => {
     const route = useRoute();
     const hash = route.hash;
+
     if (hash.startsWith("#tgAuthResult=")) {
         const encodedData = hash.replace("#tgAuthResult=", "");
 
         try {
-            let userData = decodeBase64(encodedData);
+            const userData = decodeBase64(encodedData);
             if (userData) {
                 console.log("Telegram Auth Data:", userData);
-                const response = await userAuthStore.telegramOAuth(userData);
-                console.log("Telegram Auth Response Page:", response);
-                if (response.status === 200) {
-                    navigateTo("/");
-                }
-            } 
-
+            } else {
+                console.warn("Failed to parse Telegram Auth Data.");
+            }
         } catch (error) {
             console.error("Error decoding Telegram Auth Result:", error);
-            Swal.fire({
-                icon: 'error',
-                title: 'Login Failed',
-                text: 'Failed to authenticate with Telegram.'
-            });
         }
     } else {
         console.warn("No Telegram auth data found.");
@@ -142,7 +131,7 @@ onMounted(async () => {
 });
 </script>
 
-<style scoped>
+<style>
 .custom-telegram-button {
     cursor: pointer;
     align-items: center;
