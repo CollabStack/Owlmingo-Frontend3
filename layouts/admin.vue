@@ -40,9 +40,11 @@
       </v-app-bar>
   
       <v-main>
-        <v-container fluid>
-          <nuxt/>
-        </v-container>
+        <transition name="fade" mode="out-in">
+          <div :key="$route.fullPath">
+            <slot />
+          </div>
+        </transition>
       </v-main>
     </v-app>
   </template>
