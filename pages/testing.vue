@@ -6,7 +6,6 @@
     <AuthSignUp />
     <AuthSignIn />
 
-
 </template>
 
 
