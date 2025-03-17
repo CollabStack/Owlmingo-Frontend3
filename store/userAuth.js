@@ -276,7 +276,7 @@ export const userAuth = defineStore('userAuth', {
             this.isLoggedIn = false;
             Cookies.remove('token');
         },
-        
+        // Telegram OAuth method
         async telegramOAuth(data) {
             const {$UserPublicAxios} = useNuxtApp();
             try {
@@ -290,7 +290,35 @@ export const userAuth = defineStore('userAuth', {
                 throw error;
             }
         },
+        // Google OAuth method
+        async googleOAuth(data) {
+            const {$UserPublicAxios} = useNuxtApp();
+            try {
+                const response = await $UserPublicAxios.post('/google/auth', data);
+                this.setUser(response.data.data.user);
+                this.setToken(response.data.data.token);
+                this.isLoggedIn = true;
+                return response.data;
+            } catch (error) {
+                console.error('Google OAuth error:', error);
+                throw error;
+            }
+        },
         
+        // GitHub OAuth method
+        async githubOAuth(data) {
+            const {$UserPublicAxios} = useNuxtApp();
+            try {
+                const response = await $UserPublicAxios.post('/github/auth', data);
+                this.setUser(response.data.data.user);
+                this.setToken(response.data.data.token);
+                this.isLoggedIn = true;
+                return response.data;
+            } catch (error) {
+                console.error('GitHub OAuth error:', error);
+                throw error;
+            }
+        },
         async refreshToken() {
             // Implementation for refreshing token
             console.log("Refreshing token");
