@@ -11,6 +11,7 @@
             density="compact" 
             hide-details 
             class="mt-2 rounded-lg bg-blue-lighten-5"
+            placeholder="Enter name"
         />
 
         <!-- Checkbox Options -->
@@ -36,13 +37,6 @@
                 </v-checkbox>
             </v-col>
         </v-row>
-         
-        <div class="container">
-            <v-spacer></v-spacer>
-            <v-btn variant="outlined" color="blue" class="w-100 mb-3 bottom-button rounded-lg">
-                Completions & Responses
-            </v-btn>
-        </div>
     </v-navigation-drawer>
 </template>
 
@@ -50,19 +44,15 @@
 import { ref } from 'vue';
 
 // Reactive State
-const name = ref('Lesson Name');
+const name = ref('');
 
 // Checkboxes reactive
 const options = ref([
     { model: ref(true), label: "Show Answers", tooltip: "Toggle to show correct answers after submission." },
     { model: ref(false), label: "Shuffle Questions", tooltip: "Randomizes the order of questions in the quiz." }
 ]);
+
 </script>
 
 <style scoped>  
- .container {
-    display: flex;
-    flex-direction: column;
-    height: 57vh; 
-    }
 </style>
