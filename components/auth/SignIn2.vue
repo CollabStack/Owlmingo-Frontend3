@@ -54,21 +54,21 @@
                 <p class="text-center mt-10 text-grey-darken-1">Other Log in Option</p>
 
                 <div class="icon d-flex flex-row justify-center mt-5">
-                    <v-btn icon="" class="icon-button" @click="loginWithGoogle">
+                    <v-btn icon="" class="icon-button" @click="googleOAuth">
                         <v-img
                             width="50px"
                             height="50px"
                             src="/icons/icons8-google-logo.png"
                         ></v-img>
                     </v-btn>
-                    <v-btn icon="" class="icon-button" @click="loginWithGithub">
+                    <v-btn icon="" class="icon-button" @click="githubOAuth">
                         <v-img
                             width="50px"
                             height="50px"
                             src="/icons/icons8-github-logo.png"
                         ></v-img>
                     </v-btn>
-                    <v-btn icon="" class="icon-button" @click="loginWithTelegram">
+                    <v-btn icon="" class="icon-button" @click="telegramOAuth">
                         <v-img
                             width="50px"
                             height="50px"
@@ -99,6 +99,7 @@
     const password = ref('');
     const showPassword = ref(false);
     const isLoading = ref(false);
+    const runtimeConfig = useRuntimeConfig();
 
     onMounted(() => {
         console.log('Sign In mounted');
@@ -149,20 +150,110 @@
         navigateTo('/auth/sign-up');
     };
 
-    const loginWithGoogle = () => {
-        console.log('Login with Google');
-        // Implement Google OAuth login
-    };
+    const googleOAuth = () => {
+    console.log('Login with Google');
+    // Create a window popup for Google OAuth
+    const width = 600;
+    const height = 600;
+    const left = window.innerWidth / 2 - width / 2;
+    const top = window.innerHeight / 2 - height / 2;
+    
+    // Use the Google OAuth URL from your runtime config or fallback to a default
+    const googleAuthUrl = runtimeConfig.public.GOOGLE_AUTH_URL || 
+        "https://accounts.google.com/o/oauth2/v2/auth" +
+        "?client_id=YOUR_CLIENT_ID" +
+        "&redirect_uri=" + encodeURIComponent(window.location.origin + "/auth/google-callback") +
+        "&response_type=code" +
+        "&scope=email%20profile";
+    
+    // Open popup window for authentication
+    const oauthWindow = window.open(
+        googleAuthUrl,
+        "Google OAuth",
+        `width=${width},height=${height},left=${left},top=${top}`
+    );
+    
+    // Add listener for OAuth completion (window closes)
+    const checkInterval = setInterval(() => {
+        if (oauthWindow && oauthWindow.closed) {
+            clearInterval(checkInterval);
+            // Check if authentication was successful - you might need to implement a way
+            // to communicate this from the callback page
+        }
+    }, 500);
+};
 
-    const loginWithGithub = () => {
-        console.log('Login with GitHub');
-        // Implement GitHub OAuth login
-    };
+    const githubOAuth = () => {
+    console.log('Login with GitHub');
+    // Create a window popup for GitHub OAuth
+    const width = 600;
+    const height = 600;
+    const left = window.innerWidth / 2 - width / 2;
+    const top = window.innerHeight / 2 - height / 2;
+    
+    // Use the GitHub OAuth URL from your runtime config or fallback to a default
+    const githubAuthUrl = runtimeConfig.public.GITHUB_AUTH_URL ||
+        "https://github.com/login/oauth/authorize" +
+        "?client_id=YOUR_CLIENT_ID" +
+        "&redirect_uri=" + encodeURIComponent(window.location.origin + "/auth/github-callback") +
+        "&scope=user:email";
+    
+    // Open popup window for authentication
+    const oauthWindow = window.open(
+        githubAuthUrl,
+        "GitHub OAuth",
+        `width=${width},height=${height},left=${left},top=${top}`
+    );
+    
+    // Add listener for OAuth completion (window closes)
+    const checkInterval = setInterval(() => {
+        if (oauthWindow && oauthWindow.closed) {
+            clearInterval(checkInterval);
+            // Check if authentication was successful - you might need to implement a way
+            // to communicate this from the callback page
+        }
+    }, 500);
+};
 
-    const loginWithTelegram = () => {
-        console.log('Login with Telegram');
-        // Implement Telegram OAuth login
-    };
+    const telegramOAuth = () => {
+    console.log('Login with Telegram');
+    // Use the Telegram OAuth configuration
+    const botId = runtimeConfig.public.BOT_ID;
+    const returnTo = runtimeConfig.public.BOT_RETURN_URL || window.location.origin + '/auth/telegram-callback';
+    
+    if (!botId) {
+        Swal.fire({
+            icon: 'error',
+            title: 'Configuration Error',
+            text: 'Telegram login is not properly configured.'
+        });
+        return;
+    }
+    
+    // Create popup for Telegram OAuth
+    const width = 600;
+    const height = 600;
+    const left = window.innerWidth / 2 - width / 2;
+    const top = window.innerHeight / 2 - height / 2;
+    
+    // Construct Telegram OAuth URL
+    const authUrl = `https://oauth.telegram.org/auth?bot_id=${botId}&origin=${encodeURIComponent(window.location.origin)}&request_access=write&return_to=${encodeURIComponent(returnTo)}`;
+    
+    // Open popup window for Telegram authentication
+    const oauthWindow = window.open(
+        authUrl,
+        "Telegram OAuth",
+        `width=${width},height=${height},left=${left},top=${top}`
+    );
+    
+    // Add listener for OAuth completion (window closes)
+    const checkInterval = setInterval(() => {
+        if (oauthWindow && oauthWindow.closed) {
+            clearInterval(checkInterval);
+            // The Telegram callback should handle redirecting or communicating the auth result
+        }
+    }, 500);
+};
     
     </script>
     
