@@ -8,17 +8,19 @@
     </div>
 
     <!-- School & Work Toggle with animation -->
-    <div v-motion :initial="{ opacity: 0, scale: 0.95 }" :enter="{ opacity: 1, scale: 1, transition: { delay: 200, duration: 500 } }">
-      <v-btn-toggle v-model="selectedTab" class="mt-3 bg-grey-lighten-3 rounded-pill pa-1 toggle-container" density="compact" mandatory>
+    <div v-motion :initial="{ opacity: 0, scale: 0.95 }"
+      :enter="{ opacity: 1, scale: 1, transition: { delay: 200, duration: 500 } }">
+      <v-btn-toggle v-model="selectedTab" class="mt-3 bg-grey-lighten-3 rounded-pill pa-1 toggle-container"
+        density="compact" mandatory>
         <v-btn value="school" class="rounded-pill toggle-btn" :class="{
-            'bg-secondary text-white toggle-btn-active': selectedTab === 'school',
-            'bg-transparent text-black': selectedTab !== 'school'
+          'bg-secondary text-white toggle-btn-active': selectedTab === 'school',
+          'bg-transparent text-black': selectedTab !== 'school'
         }" size="small">
           School
         </v-btn>
         <v-btn value="work" class="rounded-pill toggle-btn" :class="{
-            'bg-secondary text-white toggle-btn-active': selectedTab === 'work',
-            'bg-transparent text-black': selectedTab !== 'work'
+          'bg-secondary text-white toggle-btn-active': selectedTab === 'work',
+          'bg-transparent text-black': selectedTab !== 'work'
         }" size="small">
           Work
         </v-btn>
@@ -27,11 +29,8 @@
 
     <v-row class="mt-6 justify-center">
       <v-col cols="12" md="5" v-for="(plan, index) in activePlans" :key="index">
-        <div 
-          v-motion 
-          :initial="{ opacity: 0, y: 50 }" 
-          :enter="{ opacity: 1, y: 0, transition: { delay: 300 + (index * 150), duration: 700 } }"
-        >
+        <div v-motion :initial="{ opacity: 0, y: 50 }"
+          :enter="{ opacity: 1, y: 0, transition: { delay: 300 + (index * 150), duration: 700 } }">
           <v-card class="pa-6 text-left rounded-lg plan-card" elevation="2">
             <p class="text-h4 font-weight-bold mb-1 outfit outfit-bold" :class="plan.colorClass">
               {{ plan.name }}
@@ -49,19 +48,16 @@
                 </template>
               </p>
               <p class="text-h7 text-grey-darken-1 mb-1 outfit outfit-regular">
-                {{ selectedTab === 'school' ? plan.billing : selectedTypes[plan.name] === 'month' ? plan.monthlyBilling : plan.annualBilling }}
+                {{ selectedTab === 'school' ? plan.billing : selectedTypes[plan.name] === 'month' ? plan.monthlyBilling
+                  :
+                plan.annualBilling }}
               </p>
             </div>
 
             <!-- v-btn-toggle with smooth animation -->
             <transition name="fade" mode="out-in">
-              <v-btn-toggle
-                v-if="selectedTab === 'work'"
-                v-model="selectedTypes[plan.name]"
-                class="mt-2 bg-grey-lighten-3 rounded-pill pa-1 inner-toggle-container"
-                density="compact"
-                mandatory
-              >
+              <v-btn-toggle v-if="selectedTab === 'work'" v-model="selectedTypes[plan.name]"
+                class="mt-2 bg-grey-lighten-3 rounded-pill pa-1 inner-toggle-container" density="compact" mandatory>
                 <v-btn class="rounded-pill toggle-btn" size="small" value="annual" :class="{
                   'bg-grey-lighten-2 text-black toggle-btn-active': selectedTypes[plan.name] === 'annual',
                   'bg-transparent text-black': selectedTypes[plan.name] !== 'annual'
@@ -79,14 +75,9 @@
 
             <!-- Features List with animation -->
             <v-list class="text-left feature-list">
-              <v-list-item 
-                v-for="(feature, i) in plan.features" 
-                :key="i" 
-                class="align-start feature-item"
-                v-motion
+              <v-list-item v-for="(feature, i) in plan.features" :key="i" class="align-start feature-item" v-motion
                 :initial="{ opacity: 0, x: -10 }"
-                :enter="{ opacity: 1, x: 0, transition: { delay: 400 + (i * 100), duration: 500 } }"
-              >
+                :enter="{ opacity: 1, x: 0, transition: { delay: 400 + (i * 100), duration: 500 } }">
                 <template #prepend>
                   <div class="checkmark-container">
                     <v-icon :color="plan.iconColor" class="checkmark-icon">mdi-check-circle</v-icon>
@@ -99,7 +90,8 @@
             <!-- For School Tab: See Work Plans Link -->
             <p v-if="selectedTab === 'school'" class="text-h7 mb-1 outfit outfit-regular">
               See our
-              <a href="#" @click.prevent="selectedTab = 'work'" class="text-decoration-none link-hover" style="color: blue;">
+              <a href="#" @click.prevent="selectedTab = 'work'" class="text-decoration-none link-hover"
+                style="color: blue;">
                 work plans
               </a>
               for responses and other features for teachers and professionals.
@@ -108,15 +100,9 @@
             <!-- Subscribe Button with animation like home page -->
             <v-dialog max-width="500">
               <template v-slot:activator="{ props: activatorProps }">
-                <v-btn
-                  block 
-                  v-bind="activatorProps"
-                  :color="plan.buttonColor" 
-                  class="mt-4 rounded-lg animated-btn outfit outfit-medium"
-                  rounded 
-                  :variant="getButtonVariant(plan.name)"
-                  @click="checkout(plan)"
-                  >
+                <v-btn block v-bind="activatorProps" :color="plan.buttonColor"
+                  class="mt-4 rounded-lg animated-btn outfit outfit-medium" rounded
+                  :variant="getButtonVariant(plan.name)" @click="checkout(plan)">
                   <span class="d-flex align-center">
                     {{ buttonText }}
                     <v-icon class="ms-2 btn-icon">mdi-check-circle</v-icon>
@@ -147,8 +133,11 @@
       </v-col>
     </v-row>
 
-    <p v-if="showFooterLink" class="mt-6 text-caption outfit outfit-regular" v-motion :initial="{ opacity: 0 }" :enter="{ opacity: 1, transition: { delay: 800, duration: 500 } }">
-      Visit our <a href="#" class="text-decoration-none link-hover" style="color: blue;" @click="$emit('linkClick')">plans page</a> to compare all features.
+    <p v-if="showFooterLink" class="mt-6 text-caption outfit outfit-regular" v-motion :initial="{ opacity: 0 }"
+      :enter="{ opacity: 1, transition: { delay: 800, duration: 500 } }">
+      Visit our <a href="#" class="text-decoration-none link-hover" style="color: blue;"
+        @click="$emit('linkClick')">plans
+        page</a> to compare all features.
     </p>
   </v-container>
   <!-- <v-dialog max-width="500">
@@ -178,13 +167,13 @@
       </v-card>
     </template>
   </v-dialog> -->
-  
+
 </template>
 
 <script setup>
-import { ref, computed} from "vue";
+import { ref, computed } from "vue";
 import AbaPayment from "./AbaPayment.vue";
-const props = defineProps({ 
+const props = defineProps({
   title: {
     type: String,
     default: "Subscribe to Generate Unlimited Quizzes"
@@ -208,7 +197,7 @@ const props = defineProps({
 });
 
 const selectedTab = ref(props.initialTab);
-let scriptLoaded = ref(false);
+let scriptLoaded = false
 // Stores selection state for Professional & Business plans separately
 const selectedTypes = ref({
   Professional: "annual",
@@ -291,39 +280,36 @@ const activePlans = computed(() => plans[selectedTab.value]);
 
 // // mounted 
 onMounted(() => {
-  loadAbaPaywayScript();
+  // loadAbaPaywayScript();
 });
 
-const loadAbaPaywayScript = () => {
-  if (document.querySelector("script[src='https://checkout.payway.com.kh/plugins/checkout2-0.js']")) {
-    console.log("✅ AbaPayway script already loaded.");
-    scriptLoaded.value = true;
-    return;
-  }
+// ================== Methods ==================
+// const loadAbaPaywayScript = ()=>{
+//   if (!scriptLoaded) {
+//     const script = document.createElement("script");
+//     script.src = "https://checkout.payway.com.kh/plugins/checkout2-0.js";
+//     script.onload = () => {
+//       scriptLoaded= true;
+//       console.log("AbaPayway script loaded");
+//     };
+//     document.head.appendChild(script);
+//   }
+// }
+// const loadAbaPaywayScript = () => {
+//   if (document.querySelector('script[src="https://checkout.payway.com.kh/plugins/checkout2-0.js"]')) {
+//     console.log("AbaPayway script already loaded");
+//     return;
+//   }
+  
+//   const script = document.createElement("script");
+//   script.src = "https://checkout.payway.com.kh/plugins/checkout2-0.js";
+//   script.onload = () => {
+//     scriptLoaded.value = true;
+//     console.log("AbaPayway script loaded");
+//   };
+//   document.head.appendChild(script);
+// }
 
-  const script = document.createElement("script");
-  script.src = "https://checkout.payway.com.kh/plugins/checkout2-0.js";
-  script.async = true;
-  script.onload = () => {
-    scriptLoaded.value = true;
-    console.log("✅ AbaPayway script loaded.");
-  };
-  script.onerror = () => {
-    console.error("❌ Failed to load AbaPayway.");
-  };
-  document.head.appendChild(script);
-};
-// loadAbaPaywayScript() {
-//       if (!this.scriptLoaded) {
-//         const script = document.createElement("script");
-//         script.src = "https://checkout.payway.com.kh/plugins/checkout2-0.js";
-//         script.onload = () => {
-//           this.scriptLoaded = true;
-//           console.log("AbaPayway script loaded");
-//         };
-//         document.head.appendChild(script);
-//       }
-//     },
 // Determine button variant
 const getButtonVariant = (planName) => {
   if (selectedTab.value === "school") {
@@ -333,7 +319,7 @@ const getButtonVariant = (planName) => {
   }
 };
 
-const checkout = (plan) =>{
+const checkout = (plan) => {
   console.log("Subscribe: ", plan);
 }
 </script>
@@ -349,9 +335,17 @@ const checkout = (plan) =>{
   font-style: normal;
 }
 
-.outfit-regular { font-weight: 400; }
-.outfit-medium { font-weight: 500; }
-.outfit-bold { font-weight: 700; }
+.outfit-regular {
+  font-weight: 400;
+}
+
+.outfit-medium {
+  font-weight: 500;
+}
+
+.outfit-bold {
+  font-weight: 700;
+}
 
 /* Plan cards with hover effect */
 .plan-card {
@@ -451,7 +445,7 @@ const checkout = (plan) =>{
   left: -100%;
   width: 100%;
   height: 100%;
-  background: linear-gradient(90deg, transparent, rgba(255,255,255,0.2), transparent);
+  background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.2), transparent);
   transition: all 0.6s ease;
 }
 
@@ -502,11 +496,13 @@ const checkout = (plan) =>{
 }
 
 /* Enhanced transitions */
-.fade-enter-active, .fade-leave-active {
+.fade-enter-active,
+.fade-leave-active {
   transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
 }
 
-.fade-enter-from, .fade-leave-to {
+.fade-enter-from,
+.fade-leave-to {
   opacity: 0;
   transform: translateY(10px);
 }
