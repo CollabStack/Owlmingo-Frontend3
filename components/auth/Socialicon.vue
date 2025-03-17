@@ -15,6 +15,7 @@
                 <img :src="`/icons/${icon.src}`" :alt="icon.alt" style="width: 52px; height: 52px; padding: auto;"/>
               </a>
             </v-row>
+            <TelegramLogin></TelegramLogin>
   
             <div v-if="showSignUp" class="sign-up">
               <span style="color: var(--v-sonic_silver); font-size: 20px;">
@@ -70,11 +71,11 @@ export default {
           alt: 'GitHub',
           link: '#',
         },
-        {
-          src: 'icons8-telegram-144.svg', // Just the filename
-          alt: 'Telegram',
-          link: '#',
-        },
+        // {
+        //   src: 'icons8-telegram-144.svg', // Just the filename
+        //   alt: 'Telegram',
+        //   link: '#',
+        // },
       ],
     };
   },
