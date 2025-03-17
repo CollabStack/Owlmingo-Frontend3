@@ -1,5 +1,6 @@
 <template>
-    <SignIn />
+    <!-- <SignIn /> -->
+    <AuthSignIn2 />
     <!-- <Auth-SignIn /> -->
     <!-- <TelegramAuth /> -->
 </template>
