@@ -276,68 +276,78 @@ export const userAuth = defineStore('userAuth', {
             this.isLoggedIn = false;
             Cookies.remove('token');
         },
-        // Telegram OAuth method
+
         async telegramOAuth(data) {
-            const {$UserPublicAxios} = useNuxtApp();
+            const {$UserPublicAxios} = useNuxtApp(); // Use full Nuxt app instance
             try {
-                const response = await $UserPublicAxios.post('/telegram/auth', data);
-                this.setUser(response.data.data.user);
-                this.setToken(response.data.data.token);
-                this.isLoggedIn = true;
-                return response.data;
-            } catch (error) {
-                console.error('Telegram OAuth error:', error);
-                throw error;
+            const {first_name, last_name, username} = data;
+            const telegram_id = data.id;
+            const response = await $UserPublicAxios.post('/telegram-oauth', {first_name, last_name, username, telegram_id});
+            if (response.status !== 200) {
+                throw new Error(`Error: Received status code ${response.status}`);
             }
-        },
-        // Google OAuth method
-        async googleOAuth(data) {
-            const {$UserPublicAxios} = useNuxtApp();
-            try {
-                const response = await $UserPublicAxios.post('/google/auth', data);
-                this.setUser(response.data.data.user);
-                this.setToken(response.data.data.token);
-                this.isLoggedIn = true;
-                return response.data;
+            console.log("response OAuth", response);
+            const token = response.data.data['token'];
+            this.setUser(response.data.data['user']);
+            this.setToken(token);
+            this.refreshToken();
+            this.isLoggedIn = true;
+            return response;
             } catch (error) {
-                console.error('Google OAuth error:', error);
-                throw error;
-            }
-        },
-        
-        // GitHub OAuth method
-        async githubOAuth(data) {
-            const {$UserPublicAxios} = useNuxtApp();
-            try {
-                const response = await $UserPublicAxios.post('/github/auth', data);
-                this.setUser(response.data.data.user);
-                this.setToken(response.data.data.token);
-                this.isLoggedIn = true;
-                return response.data;
-            } catch (error) {
-                console.error('GitHub OAuth error:', error);
-                throw error;
+            throw error;
             }
         },
         async refreshToken() {
-            // Implementation for refreshing token
-            console.log("Refreshing token");
-            // Your token refresh implementation here
+            try{
+                const {$UserPrivateAxios} = useNuxtApp(); // Use full Nuxt app instance
+                const response = await $UserPrivateAxios.post('/refresh-token');
+                const token = response.data.data['token'];
+                if (!token) {
+                    this.logout();
+                    return;
+                }
+                this.setToken(token);
+            }catch(error){
+                console.log("Refresh Token Error: ", error);
+                this.logout();
+            }
         },
         
         async checkTokenExpired() {
-            // Implementation for checking if token is expired
-            console.log("Checking if token is expired");
-            // Your token expiration check implementation here
+            this.token = this.getToken();
+            if (!this.token) {
+              this.logout();
+              return false;
+            }
+          
+            try {
+              // Split the JWT token and decode the payload
+              const payloadBase64 = this.token.split('.')[1]; // Get the payload part
+              const payload = JSON.parse(atob(payloadBase64)); // Decode and parse it
+          
+              const currentTime = Date.now() / 1000; // Current time in seconds
+              if (payload.exp && payload.exp < currentTime) {
+                this.logout(); // Token expired, log out the user
+                return false;
+              }
+              this.isLoggedIn = true;
+              return true; // Token is valid
+            } catch (error) {
+              this.logout(); // Logout on invalid token
+              return false;
+            }
         },
         
         initializeSession() {
-            const token = this.getToken();
-            if (token) {
-                this.isLoggedIn = true;
-                // Optionally fetch user data here
-                // this.fetchUserData();
+            if (!this.token) {
+                this.logout();
+                return;
             }
+            this.checkTokenExpired().then(isValid => {
+                if (isValid) {
+                    this.refreshToken();
+                }
+            });
         }
     }
 });
