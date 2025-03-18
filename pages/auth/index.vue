@@ -1,9 +1,5 @@
 <template>
-    <SignIn />
-    <!-- <AuthSignIn2 /> -->
-    <!-- <Auth-SignIn /> -->
-    <AuthTelegramLogin />
+    <AuthSignIn />
 </template>
 <script setup>
-import SignIn from '~/components/auth/SignIn.vue';
 </script>

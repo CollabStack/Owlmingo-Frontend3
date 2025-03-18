@@ -68,13 +68,14 @@
                             src="/icons/icons8-github-logo.png"
                         ></v-img>
                     </v-btn>
-                    <v-btn icon="" class="icon-button" @click="telegramOAuth">
+                    <!-- <v-btn icon="" class="icon-button" @click="telegramOAuth">
                         <v-img
                             width="50px"
                             height="50px"
                             src="/icons/icons8-telegram-app-100.png"
                         ></v-img>
-                    </v-btn>
+                    </v-btn> -->
+                    <TelegramLogin/>
                 </div>
                 <div class="sign-up-option d-flex flex-row justify-center align-center mt-10">
                     <p class="text-center text-grey-darken-1">Don't have an account?</p>
@@ -93,6 +94,7 @@
     import Swal from 'sweetalert2';
     import { ref, onMounted } from 'vue';
     import { userAuth } from '~/store/userAuth';
+    import TelegramLogin from './TelegramLogin.vue';
 
     const authStore = userAuth();
     const email = ref('');

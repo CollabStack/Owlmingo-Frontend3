@@ -76,11 +76,17 @@ onMounted(async () => {
 }
 </style> -->
 <template>
-    <div class="custom-telegram-button" @click="redirectToTelegramAuth">
-        <!-- <button class="custom-telegram-button" @click="redirectToTelegramAuth"> -->
-            <img src="/icons/icons8-telegram-48.svg" alt="Telegram Login" />
-        <!-- </button> -->
-    </div>
+    <!-- <div class="custom-telegram-button" @click="redirectToTelegramAuth"> -->
+    <!-- <div class="icon-button" @click="redirectToTelegramAuth">
+        <img src="/icons/icons8-telegram-48.svg" alt="Telegram Logo" />
+    </div> -->
+    <v-btn icon="" class="icon-button" @click="redirectToTelegramAuth">
+        <v-img
+            width="50px"
+            height="50px"
+            src="/icons/icons8-telegram-48.svg"
+        ></v-img>
+    </v-btn>
 </template>
 
 <script setup>
@@ -142,5 +148,30 @@ onMounted(() => {
 .custom-telegram-button img {
     width: 50px;
     height: 50px;
+}
+
+.icon-button {
+    cursor: pointer;
+    position: relative;
+    overflow: hidden;
+    transition: background-color 0.3s, transform 0.3s;
+}
+.icon-button::before {
+    content: "";
+    position: absolute;
+    background-color: rgba(255, 255, 255, 0.1);
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%) scale(0);
+    transition: transform 0.6s ease-out;
+}
+.icon-button:hover::before {
+    transform: translate(-50%, -50%) scale(3);
+}
+.icon-button:active::before {
+    transform: scale(0.9);
+}
+.icon-button:hover {
+    animation: bounce 1s infinite;
 }
 </style>
