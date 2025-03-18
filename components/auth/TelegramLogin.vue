@@ -76,10 +76,6 @@ onMounted(async () => {
 }
 </style> -->
 <template>
-    <!-- <div class="custom-telegram-button" @click="redirectToTelegramAuth"> -->
-    <!-- <div class="icon-button" @click="redirectToTelegramAuth">
-        <img src="/icons/icons8-telegram-48.svg" alt="Telegram Logo" />
-    </div> -->
     <v-btn icon="" class="icon-button" @click="redirectToTelegramAuth">
         <v-img
             width="50px"
@@ -114,22 +110,42 @@ const decodeBase64 = (str) => {
 };
 
 // Extract Telegram authentication data
-onMounted(() => {
+onMounted(async () => {
     const route = useRoute();
     const hash = route.hash;
 
     if (hash.startsWith("#tgAuthResult=")) {
         const encodedData = hash.replace("#tgAuthResult=", "");
 
+        // try {
+        //     const userData = decodeBase64(encodedData);
+        //     if (userData) {
+        //         console.log("Telegram Auth Data:", userData);
+        //     } else {
+        //         console.warn("Failed to parse Telegram Auth Data.");
+        //     }
+        // } catch (error) {
+        //     console.error("Error decoding Telegram Auth Result:", error);
+        // }
+        
         try {
-            const userData = decodeBase64(encodedData);
+            let userData = decodeBase64(encodedData);
             if (userData) {
                 console.log("Telegram Auth Data:", userData);
-            } else {
-                console.warn("Failed to parse Telegram Auth Data.");
-            }
+                const response = await userAuthStore.telegramOAuth(userData);
+                console.log("Telegram Auth Response Page:", response);
+                if (response.status === 200) {
+                    navigateTo("/");
+                }
+            } 
+            
         } catch (error) {
             console.error("Error decoding Telegram Auth Result:", error);
+            Swal.fire({
+                icon: 'error',
+                title: 'Login Failed',
+                text: 'Failed to authenticate with Telegram.'
+            });
         }
     } else {
         console.warn("No Telegram auth data found.");
