@@ -297,6 +297,10 @@ export const userAuth = defineStore('userAuth', {
             throw error;
             }
         },
+
+        async googleOAuth(data) {
+            
+        },
         async refreshToken() {
             try{
                 const {$UserPrivateAxios} = useNuxtApp(); // Use full Nuxt app instance

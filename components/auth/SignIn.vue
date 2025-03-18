@@ -88,13 +88,14 @@
     import { ref, onMounted } from 'vue';
     import { userAuth } from '~/store/userAuth';
     import TelegramLogin from './TelegramLogin.vue';
+    import { useNuxtApp } from '#app';
 
     const authStore = userAuth();
     const email = ref('');
     const password = ref('');
     const showPassword = ref(false);
     const isLoading = ref(false);
-    const runtimeConfig = useRuntimeConfig();
+    const runtimeConfig = useRuntimeConfig(); 
 
     onMounted(() => {
         console.log('Sign In mounted');
@@ -133,6 +134,22 @@
         } finally {
             isLoading.value = false;
         }
+    };
+
+    const googleOAuth = async () => {
+        const {$UserPublicAxios} = useNuxtApp(); // Use full Nuxt app instance
+        console.log('Google OAuth');
+        const response = await $UserPublicAxios.post('/google');
+        // console.log('Google OAuth Response:', response);
+    };
+
+    const githubOAuth = async () => {
+        console.log('Github OAuth');
+        const {$UserPublicAxios} = useNuxtApp(); // Use full Nuxt app instance
+        // const response = await $UserPublicAxios.get('/github');
+        window.location.href = "https://owlmingo-16f448c07f1f.herokuapp.com/api/v1/user/github";
+        console.log('Github OAuth Response:', response);
+
     };
 
     const gotoForgotPassword = () => {
