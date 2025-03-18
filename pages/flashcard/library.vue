@@ -5,5 +5,9 @@
 </template>
 
 <script setup>
+<<<<<<< HEAD
 
 </script>
+=======
+</script>
+>>>>>>> main

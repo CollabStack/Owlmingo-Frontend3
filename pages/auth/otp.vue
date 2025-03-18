@@ -1,8 +1,9 @@
 <template>
-    <OtpCode />
-    <!-- <Auth-SignIn /> -->
-    <!-- <TelegramAuth /> -->
-</template>
-<script setup>
-import OtpCode from '~/components/auth/Otp.vue';
-</script>
+    <div>
+      <Otp :type="$route.query.type || 'email'" />
+    </div>
+  </template>
+  
+  <script setup>
+  import Otp from '~/components/auth/Otp.vue';
+  </script>

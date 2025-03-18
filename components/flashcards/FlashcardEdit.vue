@@ -7,7 +7,11 @@
           Create
         </v-btn>
       </v-container>
+<<<<<<< HEAD
   
+=======
+
+>>>>>>> main
       <!-- Deck Name Input -->
       <v-container>
         <v-card class="pa-4">
@@ -20,7 +24,11 @@
           </v-card-text>
         </v-card>
       </v-container>
+<<<<<<< HEAD
   
+=======
+
+>>>>>>> main
       <!-- Flashcard List -->
       <v-container v-if="flashcards.length > 0">
         <v-container v-for="(flashcard, index) in flashcards" :key="index" class="mb-4">
@@ -33,6 +41,7 @@
                     <v-btn icon @click="undo">
                       <v-icon>mdi-undo</v-icon>
                     </v-btn>
+<<<<<<< HEAD
   
                     <v-btn icon @click="redo">
                       <v-icon>mdi-redo</v-icon>
@@ -66,6 +75,41 @@
                       <v-icon>mdi-format-list-bulleted</v-icon>
                     </v-btn>
   
+=======
+
+                    <v-btn icon @click="redo">
+                      <v-icon>mdi-redo</v-icon>
+                    </v-btn>
+
+                    <p class="mr-2">|</p>
+
+                    <v-btn icon @click="applyFormat('bold')">
+                      <v-icon>mdi-format-bold</v-icon>
+                    </v-btn>
+
+                    <v-btn icon @click="applyFormat('italic')">
+                      <v-icon>mdi-format-italic</v-icon>
+                    </v-btn>
+
+                    <v-btn icon @click="applyFormat('underline')">
+                      <v-icon>mdi-format-underline</v-icon>
+                    </v-btn>
+
+                    <v-btn icon @click="applyFormat('strikethrough')">
+                      <v-icon>mdi-format-strikethrough</v-icon>
+                    </v-btn>
+
+                    <v-btn icon @click="applyColor">
+                      <v-icon>mdi-format-color-text</v-icon>
+                    </v-btn>
+
+                    <p class="mr-2">|</p>
+
+                    <v-btn icon @click="applyFormat('unordered-list')">
+                      <v-icon>mdi-format-list-bulleted</v-icon>
+                    </v-btn>
+
+>>>>>>> main
                     <v-btn icon @click="applyFormat('ordered-list')">
                       <v-icon>mdi-format-list-numbered</v-icon>
                     </v-btn>
@@ -83,7 +127,11 @@
                 <p class="mr-16 mb-0 font-weight-bold">Back</p>
               </div>
             </div>
+<<<<<<< HEAD
   
+=======
+
+>>>>>>> main
             <v-row class="align-center mt-3">
               <!-- Front Side -->
               <v-col cols="12" sm="6" class="d-flex align-center">
@@ -100,7 +148,11 @@
                 <div contenteditable="true" class="editable-textarea" :innerHTML="flashcard.frontText"
                   @input="flashcard.frontText = $event.target.innerHTML" placeholder="Enter front text"></div>
               </v-col>
+<<<<<<< HEAD
   
+=======
+
+>>>>>>> main
               <!-- Back Side -->
               <v-col cols="12" sm="6" class="d-flex align-center">
                 <!-- Editable div for back text -->
@@ -127,7 +179,11 @@
           </v-card-text>
         </v-card>
       </v-container>
+<<<<<<< HEAD
   
+=======
+
+>>>>>>> main
       <!-- Add Flashcard Button -->
       <v-container class="text-center">
         <v-btn color="primary" @click="addFlashcard" class="mt-4" rounded variant="outlined">
@@ -136,8 +192,13 @@
       </v-container>
     </div>
   </template>
+<<<<<<< HEAD
   
   
+=======
+
+
+>>>>>>> main
   <script setup>
   import { ref, onMounted } from 'vue';
   
@@ -231,8 +292,13 @@
   // Load flashcards on mount
   onMounted(loadFlashcards);
   </script>
+<<<<<<< HEAD
   
   
+=======
+
+
+>>>>>>> main
   <style scoped>
   .editable-textarea {
     width: 100%;

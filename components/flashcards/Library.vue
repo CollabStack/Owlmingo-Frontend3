@@ -7,7 +7,11 @@
           <v-icon>mdi-plus</v-icon>
         </v-btn>
       </v-container>
+<<<<<<< HEAD
   
+=======
+
+>>>>>>> main
       <!-- Tag List -->
       <v-container>
         <v-row>
@@ -15,6 +19,7 @@
             <v-card class="d-flex align-center px-4 mx-2" elevation="2">
               <!-- Color Indicator -->
               <div :style="{ backgroundColor: tag.color }" style="width: 30px; height:30px; border-radius: 5px;"></div>
+<<<<<<< HEAD
   
               <!-- Tag Name -->
               <p class="mx-3 mb-0">{{ tag.name }}</p>
@@ -22,6 +27,15 @@
               <!-- Spacer -->
               <v-spacer></v-spacer>
   
+=======
+
+              <!-- Tag Name -->
+              <p class="mx-3 mb-0">{{ tag.name }}</p>
+
+              <!-- Spacer -->
+              <v-spacer></v-spacer>
+
+>>>>>>> main
               <!-- Updated Menu Icon -->
               <v-menu offset-y>
                 <template v-slot:activator="{ props }">
@@ -40,7 +54,11 @@
                       </v-col>
                     </v-row>
                   </v-list-item>
+<<<<<<< HEAD
   
+=======
+
+>>>>>>> main
                   <v-list-item @click="confirmDelete(index)">
                     <v-row align="center" no-gutters>
                       <v-col cols="2" class="d-flex justify-center">
@@ -57,7 +75,11 @@
           </v-col>
         </v-row>
       </v-container>
+<<<<<<< HEAD
   
+=======
+
+>>>>>>> main
       <!-- Add/Edit Tag Dialog -->
       <v-dialog v-model="dialog" width="400">
         <v-card>
@@ -73,7 +95,11 @@
           </v-card-actions>
         </v-card>
       </v-dialog>
+<<<<<<< HEAD
   
+=======
+
+>>>>>>> main
       <!-- Delete Confirmation Dialog -->
       <v-dialog v-model="deleteDialog" width="400">
         <v-card>
@@ -101,10 +127,16 @@
       </v-container>
     </dev>
 </template>
+<<<<<<< HEAD
   
 <script setup>
 import { ref, onMounted } from 'vue';
 
+=======
+
+<script setup>
+import { ref, onMounted } from 'vue';
+>>>>>>> main
 const tags = ref([]);
 const dialog = ref(false);
 const deleteDialog = ref(false);
@@ -112,14 +144,20 @@ const newTagName = ref("");
 const newTagColor = ref("#FF5733");
 const editingIndex = ref(null);
 const deletingIndex = ref(null);
+<<<<<<< HEAD
 
+=======
+>>>>>>> main
 onMounted(() => {
   const savedTags = JSON.parse(localStorage.getItem('tags'));
   if (savedTags) {
     tags.value = savedTags;
   }
 });
+<<<<<<< HEAD
 
+=======
+>>>>>>> main
 const addTag = () => {
   if (newTagName.value.trim() && newTagColor.value) {
     tags.value.push({ name: newTagName.value, color: newTagColor.value });
@@ -127,12 +165,18 @@ const addTag = () => {
     resetDialog();
   }
 };
+<<<<<<< HEAD
 
+=======
+>>>>>>> main
 const confirmDelete = (index) => {
   deletingIndex.value = index;
   deleteDialog.value = true;
 };
+<<<<<<< HEAD
 
+=======
+>>>>>>> main
 const removeTag = () => {
   if (deletingIndex.value !== null) {
     tags.value.splice(deletingIndex.value, 1);
@@ -141,14 +185,20 @@ const removeTag = () => {
     deletingIndex.value = null;
   }
 };
+<<<<<<< HEAD
 
+=======
+>>>>>>> main
 const editTag = (index) => {
   editingIndex.value = index;
   newTagName.value = tags.value[index].name;
   newTagColor.value = tags.value[index].color;
   dialog.value = true;
 };
+<<<<<<< HEAD
 
+=======
+>>>>>>> main
 const saveTag = () => {
   if (editingIndex.value !== null) {
     tags.value[editingIndex.value] = { name: newTagName.value, color: newTagColor.value };
@@ -158,11 +208,17 @@ const saveTag = () => {
   saveToLocalStorage();
   resetDialog();
 };
+<<<<<<< HEAD
 
 const saveToLocalStorage = () => {
   localStorage.setItem('tags', JSON.stringify(tags.value));
 };
 
+=======
+const saveToLocalStorage = () => {
+  localStorage.setItem('tags', JSON.stringify(tags.value));
+};
+>>>>>>> main
 const resetDialog = () => {
   dialog.value = false;
   newTagName.value = "";
@@ -172,5 +228,9 @@ const resetDialog = () => {
 </script>
 
 <style scoped>
+<<<<<<< HEAD
 
 </style>
+=======
+</style>
+>>>>>>> main
