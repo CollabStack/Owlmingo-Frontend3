@@ -65,13 +65,13 @@
                             src="/icons/icons8-github-logo.png"
                         ></v-img>
                     </v-btn>
-                    <v-btn icon="" class="icon-button">
+                    <!-- <v-btn icon="" class="icon-button">
                         <v-img
                             width="50px"
                             height="50px"
                             src="/icons/icons8-telegram-app-100.png"
                         ></v-img>
-                    </v-btn>
+                    </v-btn> -->
                 </div>
             </v-form>
             </v-card-text>

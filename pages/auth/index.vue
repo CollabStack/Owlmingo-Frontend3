@@ -5,5 +5,5 @@
     <AuthTelegramLogin />
 </template>
 <script setup>
-import SignIn from '~/components/auth/SignIn2.vue';
+import SignIn from '~/components/auth/SignIn.vue';
 </script>
