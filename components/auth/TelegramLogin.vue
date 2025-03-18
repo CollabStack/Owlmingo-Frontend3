@@ -88,7 +88,7 @@ onMounted(async () => {
 <script setup>
 import { useRoute } from "#imports"; // ✅ Correct import for Nuxt
 import { onMounted } from "vue";
-import userAuth from "~/store/userAuth";
+import { userAuth } from '~/store/userAuth';
 
 const userAuthStore = userAuth();
 // Telegram Bot ID
