@@ -1,37 +1,33 @@
 <template>
-    <SideBarQuiz />
-    <v-row class="mx-12 mt-4">
-      <v-col cols="12" class="mx-auto">
-        <!-- Start Quiz Button -->
-        <v-btn
-          v-if="questions.length !== 0"
-          variant="outlined"
-          class="float-end mt-2 rounded-lg"
-          color="blue"
-          :disabled="questions.length === 0"
-          @click="startQuiz"
-        >
-          Start Quiz
-        </v-btn>
-  
-        <!-- Quiz Title -->
-        <h2 class="text-h5 mt-2">Edit Quiz</h2>
-  
-        <!-- If no questions, display a message -->
-        <div v-if="questions.length === 0" class="text-center mt-6 mb-6">
-          <h4>You have no quiz!</h4>
-        </div>
-  
-        <!-- Render Multiple Questions -->
-        <div v-for="(question, index) in questions" :key="question.id">
-          <EditQuiz
-            :question="question"
-            @delete="removeQuestion(index)"
-          />
-        </div>
-  
-        <!-- Add Question Button -->
-        <v-row justify="center" class="mt-12 mb-12">
+  <SideBarQuiz />
+  <v-row class="mx-12 mt-4">
+    <v-col cols="12" class="mx-auto">
+      <v-btn
+        v-if="questions.length !== 0"
+        variant="outlined"
+        class="float-end mt-2 rounded-lg start-quiz-btn"
+        color="blue"
+        @click="startQuiz"
+      >
+        Start Quiz
+      </v-btn>
+
+      <h2 v-if="questions.length !== 0" class="text-h5 mt-2">Edit Quiz</h2>
+
+      <div v-if="questions.length === 0" class="text-center mt-6 mb-6">
+        <p class="text-center mt-6">No quiz data available.</p>
+      </div>
+
+      <div v-for="(question, index) in questions" :key="question.id">
+        <EditQuiz
+          :question="question"
+          @delete="removeQuestion(index)"
+          @update-question="updateQuestion(index, $event)"
+        />
+      </div>
+
+      <!-- Add Question Button -->
+      <v-row justify="center" class="mt-12 mb-12">
             <v-btn variant="outlined" class="rounded-lg" color="blue" @click="addQuestion">
                 Add Question
             </v-btn>
@@ -47,91 +43,65 @@
                 Start Quiz
             </v-btn>
         </v-row>
-      </v-col>
-    </v-row>
-  </template>
-  
-  <script setup lang="ts">
-  import { ref } from 'vue';
-  import { useRouter } from 'vue-router';
-  import EditQuiz from '~/components/quiz/EditQuiz.vue';
-  import SideBarQuiz from '~/components/quiz/SideBarQuiz.vue';
+    </v-col>
+  </v-row>
+</template>
 
-  
-  // Define question structure
-  interface Question {
-    id: number;
-    text: string;
-    type: boolean; // false for single-choice, true for multiple-choice
-    options: { value: string; text: string }[];
-    selectedOption?: string | null; // single-choice answer
-    selectedAnswers?: string[]; // multiple-choice answers
+<script setup lang="ts">
+import { ref } from 'vue';
+import { useRouter } from 'vue-router';
+import EditQuiz from '~/components/quiz/EditQuiz.vue';
+import SideBarQuiz from '~/components/quiz/SideBarQuiz.vue';
+
+interface Question {
+  id: number;
+  text: string;
+  type: boolean;
+  options: { value: string; text: string }[];
+  selectedOption?: string | null;
+  selectedAnswers?: string[];
+}
+
+const questions = ref<Question[]>([]);
+
+const router = useRouter();
+
+const startQuiz = () => {
+  const allValid = questions.value.every(q => q.text.trim() !== '' &&
+    q.options.every(opt => opt.text.trim() !== ''));
+
+  if (!allValid) {
+    alert('Please fill in all questions and options before starting.');
+    return;
   }
-  
-  // Define questions array
-  const questions = ref<Question[]>([
-    {
-      id: 1,
-      text: 'What is the capital of France?',
-      type: false,
-      options: [
-        { value: '1', text: 'Berlin' },
-        { value: '2', text: 'Madrid' },
-        { value: '3', text: 'Paris' },
-        { value: '4', text: 'Rome' }
-      ],
-      selectedOption: null
-    },
-    {
-      id: 2,
-      text: 'Which of the following are programming languages?',
-      type: true,
-      options: [
-        { value: '1', text: 'Python' },
-        { value: '2', text: 'HTML' },
-        { value: '3', text: 'JavaScript' },
-        { value: '4', text: 'CSS' }
-      ],
-      selectedAnswers: ['1', '3']
-    }
-  ]);
-  
-  // Define router
-  const router = useRouter();
-  
-  // Start Quiz Function - navigate to DoQuiz.vue
-//   const startQuiz = () => {
-//     router.push('/quiz/do-quiz');
-//   };
 
-  const startQuiz = () => {
-    const quizData = encodeURIComponent(JSON.stringify(questions.value));
-    router.push(`/quiz/do-quiz?questions=${quizData}`);
-  };
-  
-  // Add a new question
-  const addQuestion = () => {
-    questions.value.push({
-      id: Date.now(),
-      text: '',
-      type: false,
-      options: [
-        { value: '1', text: '' },
-        { value: '2', text: '' },
-        { value: '3', text: '' },
-        { value: '4', text: '' }
-      ],
-      selectedOption: null, // For single-choice questions
-      selectedAnswers: [] // For multiple-choice questions
-    });
-  };
-  
-  // Remove a question
-  const removeQuestion = (index: number) => {
-    questions.value.splice(index, 1);
-  };
-  </script>
-  
-  <style scoped>
-  
-  </style>
+  router.push({
+    path: '/quiz/do-quiz',
+    query: { questions: JSON.stringify(questions.value) }
+  });
+};
+
+const addQuestion = () => {
+  questions.value.push({
+    id: Date.now(),
+    text: '',
+    type: false,
+    options: [
+      { value: '1', text: '' },
+      { value: '2', text: '' },
+      { value: '3', text: '' },
+      { value: '4', text: '' }
+    ],
+    selectedOption: null,
+    selectedAnswers: []
+  });
+};
+
+const removeQuestion = (index: number) => {
+  questions.value.splice(index, 1);
+};
+
+const updateQuestion = (index: number, updatedQuestion: Question) => {
+  questions.value[index] = updatedQuestion;
+};
+</script>

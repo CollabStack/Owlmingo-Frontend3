@@ -1,7 +1,6 @@
 <template>
-    <SignUp />
+    <AuthSignUp2 />
 </template>
 <script setup>
-import SignUp from '~/components/auth/SignUp2.vue';
 
 </script>

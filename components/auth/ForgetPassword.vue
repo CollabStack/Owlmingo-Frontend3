@@ -1,15 +1,56 @@
 <script setup>
 import { ref } from 'vue';
-const email = ref('');import { useRouter } from 'vue-router';
-const router = useRouter();
+import { userAuth } from '~/store/userAuth';
+import Swal from 'sweetalert2';
+
+const authStore = userAuth();
+const email = ref('');
 
 const gotoSignIn = () => {
-    console.log('gotoSignIn');
-    router.push('/auth/');  
+    console.log('Back to Sign In');
+    navigateTo('/auth/login');
 }
+
 const gotoSignUp = () => {
     console.log('gotoSignUp');
-    router.push('/auth/sign-up');  
+    navigateTo('/auth/sign-up');
+}
+
+const forgotPassword = async () => {
+    if (!email.value) {
+        Swal.fire({
+            icon: 'error',
+            title: 'Email Required',
+            text: 'Please enter your email address'
+        });
+        return;
+    }
+    
+    try {
+        await authStore.ForgotPassword(email.value);
+        
+        Swal.fire({
+            title: 'Email Sent',
+            text: 'A verification code has been sent to your email',
+            icon: 'success',
+            timer: 2000,
+            showConfirmButton: false
+        });
+        
+        // Pass the reset-password type to OTP component
+        navigateTo({
+            path: "/auth/otp",
+            query: { type: 'reset-password' }
+        });
+    } catch (error) {
+        console.error('Forgot password error:', error);
+        
+        Swal.fire({
+            icon: 'error',
+            title: 'Failed',
+            text: error.response?.data?.message || 'Failed to process your request. Please try again.'
+        });
+    }
 }
 </script>
 
@@ -31,10 +72,11 @@ const gotoSignUp = () => {
           Back to Sign In
         </span>
       </v-form>
-      <v-btn to="/auth/otp"color="blue-lighten-2" class="send-btt mt-5 py-3 text-white">
+      <v-btn @click="forgotPassword" color="blue-lighten-2" class="send-btt mt-5 py-3 text-white">
           Send
-          </v-btn>
+      </v-btn>
 
+      <!-- Rest of the template remains the same -->
       <p class="text-center mt-10 text-grey-darken-1">Other Log in Option</p>
 
       <div class="icon d-flex flex-row justify-center mt-5">
@@ -75,7 +117,7 @@ const gotoSignUp = () => {
           ></v-img>
     </v-card-text>
   </v-col>
-  </template>
+</template>
   
 <style scoped>
 .left-section-forgot-pass {

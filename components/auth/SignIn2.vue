@@ -24,40 +24,51 @@
                 <v-text-field
                     v-model="password"
                     label="Password"
-                    type="password"
+                    :type="showPassword ? 'text' : 'password'"
                     variant="outlined"
                     rounded
                     class="custom-text-field"
+                    :append-inner-icon="showPassword ? 'mdi-eye-off' : 'mdi-eye'"
+                    @click:append-inner="showPassword = !showPassword"
                 ></v-text-field>
 
                 <div class="d-flex justify-end">
-                    <span class="text-caption d-flex justify-end text-decoration-none text-black font-weight-bold" style="margin-left: 288px;" @click="gotoForgotPassword">
-                        forgot password
+                    <span 
+                      @click="gotoForgotPassword"
+                      class="text-caption d-flex justify-end text-decoration-none text-blue-darken-1 font-weight-bold cursor-pointer" 
+                      style="margin-left: 288px;">
+                        Forgot password?
                     </span>
                 </div>
 
-                <v-btn block color="blue-lighten-2" class="sign-in-btt mt-4 py-3 text-white">
+                <v-btn 
+                  @click="login" 
+                  block 
+                  color="blue-lighten-2" 
+                  class="sign-in-btt mt-4 py-3 text-white"
+                  :loading="isLoading"
+                >
                     Login
                 </v-btn>
 
                 <p class="text-center mt-10 text-grey-darken-1">Other Log in Option</p>
 
                 <div class="icon d-flex flex-row justify-center mt-5">
-                    <v-btn icon="" class="icon-button">
+                    <v-btn icon="" class="icon-button" @click="googleOAuth">
                         <v-img
                             width="50px"
                             height="50px"
                             src="/icons/icons8-google-logo.png"
                         ></v-img>
                     </v-btn>
-                    <v-btn icon="" class="icon-button">
+                    <v-btn icon="" class="icon-button" @click="githubOAuth">
                         <v-img
                             width="50px"
                             height="50px"
                             src="/icons/icons8-github-logo.png"
                         ></v-img>
                     </v-btn>
-                    <v-btn icon="" class="icon-button">
+                    <v-btn icon="" class="icon-button" @click="telegramOAuth">
                         <v-img
                             width="50px"
                             height="50px"
@@ -67,7 +78,7 @@
                 </div>
                 <div class="sign-up-option d-flex flex-row justify-center align-center mt-10">
                     <p class="text-center text-grey-darken-1">Don't have an account?</p>
-                    <a @click="gotoSignUp" class="text-caption text-decoration-none text-black font-weight-bold">
+                    <a @click="gotoSignUp" class="text-caption text-decoration-none text-black font-weight-bold ml-2 cursor-pointer">
                         Sign Up
                     </a>
                 </div>
@@ -78,21 +89,69 @@
         </v-col>
     </template>
     
-    <script setup> 
-    import { ref } from 'vue';
-    const email = ref('');import { useRouter } from 'vue-router';
-    const router = useRouter();
+    <script setup>
+    import Swal from 'sweetalert2';
+    import { ref, onMounted } from 'vue';
+    import { userAuth } from '~/store/userAuth';
+
+    const authStore = userAuth();
+    const email = ref('');
+    const password = ref('');
+    const showPassword = ref(false);
+    const isLoading = ref(false);
+    const runtimeConfig = useRuntimeConfig();
+
+    onMounted(() => {
+        console.log('Sign In mounted');
+    });
+
+    const login = async () => {
+        if (!email.value || !password.value) {
+            Swal.fire({
+                icon: 'error',
+                title: 'Missing Information',
+                text: 'Please enter both email and password.'
+            });
+            return;
+        }
+
+        try {
+            isLoading.value = true;
+            await authStore.login(email.value, password.value);
+            
+            Swal.fire({
+                icon: 'success',
+                title: 'Login Successful',
+                text: 'Welcome back!',
+                timer: 2000,
+                showConfirmButton: false
+            });
+            
+            navigateTo("/");
+        } catch (error) {
+            console.error('Login error:', error);
+            Swal.fire({
+                icon: 'error',
+                title: 'Login Failed',
+                text: error.response?.data?.message || 'Please check your credentials and try again.'
+            });
+        } finally {
+            isLoading.value = false;
+        }
+    };
 
     const gotoForgotPassword = () => {
-        console.log('gotoForgotPassword');
-        router.push('/auth/forgot-password');
-    }
-    const gotoSignUp = () => {
-        console.log('gotoSignUp');
-        router.push('/auth/sign-up');  
-    }
+        console.log('Navigate to forgot password');
+        navigateTo('/auth/forgot-password');
+    };
 
+    const gotoSignUp = () => {
+        console.log('Navigate to sign up');
+        navigateTo('/auth/sign-up');
+    };
+    
     </script>
+    
     <style scoped>
     .image-banner {
         margin-right: -120px;
@@ -172,17 +231,15 @@
         transform: scale(0.9);
     }
     .icon-button:hover {
-        animation:  bounce 1s infinite;
+        animation: bounce 1s infinite;
     }
     @keyframes bounce {
-
         0%,
         100% {
-        transform: translateY(0);
+            transform: translateY(0);
         }
-
         50% {
-        transform: translateY(-10px);
+            transform: translateY(-10px);
         }
     }
     .sign-up-option {
@@ -192,5 +249,10 @@
         height: 50px;
         border-radius: 15px;
     }
-    
+    .cursor-pointer {
+        cursor: pointer;
+    }
+    .ml-2 {
+        margin-left: 8px;
+    }
     </style>

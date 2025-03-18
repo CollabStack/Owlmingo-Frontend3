@@ -2,7 +2,7 @@
     <v-app id="inspire">
       <v-navigation-drawer v-model="drawer" color="primary" app>
         <v-container fluid class="d-flex align-items-center justify-start">
-          <img src="../static/images/tgi-logo.png" alt="TGI Logo" width="200px" />
+          <img src="/logo/icon-no-bg.svg" alt="Logo" width="200px" />
         </v-container>
         <v-list>
           <v-list-item v-for="item in items" :key="item.title" :to="item.link_nav" link>
@@ -27,7 +27,7 @@
         </v-list>
   
         <template v-slot:append>
-          <div class="pa-2">
+          <div class="pa-2"> 
             <v-btn block @click="logout">
               Logout
             </v-btn>
@@ -40,9 +40,11 @@
       </v-app-bar>
   
       <v-main>
-        <v-container fluid>
-          <nuxt/>
-        </v-container>
+        <transition name="fade" mode="out-in">
+          <div :key="$route.fullPath">
+            <slot />
+          </div>
+        </transition>
       </v-main>
     </v-app>
   </template>
