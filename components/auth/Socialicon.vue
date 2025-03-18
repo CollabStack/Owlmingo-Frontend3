@@ -15,7 +15,7 @@
                 <img :src="`/icons/${icon.src}`" :alt="icon.alt" style="width: 52px; height: 52px; padding: auto;"/>
               </a>
             </v-row>
-            <TelegramLogin></TelegramLogin>
+            <!-- <TelegramLogin></TelegramLogin> -->
   
             <div v-if="showSignUp" class="sign-up">
               <span style="color: var(--v-sonic_silver); font-size: 20px;">
