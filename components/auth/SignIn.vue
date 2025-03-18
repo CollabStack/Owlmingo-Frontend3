@@ -147,7 +147,7 @@
         console.log('Github OAuth');
         const {$UserPublicAxios} = useNuxtApp(); // Use full Nuxt app instance
         // const response = await $UserPublicAxios.get('/github');
-        // window.location.href = "https://owlmingo-16f448c07f1f.herokuapp.com/api/v1/user/github";
+        window.location.href = "https://owlmingo-16f448c07f1f.herokuapp.com/api/v1/user/github";
         console.log('Github OAuth Response:', response);
 
     };
