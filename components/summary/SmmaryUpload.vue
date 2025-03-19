@@ -3,11 +3,11 @@
     <!-- Header -->
     <h1 class="text-h4 font-weight-bold text-primary mb-3 outfit outfit-bold" v-motion :initial="{ opacity: 0, y: 20 }"
       :enter="{ opacity: 1, y: 0, transition: { duration: 600 } }">
-      AI Quiz Generator
+      AI Summary Generator
     </h1>
     <p class="text-subtitle-1 text-grey-darken-1 mb-6 outfit outfit-regular" v-motion :initial="{ opacity: 0, y: 20 }"
       :enter="{ opacity: 1, y: 0, transition: { duration: 600, delay: 200 } }">
-      Upload a document, paste your notes, or select a video to automatically generate quizzes with AI.
+      Upload a document, paste your notes, or select a video to automatically generate summaries with AI.
     </p>
 
     <!-- Tabs and Options -->
@@ -69,18 +69,20 @@
 
           @file-selected="handleFileSelected('document', $event)" @file-removed="handleFileRemoved('document')"
           @error="showSnackbar" />
-        <p class="mt-2 animated-link">Looking for flashcards instead? Try the <nuxt-link to="/"
-            style="text-decoration: none;"> AI Flashcard Generator</nuxt-link></p>
-
-        <v-row> <!-- Add the missing opening <v-row> tag -->
-          <!-- Conditionally render the 'Next' button -->
-          <v-col class="d-flex justify-end">
-            <v-btn class="text-blue rounded-xl" variant = "outlined" @click = "generateQuiz">
-              Next
-            </v-btn>
-          </v-col>
-        </v-row>
-
+        <div class="button-container" style="margin: 12px 0;">
+          <v-btn color="royal_blue" min-width="92" variant="outlined"
+            class="custom-btn text-none animated-btn outfit outfit-medium" 
+            @click="generateSummary"
+            :disabled="!documentFile" 
+            rounded="xl">
+            <span class="d-flex align-center">
+              Generate
+              <v-icon class="ms-2 btn-icon">mdi-lightning-bolt</v-icon>
+            </span>
+          </v-btn>
+        </div>
+        <p class="mt-2 animated-link">Looking for summaries instead? Try the <nuxt-link to="/"
+            style="text-decoration: none;"> AI Summary Generator</nuxt-link></p>
       </v-window-item>
 
       <!-- Text Upload -->
@@ -93,7 +95,7 @@
           </v-textarea>
           <div class="button-container">
             <v-btn color="royal_blue" min-width="92" variant="outlined"
-              class="custom-btn text-none animated-btn outfit outfit-medium" @click="generateQuiz"
+              class="custom-btn text-none animated-btn outfit outfit-medium" @click="generateSummary"
               :disabled="!textContent" rounded="xl">
               <span class="d-flex align-center">
                 Generate
@@ -101,8 +103,8 @@
               </span>
             </v-btn>
           </div>
-          <p class="animated-link mt-4">Looking for flashcards instead? Try the <nuxt-link to="/"
-              style="text-decoration: none;"> AI Flashcard Generator</nuxt-link></p>
+          <p class="animated-link mt-4">Looking for summaries instead? Try the <nuxt-link to="/"
+              style="text-decoration: none;"> AI Summary Generator</nuxt-link></p>
         </div>
       </v-window-item>
 
@@ -114,8 +116,20 @@
 
           @file-selected="handleFileSelected('image', $event)" @file-removed="handleFileRemoved('image')"
           @error="showSnackbar" />
-        <p class="mt-2 animated-link">Looking for flashcards instead? Try the <nuxt-link to="/"
-            style="text-decoration: none;"> AI Flashcard Generator</nuxt-link></p>
+        <div class="button-container" style="margin: 12px 0;">
+          <v-btn color="royal_blue" min-width="92" variant="outlined"
+            class="custom-btn text-none animated-btn outfit outfit-medium" 
+            @click="generateSummary"
+            :disabled="!imageFile" 
+            rounded="xl">
+            <span class="d-flex align-center">
+              Generate
+              <v-icon class="ms-2 btn-icon">mdi-lightning-bolt</v-icon>
+            </span>
+          </v-btn>
+        </div>
+        <p class="mt-2 animated-link">Looking for summaries instead? Try the <nuxt-link to="/"
+            style="text-decoration: none;"> AI Summary Generator</nuxt-link></p>
       </v-window-item>
 
       <!-- Video Upload -->
@@ -128,7 +142,7 @@
           </v-textarea>
           <div class="button-container">
             <v-btn color="royal_blue" min-width="92" variant="outlined"
-              class="custom-btn text-none animated-btn outfit outfit-medium" @click="generateQuiz"
+              class="custom-btn text-none animated-btn outfit outfit-medium" @click="generateSummary"
               :disabled="!textContent" rounded="xl">
               <span class="d-flex align-center">
                 Generate
@@ -136,24 +150,9 @@
               </span>
             </v-btn>
           </div>
-          <p class="animated-link mt-4">Looking for flashcards instead? Try the <nuxt-link to="/"
-              style="text-decoration: none;"> AI Flashcard Generator</nuxt-link></p>
+          <p class="animated-link mt-4">Looking for summaries instead? Try the <nuxt-link to="/"
+              style="text-decoration: none;"> AI Summary Generator</nuxt-link></p>
         </div>
-
-        
-        <v-row class="mt-2" align="center">
-          <v-col class="d-flex">
-            <p class="animated-link">Looking for flashcards instead? Try the 
-              <nuxt-link to="/" style="text-decoration: none;"> AI Flashcard Generator</nuxt-link>
-            </p>
-          </v-col>
-          <!-- Conditionally render the 'Next' button -->
-          <v-col class="d-flex justify-end">
-            <v-btn class="text-blue rounded-xl" variant = "outlined" @click = "generateQuiz">
-              Next
-            </v-btn>
-          </v-col>
-        </v-row>
       </v-window-item>
 
       <!-- Video Upload -->
@@ -170,20 +169,20 @@
           @file-removed="handleFileRemoved('video')"
           @error="showSnackbar"
         />
-        <v-row class="mt-2" align="center">
-          <v-col class="d-flex">
-            <p class="animated-link">Looking for flashcards instead? Try the 
-              <nuxt-link to="/" style="text-decoration: none;"> AI Flashcard Generator</nuxt-link>
-            </p>
-          </v-col>
-          <!-- Conditionally render the 'Next' button -->
-          <v-col class="d-flex justify-end">
-            <v-btn class="text-blue rounded-xl" variant = "outlined" @click = "generateQuiz">
-              Next
-            </v-btn>
-          </v-col>
-        </v-row>
-
+        <div class="button-container">
+          <v-btn color="royal_blue" min-width="92" variant="outlined"
+            class="custom-btn text-none animated-btn outfit outfit-medium" 
+            @click="generateSummary"
+            :disabled="!videoFile" 
+            rounded="xl">
+            <span class="d-flex align-center">
+              Generate
+              <v-icon class="ms-2 btn-icon">mdi-lightning-bolt</v-icon>
+            </span>
+          </v-btn>
+        </div>
+        <p class="mt-2 animated-link">Looking for summaries instead? Try the <nuxt-link to="/"
+            style="text-decoration: none;"> AI Summary Generator</nuxt-link></p>
       </v-window-item>
     </v-window>
 
@@ -191,7 +190,7 @@
     <v-overlay :model-value="loading" class="align-center justify-center">
       <v-card color="white" width="300" class="pa-4 rounded-xl text-center">
         <v-progress-circular indeterminate color="primary" size="64"></v-progress-circular>
-        <p class="mt-4">Generating your quiz...</p>
+        <p class="mt-4">Generating your summary...</p>
       </v-card>
     </v-overlay>
 
@@ -208,9 +207,12 @@
 <script setup>
 import { ref } from 'vue';
 import FileUploader from '../common/FileUploader.vue';
-import { useRouter } from 'vue-router'; // Import useRouter
+import { useRouter } from 'vue-router';
+import { userAuth } from '~/store/userAuth';
+import Swal from 'sweetalert2';
   
-const router = useRouter(); // Initialize router
+const router = useRouter();
+const authStore = userAuth();
 
 const tab = ref('document'); // Default tab
 const sheet = ref(false);
@@ -261,27 +263,42 @@ const showSnackbar = (message) => {
   snackbar.value = true;
 };
 
-// Generate Quiz
+// Check if the user is authenticated before allowing summary generation
+const checkAuth = () => {
+  if (!authStore.isLoggedIn) {
+    Swal.fire({
+      title: 'Authentication Required',
+      text: 'You need to login or sign up to generate summaries',
+      icon: 'warning',
+      showCancelButton: true,
+      confirmButtonText: 'Login',
+      cancelButtonText: 'Sign Up'
+    }).then((result) => {
+      if (result.isConfirmed) {
+        // User chose to login
+        router.push('/auth');
+      } else if (result.dismiss === Swal.DismissReason.cancel) {
+        // User chose to sign up
+        router.push('/auth/sign-up');
+      }
+    });
+    return false;
+  }
+  return true;
+};
 
-const generateQuiz = () => {
+// Generate Summary
+const generateSummary = () => {
+  if (!checkAuth()) return;
+  
   loading.value = true;
 
   // Simulate API call with timeout
   setTimeout(() => {
     loading.value = false;
-    showSnackbar('Quiz generated successfully!');
+    showSnackbar('Summary generated successfully!');
   }, 2000);
 };
-
-// const generateQuiz = () => {
-//   loading.value = true;
-  
-//   // Simulate API call with timeout
-//   setTimeout(() => {
-//     loading.value = false;
-//     showSnackbar('Quiz generated successfully!');
-//   }, 2000);
-// };
 
 </script>
 

@@ -1,5 +1,5 @@
 <template>
-  <Quiz-QuizeGenerator />
+  <<QuizeUpload />
   <div class="mt-8 mx-16 mb-8">
     <SectionDivider />
   </div>  
@@ -12,6 +12,7 @@
 
 <script setup>
 import Footer from '~/components/Footer.vue';
+import QuizeUpload from '~/components/quiz/QuizeUpload.vue';
 import SectionDivider from '~/components/SectionDivider.vue';
 
 
