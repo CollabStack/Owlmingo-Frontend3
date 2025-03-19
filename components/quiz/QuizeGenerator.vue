@@ -1,59 +1,33 @@
 <template>
   <v-container>
     <!-- Header -->
-    <h1 class="text-h4 font-weight-bold text-primary mb-3 outfit outfit-bold"
-        v-motion
-        :initial="{ opacity: 0, y: 20 }"
-        :enter="{ opacity: 1, y: 0, transition: { duration: 600 } }">
+    <h1 class="text-h4 font-weight-bold text-primary mb-3 outfit outfit-bold" v-motion :initial="{ opacity: 0, y: 20 }"
+      :enter="{ opacity: 1, y: 0, transition: { duration: 600 } }">
       AI Quiz Generator
     </h1>
-    <p class="text-subtitle-1 text-grey-darken-1 mb-6 outfit outfit-regular"
-       v-motion
-       :initial="{ opacity: 0, y: 20 }"
-       :enter="{ opacity: 1, y: 0, transition: { duration: 600, delay: 200 } }">
+    <p class="text-subtitle-1 text-grey-darken-1 mb-6 outfit outfit-regular" v-motion :initial="{ opacity: 0, y: 20 }"
+      :enter="{ opacity: 1, y: 0, transition: { duration: 600, delay: 200 } }">
       Upload a document, paste your notes, or select a video to automatically generate quizzes with AI.
     </p>
 
     <!-- Tabs and Options -->
-    <v-row class="align-center"
-           v-motion
-           :initial="{ opacity: 0, y: 20 }"
-           :enter="{ opacity: 1, y: 0, transition: { duration: 600, delay: 300 } }">
+    <v-row class="align-center" v-motion :initial="{ opacity: 0, y: 20 }"
+      :enter="{ opacity: 1, y: 0, transition: { duration: 600, delay: 300 } }">
       <v-col cols="9">
-        <v-btn-toggle 
-          v-model="tab" 
-          style="width: 50%; height: 50px;"  
-          class="px-1 py-2 d-flex align-center justify-center rounded-xl custom-tab-group bg-water" 
-          color="deep-purple-accent-3"
-          group
-        >
-          <v-btn 
-            style="width: 25%; height: 45px;"
-            v-for="(option, index) in options" 
-            :key="index" 
-            :value="option.value" 
-            class="custom-tab bg-none text-primary"
-            :class="{ 'animated-tab': tab === option.value }"
-            rounded="xl" 
-            variant="text" 
-            color="primary"
-            v-motion
-            :initial="{ opacity: 0, y: 10 }"
-            :enter="{ opacity: 1, y: 0, transition: { delay: 100 * index, duration: 500 } }"
-          >
+        <v-btn-toggle v-model="tab" style="width: 50%; height: 50px;"
+          class="px-1 py-2 d-flex align-center justify-center rounded-xl custom-tab-group bg-water"
+          color="deep-purple-accent-3" group>
+          <v-btn style="width: 25%; height: 45px;" v-for="(option, index) in options" :key="index" :value="option.value"
+            class="custom-tab bg-none text-primary" :class="{ 'animated-tab': tab === option.value }" rounded="xl"
+            variant="text" color="primary" v-motion :initial="{ opacity: 0, y: 10 }"
+            :enter="{ opacity: 1, y: 0, transition: { delay: 100 * index, duration: 500 } }">
             {{ option.label }}
           </v-btn>
         </v-btn-toggle>
       </v-col>
       <v-col cols="3" class="d-flex justify-end">
-        <v-btn 
-          rounded="xl" 
-          color="medium-emphasis" 
-          min-width="92" 
-          variant="outlined" 
-          class="custom-btn text-none animated-btn outfit outfit-medium" 
-          @click="sheet = true"
-        >
+        <v-btn rounded="xl" color="medium-emphasis" min-width="92" variant="outlined"
+          class="custom-btn text-none animated-btn outfit outfit-medium" @click="sheet = true">
           <span class="d-flex align-center">
             Options
             <v-icon class="ms-2 btn-icon">mdi-cog</v-icon>
@@ -75,22 +49,11 @@
         <!-- Select Option -->
         <v-container>
           <p class="text-primary text-h6 text-left">Question Type</p>
-          <v-select
-            clearable
-            chips
-            label="Multiple Choice"
-            :items="['Multiple Choice', 'True/False', 'Open Ended']"
-            class="my-3 animated-input"
-          ></v-select>
+          <v-select clearable chips label="Multiple Choice" :items="['Multiple Choice', 'True/False', 'Open Ended']"
+            class="my-3 animated-input"></v-select>
 
           <p class="text-primary text-h6 text-left">Max Questions</p>
-          <v-select
-            clearable
-            chips
-            label="Auto"
-            :items="['Auto', '5', '10']"
-            class="my-3 animated-input"
-          ></v-select>
+          <v-select clearable chips label="Auto" :items="['Auto', '5', '10']" class="my-3 animated-input"></v-select>
         </v-container>
       </v-card>
     </v-bottom-sheet>
@@ -99,112 +62,78 @@
     <v-window v-model="tab" class="mt-5">
       <!-- Document Upload -->
       <v-window-item value="document">
-        <FileUploader
-          icon="mdi-file-upload"
-          placeholder="Drag a PDF or DOC file here"
+        <FileUploader icon="mdi-file-upload" placeholder="Drag a PDF or DOC file here"
           acceptedFileTypes="application/pdf,application/msword,application/vnd.openxmlformats-officedocument.wordprocessingml.document"
-          buttonText="Browse Files"
-          buttonIcon="mdi-upload"
-          :maxFileSize="20"
+          buttonText="Browse Files" buttonIcon="mdi-upload" :maxFileSize="20"
           fileTypeErrorMessage="Invalid file type! Only PDF and DOC files are allowed."
-          @file-selected="handleFileSelected('document', $event)"
-          @file-removed="handleFileRemoved('document')"
-          @error="showSnackbar"
-        />
-        <p class="mt-2 animated-link">Looking for flashcards instead? Try the <nuxt-link to="/" style="text-decoration: none;"> AI Flashcard Generator</nuxt-link></p>
+          @file-selected="handleFileSelected('document', $event)" @file-removed="handleFileRemoved('document')"
+          @error="showSnackbar" />
+        <p class="mt-2 animated-link">Looking for flashcards instead? Try the <nuxt-link to="/"
+            style="text-decoration: none;"> AI Flashcard Generator</nuxt-link></p>
       </v-window-item>
 
       <!-- Text Upload -->
       <v-window-item value="text">
-        <div class="ma-4 pa-4" outlined
-             v-motion
-             :initial="{ opacity: 0, y: 20 }"
-             :enter="{ opacity: 1, y: 0, transition: { duration: 600 } }">
-            <v-textarea
-            clearable
-            clear-icon="mdi-close-circle"
-            label="Notes" 
-            placeholder="Paste your study notes here..."
-            hide-details="auto"
-            class="clean-textarea"
-            v-model="textContent"
-            bg-color="white"
-            rows="8"
-            color="secondary"
-            counter="4000"
-            variant="plain"
-            >
-            </v-textarea>
+        <div class="ma-4 pa-4" outlined v-motion :initial="{ opacity: 0, y: 20 }"
+          :enter="{ opacity: 1, y: 0, transition: { duration: 600 } }">
+          <v-textarea clearable clear-icon="mdi-close-circle" label="Notes" placeholder="Paste your study notes here..."
+            hide-details="auto" class="clean-textarea" v-model="textContent" bg-color="white" rows="8" color="secondary"
+            counter="4000" variant="plain">
+          </v-textarea>
           <div class="button-container">
-            <v-btn 
-              color="royal_blue" 
-              min-width="92" 
-              variant="outlined" 
-              class="custom-btn text-none animated-btn outfit outfit-medium" 
-              @click="generateQuiz"
-              :disabled="!textContent"
-              rounded="xl"
-            >
+            <v-btn color="royal_blue" min-width="92" variant="outlined"
+              class="custom-btn text-none animated-btn outfit outfit-medium" @click="generateQuiz"
+              :disabled="!textContent" rounded="xl">
               <span class="d-flex align-center">
                 Generate
                 <v-icon class="ms-2 btn-icon">mdi-lightning-bolt</v-icon>
               </span>
             </v-btn>
           </div>
-          <p class="animated-link mt-4">Looking for flashcards instead? Try the <nuxt-link to="/" style="text-decoration: none;"> AI Flashcard Generator</nuxt-link></p>
+          <p class="animated-link mt-4">Looking for flashcards instead? Try the <nuxt-link to="/"
+              style="text-decoration: none;"> AI Flashcard Generator</nuxt-link></p>
         </div>
       </v-window-item>
 
       <!-- Image Upload -->
       <v-window-item value="image">
-        <FileUploader
-          icon="mdi-image"
-          placeholder="Drag an image here to upload"
-          acceptedFileTypes="image/*"
-          buttonText="Browse Images"
-          buttonIcon="mdi-image-search"
-          :maxFileSize="10"
+        <FileUploader icon="mdi-image" placeholder="Drag an image here to upload" acceptedFileTypes="image/*"
+          buttonText="Browse Images" buttonIcon="mdi-image-search" :maxFileSize="10"
           fileTypeErrorMessage="Invalid file type! Only image files are allowed."
-          @file-selected="handleFileSelected('image', $event)"
-          @file-removed="handleFileRemoved('image')"
-          @error="showSnackbar"
-        />
-        <p class="mt-2 animated-link">Looking for flashcards instead? Try the <nuxt-link to="/" style="text-decoration: none;"> AI Flashcard Generator</nuxt-link></p>
+          @file-selected="handleFileSelected('image', $event)" @file-removed="handleFileRemoved('image')"
+          @error="showSnackbar" />
+        <p class="mt-2 animated-link">Looking for flashcards instead? Try the <nuxt-link to="/"
+            style="text-decoration: none;"> AI Flashcard Generator</nuxt-link></p>
       </v-window-item>
 
       <!-- Video Upload -->
-      <v-window-item value="video">
-        <FileUploader
-          icon="mdi-video"
-          placeholder="Drag a video file here to upload"
-          acceptedFileTypes="video/*"
-          buttonText="Browse Videos"
-          buttonIcon="mdi-video-plus"
-          :maxFileSize="100"
-          fileTypeErrorMessage="Invalid file type! Only video files are allowed."
-          @file-selected="handleFileSelected('video', $event)"
-          @file-removed="handleFileRemoved('video')"
-          @error="showSnackbar"
-        />
-        <p class="mt-2 animated-link">Looking for flashcards instead? Try the <nuxt-link to="/" style="text-decoration: none;"> AI Flashcard Generator</nuxt-link></p>
+      <v-window-item value="link">
+        <div class="ma-4 pa-4" outlined v-motion :initial="{ opacity: 0, y: 20 }"
+          :enter="{ opacity: 1, y: 0, transition: { duration: 600 } }">
+          <v-textarea clearable clear-icon="mdi-close-circle" label="Notes" placeholder="Paste your link here..."
+            hide-details="auto" class="clean-textarea" v-model="textContent" bg-color="white" rows="8" color="secondary"
+            counter="4000" variant="plain">
+          </v-textarea>
+          <div class="button-container">
+            <v-btn color="royal_blue" min-width="92" variant="outlined"
+              class="custom-btn text-none animated-btn outfit outfit-medium" @click="generateQuiz"
+              :disabled="!textContent" rounded="xl">
+              <span class="d-flex align-center">
+                Generate
+                <v-icon class="ms-2 btn-icon">mdi-lightning-bolt</v-icon>
+              </span>
+            </v-btn>
+          </div>
+          <p class="animated-link mt-4">Looking for flashcards instead? Try the <nuxt-link to="/"
+              style="text-decoration: none;"> AI Flashcard Generator</nuxt-link></p>
+        </div>
       </v-window-item>
     </v-window>
 
     <!-- Loading Overlay -->
-    <v-overlay
-      :model-value="loading"
-      class="align-center justify-center"
-    >
-      <v-card
-        color="white"
-        width="300"
-        class="pa-4 rounded-xl text-center"
-      >
-        <v-progress-circular
-          indeterminate
-          color="primary"
-          size="64"
-        ></v-progress-circular>
+    <v-overlay :model-value="loading" class="align-center justify-center">
+      <v-card color="white" width="300" class="pa-4 rounded-xl text-center">
+        <v-progress-circular indeterminate color="primary" size="64"></v-progress-circular>
         <p class="mt-4">Generating your quiz...</p>
       </v-card>
     </v-overlay>
@@ -237,7 +166,7 @@ const options = ref([
   { label: 'Document', value: 'document' },
   { label: 'Text', value: 'text' },
   { label: 'Image', value: 'image' },
-  { label: 'Video', value: 'video' },
+  { label: 'Link', value: 'link' },
 ]);
 
 // Handle file selection from FileUploader component
@@ -271,7 +200,7 @@ const showSnackbar = (message) => {
 // Generate Quiz
 const generateQuiz = () => {
   loading.value = true;
-  
+
   // Simulate API call with timeout
   setTimeout(() => {
     loading.value = false;
@@ -291,13 +220,21 @@ const generateQuiz = () => {
   font-style: normal;
 }
 
-.outfit-regular { font-weight: 400; }
-.outfit-medium { font-weight: 500; }
-.outfit-bold { font-weight: 700; }
+.outfit-regular {
+  font-weight: 400;
+}
+
+.outfit-medium {
+  font-weight: 500;
+}
+
+.outfit-bold {
+  font-weight: 700;
+}
 
 /* Style for active button */
 .v-btn-toggle .v-btn--active {
-  background-color: #9D7BFC !important; 
+  background-color: #9D7BFC !important;
   color: white !important;
   transform: scale(1.05);
   transition: all 0.3s ease;
@@ -317,7 +254,7 @@ const generateQuiz = () => {
   left: -100%;
   width: 100%;
   height: 100%;
-  background: linear-gradient(90deg, transparent, rgba(255,255,255,0.2), transparent);
+  background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.2), transparent);
   transition: all 0.6s ease;
 }
 

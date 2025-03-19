@@ -1,113 +1,208 @@
 <template>
-    <div>
-      <!-- Header Section Tags -->
-      <v-container class="d-flex align-center justify-start">
-        <h1 class="text-h5">Tags</h1>
-        <v-btn icon class="rounded-xl bg-secondary text-white mx-3 justify-center align-center d-flex" max-height="30" max-width="30" @click="dialog = true">
-          <v-icon>mdi-plus</v-icon>
-        </v-btn>
-      </v-container>
-  
-      <!-- Tag List -->
-      <v-container>
-        <v-row>
-          <v-col cols="12" md="6" lg="4" v-for="(tag, index) in tags" :key="index">
-            <v-card class="d-flex align-center px-4 mx-2" elevation="2">
-              <!-- Color Indicator -->
-              <div :style="{ backgroundColor: tag.color }" style="width: 30px; height:30px; border-radius: 5px;"></div>
-  
-              <!-- Tag Name -->
-              <p class="mx-3 mb-0">{{ tag.name }}</p>
-  
-              <!-- Spacer -->
-              <v-spacer></v-spacer>
-  
-              <!-- Updated Menu Icon -->
-              <v-menu offset-y>
-                <template v-slot:activator="{ props }">
-                  <v-btn icon variant="text" v-bind="props">
-                    <v-icon>mdi-dots-vertical</v-icon>
-                  </v-btn>
-                </template>
-                <v-list>
-                    <v-list-item @click="editTag(index)">
-                    <v-row align="center" no-gutters>
-                      <v-col cols="2" class="d-flex justify-center">
-                        <v-icon class="text-secondary">mdi-pencil</v-icon>
-                      </v-col>
-                      <v-col cols="10">
-                        <v-list-item-title class="text-secondary mx-2">Edit</v-list-item-title>
-                      </v-col>
-                    </v-row>
-                  </v-list-item>
-  
-                  <v-list-item @click="confirmDelete(index)">
-                    <v-row align="center" no-gutters>
-                      <v-col cols="2" class="d-flex justify-center">
-                        <v-icon class="text-error">mdi-delete</v-icon>
-                      </v-col>
-                      <v-col cols="10">
-                        <v-list-item-title class="text-error mx-2">Delete</v-list-item-title>
-                      </v-col>
-                    </v-row>
-                  </v-list-item>
-                </v-list>
-              </v-menu>
-            </v-card>
-          </v-col>
-        </v-row>
-      </v-container>
-  
-      <!-- Add/Edit Tag Dialog -->
-      <v-dialog v-model="dialog" width="400">
-        <v-card>
-          <v-card-title class="text-h6">{{ editingIndex === null ? "Add Tag" : "Edit Tag" }}</v-card-title>
-          <v-card-text>
-            <v-text-field v-model="newTagName" label="Tag Name" variant="outlined" clearable class="mb-3"></v-text-field>
-            <v-color-picker v-model="newTagColor" hide-inputs></v-color-picker>
-          </v-card-text>
-          <v-card-actions>
+  <div>
+    <!-- Header Section Tags -->
+    <v-container class="d-flex align-center justify-start">
+      <h1 class="text-h5">Tags</h1>
+      <v-btn icon class="rounded-xl bg-secondary text-white mx-3 justify-center align-center d-flex" max-height="30"
+        max-width="30" @click="dialog = true">
+        <v-icon>mdi-plus</v-icon>
+      </v-btn>
+    </v-container>
+
+    <!-- Tag List -->
+    <v-container>
+      <v-row>
+        <v-col cols="12" md="6" lg="4" v-for="(tag, index) in tags" :key="index">
+          <v-card class="d-flex align-center px-4 mx-2" elevation="2">
+            <!-- Color Indicator -->
+            <div :style="{ backgroundColor: tag.color }" style="width: 30px; height:30px; border-radius: 5px;"></div>
+
+            <!-- Tag Name -->
+            <p class="mx-3 mb-0">{{ tag.name }}</p>
+
+            <!-- Spacer -->
             <v-spacer></v-spacer>
-            <v-btn @click="dialog = false" variant="outlined">Cancel</v-btn>
-            <v-btn class="bg-primary text-white" @click="saveTag">{{ editingIndex === null ? "Add" : "Save" }}</v-btn>
+
+            <!-- Updated Menu Icon -->
+            <v-menu offset-y>
+              <template v-slot:activator="{ props }">
+                <v-btn icon variant="text" v-bind="props">
+                  <v-icon>mdi-dots-vertical</v-icon>
+                </v-btn>
+              </template>
+              <v-list>
+                <v-list-item @click="editTag(index)">
+                  <v-row align="center" no-gutters>
+                    <v-col cols="2" class="d-flex justify-center">
+                      <v-icon class="text-secondary">mdi-pencil</v-icon>
+                    </v-col>
+                    <v-col cols="10">
+                      <v-list-item-title class="text-secondary mx-2">Edit</v-list-item-title>
+                    </v-col>
+                  </v-row>
+                </v-list-item>
+
+                <v-list-item @click="confirmDelete(index)">
+                  <v-row align="center" no-gutters>
+                    <v-col cols="2" class="d-flex justify-center">
+                      <v-icon class="text-error">mdi-delete</v-icon>
+                    </v-col>
+                    <v-col cols="10">
+                      <v-list-item-title class="text-error mx-2">Delete</v-list-item-title>
+                    </v-col>
+                  </v-row>
+                </v-list-item>
+              </v-list>
+            </v-menu>
+          </v-card>
+        </v-col>
+      </v-row>
+    </v-container>
+
+    <!-- Add/Edit Tag Dialog -->
+    <v-dialog v-model="dialog" width="400">
+      <v-card>
+        <v-card-title class="text-h6">{{ editingIndex === null ? "Add Tag" : "Edit Tag" }}</v-card-title>
+        <v-card-text>
+          <v-text-field v-model="newTagName" label="Tag Name" variant="outlined" clearable class="mb-3"></v-text-field>
+          <v-color-picker v-model="newTagColor" hide-inputs></v-color-picker>
+        </v-card-text>
+        <v-card-actions>
+          <v-spacer></v-spacer>
+          <v-btn @click="dialog = false" variant="outlined">Cancel</v-btn>
+          <v-btn class="bg-primary text-white" @click="saveTag">{{ editingIndex === null ? "Add" : "Save" }}</v-btn>
+        </v-card-actions>
+      </v-card>
+    </v-dialog>
+
+    <!-- Delete Confirmation Dialog -->
+    <v-dialog v-model="deleteDialog" width="400">
+      <v-card>
+        <v-card-title class="text-h6">Delete this tag</v-card-title>
+        <v-card-text>Are you sure you want to delete this tag? This cannot be undone.</v-card-text>
+        <v-card-actions>
+          <v-spacer></v-spacer>
+          <v-btn @click="deleteDialog = false" variant="outlined">Cancel</v-btn>
+          <v-btn class="bg-error text-white" @click="removeTag">Delete</v-btn>
+        </v-card-actions>
+      </v-card>
+    </v-dialog>
+  </div>
+
+
+  <dev>
+    <v-container class="d-flex align-center justify-start">
+      <h1 class="text-h5">Flashcards</h1>
+
+      <v-btn icon class="rounded-xl bg-secondary text-white mx-3 justify-center align-center d-flex" max-height="30"
+        max-width="30" @click="showDialog = true">
+        <v-icon>mdi-plus</v-icon>
+      </v-btn>
+
+      <!-- Dialog with two options -->
+      <v-dialog v-model="showDialog" max-width="300">
+        <v-card>
+          <div class="d-flex align-center justify-space-between">
+            <v-card-title class="headline">Choose an Option</v-card-title>
+            <v-icon class="mr-5" @click="showDialog = false">mdi-close</v-icon>
+          </div>
+
+          <v-card-actions>
+            <nuxt-link to="/flashcard" style="text-decoration: none;">
+              <v-btn color="primary">Generate by AI</v-btn>
+            </nuxt-link>
+            <nuxt-link to="/flashcard/flashcards" style="text-decoration: none;">
+              <v-btn color="secondary">From Scratch</v-btn>
+            </nuxt-link>
           </v-card-actions>
         </v-card>
       </v-dialog>
-  
-      <!-- Delete Confirmation Dialog -->
-      <v-dialog v-model="deleteDialog" width="400">
+    </v-container>
+  </dev>
+  <div>
+    <v-container>
+      <div class="d-flex align-center justify-center ">
+        <p class="mt-5 text-h6">No flashcards found</p>
+      </div>
+      <div class="d-flex align-center justify-center my-10" style="gap: 10px; ">
+        <nuxt-link to="/flashcard" style="text-decoration: none;">
+        <div class="d-flex align-center justify-center rounded-lg bg-hex"
+          style="width: 60vh; height: 20vh; border: 1px solid black; ">
+          <p class="mx-10">Generate by AI</p>
+        </div>
+      </nuxt-link>
+      <nuxt-link to="/flashcard/flashcards" style="text-decoration: none;">
+        <div class="d-flex align-center justify-center rounded-lg bg-hex"
+          style="width: 60vh; height: 20vh; border: 1px solid black; ">
+          <p class="mx-10">From Scratch</p>
+        </div>
+      </nuxt-link>
+      </div>
+
+    </v-container>  
+  </div>
+
+  <dev>
+    <v-container class="d-flex align-center justify-start">
+      <h1 class="text-h5">Quizzes</h1>
+
+      <v-btn icon class="rounded-xl bg-secondary text-white mx-3 justify-center align-center d-flex" max-height="30"
+        max-width="30" @click="showDialog = true">
+        <v-icon>mdi-plus</v-icon>
+      </v-btn>
+
+      <!-- Dialog with two options -->
+      <v-dialog v-model="showDialog" max-width="300">
         <v-card>
-          <v-card-title class="text-h6">Delete this tag</v-card-title>
-          <v-card-text>Are you sure you want to delete this tag? This cannot be undone.</v-card-text>
+          <div class="d-flex align-center justify-space-between">
+            <v-card-title class="headline">Choose an Option</v-card-title>
+            <v-icon class="mr-5" @click="showDialog = false">mdi-close</v-icon>
+          </div>
+
           <v-card-actions>
-            <v-spacer></v-spacer>
-            <v-btn @click="deleteDialog = false" variant="outlined">Cancel</v-btn>
-            <v-btn class="bg-error text-white" @click="removeTag">Delete</v-btn>
+            <nuxt-link to="/quiz" style="text-decoration: none;">
+              <v-btn color="primary">Generate by AI</v-btn>
+            </nuxt-link>
+            <nuxt-link to="/flashcard/flashcards" style="text-decoration: none;">
+              <v-btn color="secondary">From Scratch</v-btn>
+            </nuxt-link>
           </v-card-actions>
         </v-card>
       </v-dialog>
-    </div>
+    </v-container>
+  </dev>
+  <div>
+    <v-container>
+      <div class="d-flex align-center justify-center ">
+        <p class="mt-5 text-h6">No flashcards found</p>
+      </div>
+      <div class="d-flex align-center justify-center my-10" style="gap: 10px; ">
+        <nuxt-link to="/flashcard" style="text-decoration: none;">
+        <div class="d-flex align-center justify-center rounded-lg bg-hex"
+          style="width: 60vh; height: 20vh; border: 1px solid black; ">
+          <p class="mx-10">Generate by AI</p>
+        </div>
+      </nuxt-link>
+      <nuxt-link to="/flashcard/flashcards" style="text-decoration: none;">
+        <div class="d-flex align-center justify-center rounded-lg bg-hex"
+          style="width: 60vh; height: 20vh; border: 1px solid black; ">
+          <p class="mx-10">From Scratch</p>
+        </div>
+      </nuxt-link>
+      </div>
 
+    </v-container>  
+  </div>
 
-    <dev>
-         <!-- Header Section Tags -->
-      <v-container class="d-flex align-center justify-start">
-        <h1 class="text-h5">Flashcards</h1>
-        <nuxt-link to="/flashcard/flashcards" style="text-decoration: none;">
-        <v-btn icon class="rounded-xl bg-secondary text-white mx-3 justify-center align-center d-flex" max-height="30" max-width="30">
-          <v-icon>mdi-plus</v-icon>
-        </v-btn>
-        </nuxt-link>
-      </v-container>
-    </dev>
 </template>
-  
+
 <script setup>
 import { ref, onMounted } from 'vue';
 
 const tags = ref([]);
 const dialog = ref(false);
 const deleteDialog = ref(false);
+const showDialog = ref(false);
 const newTagName = ref("");
 const newTagColor = ref("#FF5733");
 const editingIndex = ref(null);
@@ -171,6 +266,4 @@ const resetDialog = () => {
 };
 </script>
 
-<style scoped>
-
-</style>
+<style scoped></style>
