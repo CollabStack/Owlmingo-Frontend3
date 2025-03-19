@@ -81,6 +81,7 @@ const tabs = [
     { label: 'Home', route: '/' },
     { label: 'Flashcard', route: '/flashcard' },
     { label: 'Quiz', route: '/quiz' },
+    { label: 'Summary', route: '/summary' }, // Add this line
     { label: 'About', route: '/about' },
     { label: 'ColorView', route: '/color'},
 ];
