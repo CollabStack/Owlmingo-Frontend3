@@ -13,8 +13,8 @@ import { userAuth } from '~/store/userAuth';
 
 const userAuthStore = userAuth();
 // Telegram Bot ID
-const botId = useRuntimeConfig().TELEGRAM_BOT_ID; // Replace with your actual bot ID
-const returnTo = useRuntimeConfig().TELEGRAM_BOT_RETURN_URL; // Replace with your actual return URL
+const botId = useRuntimeConfig().public.TELEGRAM_BOT_ID; // Replace with your actual bot ID
+const returnTo = useRuntimeConfig().public.TELEGRAM_BOT_RETURN_URL; // Replace with your actual return URL
 
 // Redirect to Telegram authentication
 const redirectToTelegramAuth = () => {
