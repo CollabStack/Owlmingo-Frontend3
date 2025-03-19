@@ -69,11 +69,125 @@
 
           @file-selected="handleFileSelected('document', $event)" @file-removed="handleFileRemoved('document')"
           @error="showSnackbar" />
+        
+        <!-- PDF page selector -->
+        <v-expand-transition>
+          <v-card v-if="documentFile && isPdfFile" class="mt-3 pa-3" variant="outlined">
+            <div class="d-flex justify-space-between align-center">
+              <p class="text-subtitle-2">
+                <v-icon color="info" class="me-1">mdi-file-pdf-box</v-icon>
+                Selected PDF: {{ documentFile.name }} ({{ totalPages }} pages)
+              </p>
+              <v-btn-toggle v-model="selectionMode" mandatory density="compact" rounded="lg">
+                <v-btn value="text" size="small">
+                  <v-icon>mdi-format-list-text</v-icon>
+                  <span class="ms-1 d-none d-sm-inline">Text</span>
+                </v-btn>
+                <v-btn value="visual" size="small">
+                  <v-icon>mdi-view-grid</v-icon>
+                  <span class="ms-1 d-none d-sm-inline">Visual</span>
+                </v-btn>
+              </v-btn-toggle>
+            </div>
+
+            <!-- Text-based page selection -->
+            <div v-if="selectionMode === 'text'" class="mt-2">
+              <v-text-field
+                v-model="pageSelection"
+                label="Select Pages"
+                placeholder="e.g., 1-5, 8, 10-12" 
+                hint="Enter page numbers or ranges separated by commas"
+                persistent-hint
+                variant="outlined"
+                density="compact"
+                class="mt-2"
+              ></v-text-field>
+              <p class="text-caption text-grey mt-1">Leave blank to process all pages</p>
+            </div>
+
+            <!-- Visual page selection -->
+            <div v-else class="mt-3">
+              <p class="text-caption mb-2">Click on page thumbnails to select or deselect</p>
+              
+              <v-progress-linear
+                v-if="loadingThumbnails"
+                indeterminate
+                color="primary"
+                class="mb-3"
+              ></v-progress-linear>
+              
+              <v-row v-else dense>
+                <v-col v-for="page in totalPages" :key="page" cols="4" sm="3" md="2" lg="2" xl="1">
+                  <v-card
+                    :class="[
+                      'page-thumbnail-card',
+                      selectedPages.has(page) ? 'selected' : ''
+                    ]"
+                    @click="togglePageSelection(page)"
+                    elevation="2"
+                    height="120"
+                  >
+                    <div class="d-flex flex-column h-100">
+                      <div class="page-thumbnail-container">
+                        <img 
+                          v-if="thumbnailsData[page-1]" 
+                          :src="thumbnailsData[page-1]" 
+                          class="page-thumbnail" 
+                          @load="thumbnailsLoaded[page-1] = true"
+                          alt="Page preview"
+                        />
+                        <div v-else class="page-placeholder">
+                          <v-icon color="grey-lighten-1" size="large">mdi-file-pdf-outline</v-icon>
+                          <div class="text-caption text-grey">Page {{ page }}</div>
+                        </div>
+                      </div>
+                      <v-card-text class="pa-1 text-center">
+                        <div class="text-caption">Page {{ page }}</div>
+                        <v-icon 
+                          v-if="selectedPages.has(page)" 
+                          color="success" 
+                          size="small"
+                          class="check-icon"
+                        >
+                          mdi-check-circle
+                        </v-icon>
+                      </v-card-text>
+                    </div>
+                  </v-card>
+                </v-col>
+              </v-row>
+
+              <div class="d-flex justify-space-between align-center mt-3">
+                <v-btn 
+                  size="small" 
+                  variant="text" 
+                  @click="selectAllPages" 
+                  prepend-icon="mdi-select-all"
+                >
+                  Select All
+                </v-btn>
+                <v-btn 
+                  size="small" 
+                  variant="text" 
+                  color="error" 
+                  @click="clearPageSelection" 
+                  prepend-icon="mdi-select-remove"
+                >
+                  Clear Selection
+                </v-btn>
+                <div class="text-body-2">
+                  {{ Array.from(selectedPages).length }} pages selected
+                </div>
+              </div>
+            </div>
+          </v-card>
+        </v-expand-transition>
+        
         <div class="button-container" style="margin: 12px 0;">
           <v-btn color="royal_blue" min-width="92" variant="outlined"
             class="custom-btn text-none animated-btn outfit outfit-medium" 
             @click="generateSummary"
-            :disabled="!documentFile" 
+            :disabled="!documentFile || (isPdfFile && selectedPages.size === 0)" 
             rounded="xl">
             <span class="d-flex align-center">
               Generate
@@ -205,10 +319,16 @@
 </template>
 
 <script setup>
-import { ref } from 'vue';
+import { ref, computed, watch, onMounted } from 'vue';
 import FileUploader from '../common/FileUploader.vue';
-import { useRouter } from 'vue-router'; // Import useRouter
-  
+import { useRouter } from 'vue-router';
+import { PDFDocument } from 'pdf-lib';
+import * as pdfjs from 'pdfjs-dist';
+
+// Set PDF.js worker
+const pdfjsWorker = await import('pdfjs-dist/build/pdf.worker.entry');
+pdfjs.GlobalWorkerOptions.workerSrc = pdfjsWorker;
+
 const router = useRouter(); // Initialize router
 
 const tab = ref('document'); // Default tab
@@ -228,10 +348,53 @@ const options = ref([
   { label: 'Link', value: 'link' },
 ]);
 
-// Handle file selection from FileUploader component
-const handleFileSelected = (type, file) => {
+// Add these new refs
+const pageSelection = ref('');
+const totalPages = ref(0);
+
+// Check if file is PDF
+const isPdfFile = computed(() => {
+  return documentFile.value && 
+    (documentFile.value.type === 'application/pdf' || 
+     documentFile.value.name.toLowerCase().endsWith('.pdf'));
+});
+
+// Enhanced file selection handler with better error handling
+const handleFileSelected = async (type, file) => {
   if (type === 'document') {
     documentFile.value = file;
+    
+    // Reset page selection
+    pageSelection.value = '';
+    selectedPages.value = new Set();
+    thumbnailsData.value = [];
+    thumbnailsLoaded.value = [];
+    
+    if (isPdfFile.value) {
+      try {
+        const arrayBuffer = await file.arrayBuffer();
+        const pdfDoc = await PDFDocument.load(arrayBuffer);
+        
+        const pages = pdfDoc.getPageCount();
+        totalPages.value = pages;
+        
+        // Select all pages by default
+        for (let i = 1; i <= pages; i++) {
+          selectedPages.value.add(i);
+        }
+        pageSelection.value = pages > 1 ? `1-${pages}` : '1';
+        
+        // Store PDF document for later use
+        pdfDocRef.value = pdfDoc;
+        
+        if (selectionMode.value === 'visual') {
+          await generateThumbnails();
+        }
+      } catch (error) {
+        console.error('Error loading PDF:', error);
+        showSnackbar('Error reading PDF file');
+      }
+    }
   } else if (type === 'image') {
     imageFile.value = file;
   } else if (type === 'video') {
@@ -239,20 +402,43 @@ const handleFileSelected = (type, file) => {
   }
 };
 
-// Handle file removal from FileUploader component
-const handleFileRemoved = (type) => {
-  if (type === 'document') {
-    documentFile.value = null;
-  } else if (type === 'image') {
-    imageFile.value = null;
-  } else if (type === 'video') {
-    videoFile.value = null;
-  }
-};
+// Add reference to store PDF document
+const pdfDocRef = ref(null);
 
-// const generateQuiz = () => {
-//     router.push('/quiz/review-quiz');
-// };
+// Parse page selection and get array of page numbers
+const getSelectedPages = () => {
+  if (!pageSelection.value.trim()) {
+    // Return all pages if selection is empty
+    return Array.from({ length: totalPages.value }, (_, i) => i + 1);
+  }
+  
+  const pages = new Set();
+  const parts = pageSelection.value.split(',');
+  
+  for (const part of parts) {
+    const trimmedPart = part.trim();
+    
+    if (trimmedPart.includes('-')) {
+      // Handle page range (e.g., "1-5")
+      const [start, end] = trimmedPart.split('-').map(num => parseInt(num.trim()));
+      if (!isNaN(start) && !isNaN(end) && start <= end) {
+        for (let i = start; i <= end; i++) {
+          if (i > 0 && i <= totalPages.value) {
+            pages.add(i);
+          }
+        }
+      }
+    } else {
+      // Handle single page
+      const pageNum = parseInt(trimmedPart);
+      if (!isNaN(pageNum) && pageNum > 0 && pageNum <= totalPages.value) {
+        pages.add(pageNum);
+      }
+    }
+  }
+  
+  return Array.from(pages).sort((a, b) => a - b);
+};
 
 // Show snackbar with custom message
 const showSnackbar = (message) => {
@@ -261,26 +447,199 @@ const showSnackbar = (message) => {
 };
 
 // Generate Summary
-
-const generateSummary = () => {
+const generateSummary = async () => {
   loading.value = true;
-
-  // Simulate API call with timeout
-  setTimeout(() => {
+  
+  try {
+    // For PDF files with page selection
+    if (isPdfFile.value) {
+      const pagesToProcess = Array.from(selectedPages.value).sort((a, b) => a - b);
+      console.log('Processing PDF pages:', pagesToProcess);
+      
+      // Here you would extract the selected pages and process them
+      // This is where you'd integrate with your backend API
+    }
+    
+    // Simulate API call with timeout (replace with actual API call)
+    setTimeout(() => {
+      loading.value = false;
+      showSnackbar('Summary generated successfully!');
+    }, 2000);
+  } catch (error) {
+    console.error('Error generating summary:', error);
     loading.value = false;
-    showSnackbar('Summary generated successfully!');
-  }, 2000);
+    showSnackbar('Error generating summary');
+  }
 };
 
-// const generateQuiz = () => {
-//   loading.value = true;
+// Add these new refs for visual page selection
+const selectionMode = ref('text');
+const selectedPages = ref(new Set());
+const thumbnailsData = ref([]);
+const thumbnailsLoaded = ref([]);
+const loadingThumbnails = ref(false);
+
+// Watch for changes in pageSelection and update selectedPages
+watch(pageSelection, (newValue) => {
+  if (selectionMode.value === 'text') {
+    selectedPages.value = new Set(getSelectedPagesArray());
+  }
+});
+
+// Watch for changes in selectedPages and update pageSelection
+watch(selectedPages, (newValue) => {
+  if (selectionMode.value === 'visual') {
+    pageSelection.value = formatSelectedPagesAsText(Array.from(newValue));
+  }
+});
+
+// Toggle page selection mode
+watch(selectionMode, async (newMode) => {
+  if (newMode === 'visual' && thumbnailsData.value.length === 0 && isPdfFile.value) {
+    await generateThumbnails();
+  }
   
-//   // Simulate API call with timeout
-//   setTimeout(() => {
-//     loading.value = false;
-//     showSnackbar('Quiz generated successfully!');
-//   }, 2000);
-// };
+  if (newMode === 'visual') {
+    // Convert text selection to visual selection
+    selectedPages.value = new Set(getSelectedPagesArray());
+  } else {
+    // Keep the selection state synchronized
+    pageSelection.value = formatSelectedPagesAsText(Array.from(selectedPages.value));
+  }
+});
+
+// Convert selected pages array to formatted text (e.g. "1-3, 5, 7-9")
+const formatSelectedPagesAsText = (pagesArray) => {
+  if (!pagesArray.length) return '';
+  
+  pagesArray.sort((a, b) => a - b);
+  
+  const ranges = [];
+  let rangeStart = pagesArray[0];
+  let rangeEnd = pagesArray[0];
+  
+  for (let i = 1; i < pagesArray.length; i++) {
+    if (pagesArray[i] === rangeEnd + 1) {
+      rangeEnd = pagesArray[i];
+    } else {
+      ranges.push(rangeStart === rangeEnd ? `${rangeStart}` : `${rangeStart}-${rangeEnd}`);
+      rangeStart = rangeEnd = pagesArray[i];
+    }
+  }
+  
+  ranges.push(rangeStart === rangeEnd ? `${rangeStart}` : `${rangeStart}-${rangeEnd}`);
+  return ranges.join(', ');
+};
+
+// Toggle selection of a page
+const togglePageSelection = (pageNum) => {
+  const newSelectedPages = new Set(selectedPages.value);
+  
+  if (newSelectedPages.has(pageNum)) {
+    newSelectedPages.delete(pageNum);
+  } else {
+    newSelectedPages.add(pageNum);
+  }
+  
+  selectedPages.value = newSelectedPages;
+  pageSelection.value = formatSelectedPagesAsText(Array.from(newSelectedPages));
+};
+
+// Select all pages
+const selectAllPages = () => {
+  const all = new Set();
+  for (let i = 1; i <= totalPages.value; i++) {
+    all.add(i);
+  }
+  selectedPages.value = all;
+};
+
+// Clear page selection
+const clearPageSelection = () => {
+  selectedPages.value = new Set();
+};
+
+// Generate thumbnails with better error handling
+const generateThumbnails = async () => {
+  if (!isPdfFile.value || !documentFile.value) return;
+  
+  loadingThumbnails.value = true;
+  thumbnailsData.value = new Array(totalPages.value).fill(null);
+  thumbnailsLoaded.value = new Array(totalPages.value).fill(false);
+  
+  try {
+    // Load the PDF using PDF.js
+    const arrayBuffer = await documentFile.value.arrayBuffer();
+    const pdf = await pdfjs.getDocument({ data: arrayBuffer }).promise;
+    const maxPages = Math.min(totalPages.value, 50); // Limit to 50 pages
+    
+    for (let i = 0; i < maxPages; i++) {
+      try {
+        const page = await pdf.getPage(i + 1);
+        const viewport = page.getViewport({ scale: 0.5 }); // Adjust scale as needed
+        
+        // Create canvas
+        const canvas = document.createElement('canvas');
+        const context = canvas.getContext('2d');
+        canvas.width = viewport.width;
+        canvas.height = viewport.height;
+        
+        // Render page to canvas
+        await page.render({
+          canvasContext: context,
+          viewport: viewport
+        }).promise;
+        
+        // Convert canvas to base64 image
+        thumbnailsData.value[i] = canvas.toDataURL('image/jpeg', 0.5);
+        thumbnailsLoaded.value[i] = true;
+      } catch (err) {
+        console.warn(`Error generating thumbnail for page ${i + 1}:`, err);
+        thumbnailsData.value[i] = null;
+      }
+    }
+  } catch (error) {
+    console.error('Error generating thumbnails:', error);
+    showSnackbar('Error generating page previews');
+  } finally {
+    loadingThumbnails.value = false;
+  }
+};
+
+// Parse page selection text and get array of page numbers
+const getSelectedPagesArray = () => {
+  if (!pageSelection.value.trim()) {
+    // Return all pages if selection is empty
+    return Array.from({ length: totalPages.value }, (_, i) => i + 1);
+  }
+  
+  const pages = new Set();
+  const parts = pageSelection.value.split(',');
+  
+  for (const part of parts) {
+    const trimmedPart = part.trim();
+    
+    if (trimmedPart.includes('-')) {
+      // Handle page range (e.g., "1-5")
+      const [start, end] = trimmedPart.split('-').map(num => parseInt(num.trim()));
+      if (!isNaN(start) && !isNaN(end) && start <= end) {
+        for (let i = start; i <= end; i++) {
+          if (i > 0 && i <= totalPages.value) {
+            pages.add(i);
+          }
+        }
+      }
+    } else {
+      // Handle single page
+      const pageNum = parseInt(trimmedPart);
+      if (!isNaN(pageNum) && pageNum > 0 && pageNum <= totalPages.value) {
+        pages.add(pageNum);
+      }
+    }
+  }
+  
+  return Array.from(pages).sort((a, b) => a - b);
+};
 
 </script>
 
@@ -603,4 +962,63 @@ const generateSummary = () => {
   box-shadow: none !important;
   transform: none !important;
 }
+
+/* Page thumbnail styling */
+.page-thumbnail-card {
+  cursor: pointer;
+  transition: all 0.2s ease;
+  border: 2px solid transparent;
+  overflow: hidden;
+  position: relative;
+}
+
+.page-thumbnail-card:hover {
+  transform: translateY(-3px);
+  box-shadow: 0 4px 8px rgba(0,0,0,0.1);
+}
+
+.page-thumbnail-card.selected {
+  border-color: var(--v-primary-base, #9D7BFC);
+  background-color: rgba(157, 123, 252, 0.05);
+}
+
+.page-thumbnail-container {
+  height: 80px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background-color: #f5f5f5;
+  transition: opacity 0.3s ease;
+}
+
+.page-thumbnail {
+  max-width: 100%;
+  max-height: 100%;
+  object-fit: contain;
+  transition: transform 0.2s ease;
+}
+
+.page-placeholder {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  height: 100%;
+  width: 100%;
+  background-color: #f8f8f8;
+}
+
+.check-icon {
+  position: absolute;
+  top: 4px;
+  right: 4px;
+  background-color: white;
+  border-radius: 50%;
+}
+
+/* Improve the selection toggle button group */
+.v-btn-toggle {
+  background-color: #f5f5f5;
+}
+
 </style>
