@@ -3,11 +3,11 @@
     <!-- Header -->
     <h1 class="text-h4 font-weight-bold text-primary mb-3 outfit outfit-bold" v-motion :initial="{ opacity: 0, y: 20 }"
       :enter="{ opacity: 1, y: 0, transition: { duration: 600 } }">
-      AI Summary Generator
+      AI Flashcard Generator
     </h1>
     <p class="text-subtitle-1 text-grey-darken-1 mb-6 outfit outfit-regular" v-motion :initial="{ opacity: 0, y: 20 }"
       :enter="{ opacity: 1, y: 0, transition: { duration: 600, delay: 200 } }">
-      Upload a document, paste your notes, or select a video to automatically generate summaries with AI.
+      Upload a document, paste your notes, or select a video to automatically generate flashcards with AI.
     </p>
 
     <!-- Tabs and Options -->
@@ -72,7 +72,7 @@
         <div class="button-container" style="margin: 12px 0;">
           <v-btn color="royal_blue" min-width="92" variant="outlined"
             class="custom-btn text-none animated-btn outfit outfit-medium" 
-            @click="generateSummary"
+            @click="generateFlashcard"
             :disabled="!documentFile" 
             rounded="xl">
             <span class="d-flex align-center">
@@ -95,7 +95,7 @@
           </v-textarea>
           <div class="button-container">
             <v-btn color="royal_blue" min-width="92" variant="outlined"
-              class="custom-btn text-none animated-btn outfit outfit-medium" @click="generateSummary"
+              class="custom-btn text-none animated-btn outfit outfit-medium" @click="generateFlashcard"
               :disabled="!textContent" rounded="xl">
               <span class="d-flex align-center">
                 Generate
@@ -119,7 +119,7 @@
         <div class="button-container" style="margin: 12px 0;">
           <v-btn color="royal_blue" min-width="92" variant="outlined"
             class="custom-btn text-none animated-btn outfit outfit-medium" 
-            @click="generateSummary"
+            @click="generateFlashcard"
             :disabled="!imageFile" 
             rounded="xl">
             <span class="d-flex align-center">
@@ -142,7 +142,7 @@
           </v-textarea>
           <div class="button-container">
             <v-btn color="royal_blue" min-width="92" variant="outlined"
-              class="custom-btn text-none animated-btn outfit outfit-medium" @click="generateSummary"
+              class="custom-btn text-none animated-btn outfit outfit-medium" @click="generateFlashcard"
               :disabled="!textContent" rounded="xl">
               <span class="d-flex align-center">
                 Generate
@@ -172,7 +172,7 @@
         <div class="button-container">
           <v-btn color="royal_blue" min-width="92" variant="outlined"
             class="custom-btn text-none animated-btn outfit outfit-medium" 
-            @click="generateSummary"
+            @click="generateFlashcard"
             :disabled="!videoFile" 
             rounded="xl">
             <span class="d-flex align-center">
@@ -190,7 +190,7 @@
     <v-overlay :model-value="loading" class="align-center justify-center">
       <v-card color="white" width="300" class="pa-4 rounded-xl text-center">
         <v-progress-circular indeterminate color="primary" size="64"></v-progress-circular>
-        <p class="mt-4">Generating your summary...</p>
+        <p class="mt-4">Generating your flashcards...</p>
       </v-card>
     </v-overlay>
 
@@ -207,9 +207,12 @@
 <script setup>
 import { ref } from 'vue';
 import FileUploader from '../common/FileUploader.vue';
-import { useRouter } from 'vue-router'; // Import useRouter
+import { useRouter } from 'vue-router';
+import { userAuth } from '~/store/userAuth';
+import Swal from 'sweetalert2';
   
-const router = useRouter(); // Initialize router
+const router = useRouter();
+const authStore = userAuth();// Initialize router
 
 const tab = ref('document'); // Default tab
 const sheet = ref(false);
@@ -260,27 +263,42 @@ const showSnackbar = (message) => {
   snackbar.value = true;
 };
 
-// Generate Summary
+// Check if the user is authenticated before allowing flashcard generation
+const checkAuth = () => {
+  if (!authStore.isLoggedIn) {
+    Swal.fire({
+      title: 'Authentication Required',
+      text: 'You need to login or sign up to generate flashcards',
+      icon: 'warning',
+      showCancelButton: true,
+      confirmButtonText: 'Login',
+      cancelButtonText: 'Sign Up'
+    }).then((result) => {
+      if (result.isConfirmed) {
+        // User chose to login
+        router.push('/auth');
+      } else if (result.dismiss === Swal.DismissReason.cancel) {
+        // User chose to sign up
+        router.push('/auth/sign-up');
+      }
+    });
+    return false;
+  }
+  return true;
+};
 
-const generateSummary = () => {
+// Generate Flashcards
+const generateFlashcard = () => {
+  if (!checkAuth()) return;
+  
   loading.value = true;
 
   // Simulate API call with timeout
   setTimeout(() => {
     loading.value = false;
-    showSnackbar('Summary generated successfully!');
+    showSnackbar('Flashcards generated successfully!');
   }, 2000);
 };
-
-// const generateQuiz = () => {
-//   loading.value = true;
-  
-//   // Simulate API call with timeout
-//   setTimeout(() => {
-//     loading.value = false;
-//     showSnackbar('Quiz generated successfully!');
-//   }, 2000);
-// };
 
 </script>
 
