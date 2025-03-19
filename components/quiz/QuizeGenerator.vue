@@ -72,17 +72,7 @@
         <p class="mt-2 animated-link">Looking for flashcards instead? Try the <nuxt-link to="/"
             style="text-decoration: none;"> AI Flashcard Generator</nuxt-link></p>
 
-          @file-selected="handleFileSelected('document', $event)"
-          @file-removed="handleFileRemoved('document')"
-          @error="showSnackbar"
-        />
-      
-        <v-row class="mt-2" align="center">
-          <v-col class="d-flex">
-            <p class="animated-link">Looking for flashcards instead? Try the 
-              <nuxt-link to="/" style="text-decoration: none;"> AI Flashcard Generator</nuxt-link>
-            </p>
-          </v-col>
+        <v-row> <!-- Add the missing opening <v-row> tag -->
           <!-- Conditionally render the 'Next' button -->
           <v-col class="d-flex justify-end">
             <v-btn class="text-blue rounded-xl" variant = "outlined" @click = "generateQuiz">
@@ -150,10 +140,7 @@
               style="text-decoration: none;"> AI Flashcard Generator</nuxt-link></p>
         </div>
 
-          @file-selected="handleFileSelected('image', $event)"
-          @file-removed="handleFileRemoved('image')"
-          @error="showSnackbar"
-        />
+        
         <v-row class="mt-2" align="center">
           <v-col class="d-flex">
             <p class="animated-link">Looking for flashcards instead? Try the 
@@ -264,9 +251,9 @@ const handleFileRemoved = (type) => {
   }
 };
 
-const generateQuiz = () => {
-    router.push('/quiz/review-quiz');
-};
+// const generateQuiz = () => {
+//     router.push('/quiz/review-quiz');
+// };
 
 // Show snackbar with custom message
 const showSnackbar = (message) => {
