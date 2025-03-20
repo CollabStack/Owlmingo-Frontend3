@@ -224,13 +224,13 @@ import { userAuth } from '~/store/userAuth';
 import { useSummaryStore } from '~/store/summaryStore';
 import { PDFDocument } from 'pdf-lib';
 import * as pdfjs from 'pdfjs-dist';
-<<<<<<<<< Temporary merge branch 1
+
 import Swal from 'sweetalert2';
-=========
+
 import { processFile } from '~/services/ocrService';
 import Swal from 'sweetalert2'; // Add this if not already imported
 import { userAuth } from '~/store/userAuth';
->>>>>>>>> Temporary merge branch 2
+
 
 // Set PDF.js worker
 const pdfjsWorker = await import('pdfjs-dist/build/pdf.worker.entry');
@@ -239,10 +239,10 @@ pdfjs.GlobalWorkerOptions.workerSrc = pdfjsWorker;
 // Initialize auth and router
 const router = useRouter();
 const authStore = userAuth();
-<<<<<<<<< Temporary merge branch 1
+
 const summaryStore = useSummaryStore();
 
-=========
+
 
 // Initialize auth on mounted with better error handling
 onMounted(async () => {
@@ -266,7 +266,7 @@ const isAuthenticated = computed(() => {
   return authStore.isLoggedIn && !!authStore.getToken();
 });
 
-const pdfSelector = ref(null); // Add this line to create the ref
+// const pdfSelector = ref(null); // Add this line to create the ref
 
 const tab = ref('document');
 const sheet = ref(false);
@@ -373,11 +373,9 @@ const showSnackbar = (message) => {
   snackbar.value = true;
 };
 
-<<<<<<<<< Temporary merge branch 1
+
 // Check if the user is authenticated before allowing summary generation
-=========
-// Add auth check function
->>>>>>>>> Temporary merge branch 2
+
 const checkAuth = () => {
   if (!authStore.isLoggedIn) {
     Swal.fire({
@@ -401,7 +399,7 @@ const checkAuth = () => {
   return true;
 };
 
-<<<<<<<<< Temporary merge branch 1
+
 // Generate Summary - Updated to use the getMergedPdf method and check authentication
 const generateSummary = async () => {
   // First check if user is authenticated
@@ -471,69 +469,7 @@ const generateSummary = async () => {
   } catch (error) {
     console.error('Error generating summary:', error);
     showSnackbar('Error generating summary: ' + (error.message || 'Unknown error'));
-=========
-// Generate Summary with better auth handling
-const generateSummary = async () => {
-  if (!isAuthenticated.value) {
-    Swal.fire({
-      title: 'Authentication Required',
-      text: 'Please log in to continue',
-      icon: 'warning',
-      showConfirmButton: true
-    }).then(() => {
-      router.push('/auth');
-    });
-    return;
-  }
 
-  try {
-    loading.value = true;
-
-    // Get fresh token before API request
-    const isValid = await authStore.checkTokenExpired();
-    if (!isValid) {
-      throw new Error('Authentication expired');
-    }
-
-    // Proceed with file processing...
-    if (isPdfFile.value && pdfSelector.value) {
-      const mergedPdfBlob = await pdfSelector.value.getMergedPdf();
-      if (mergedPdfBlob) {
-        const response = await processFile(mergedPdfBlob);
-        if (response.status === 'success') {
-          Swal.fire({
-            icon: 'success',
-            title: 'Success!',
-            text: 'Summary generated successfully',
-            timer: 2000,
-            showConfirmButton: false
-          });
-        } else {
-          throw new Error(response.message || 'Failed to generate summary');
-        }
-      }
-    } else if (imageFile.value) {
-      const response = await processFile(imageFile.value);
-      // ...rest of existing image handling...
-    } else if (textContent.value) {
-      // ...rest of existing text handling...
-    }
-
-  } catch (error) {
-    console.error('Error generating summary:', error);
-    
-    if (error.message?.includes('Authentication')) {
-      authStore.logout();
-      router.push('/auth');
-      return;
-    }
-
-    Swal.fire({
-      icon: 'error', 
-      title: 'Error',
-      text: error.message || 'Failed to generate summary'
-    });
->>>>>>>>> Temporary merge branch 2
   } finally {
     loading.value = false;
   }
