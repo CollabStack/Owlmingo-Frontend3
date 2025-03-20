@@ -220,11 +220,15 @@ import { ref, computed, watch, onMounted } from 'vue';
 import FileUploader from '../common/FileUploader.vue';
 import PdfPageSelector from './PdfPageSelector.vue';
 import { useRouter } from 'vue-router';
+import { userAuth } from '~/store/userAuth';
+import { useSummaryStore } from '~/store/summaryStore';
 import { PDFDocument } from 'pdf-lib';
 import * as pdfjs from 'pdfjs-dist';
+
 import { processFile } from '~/services/ocrService';
 import Swal from 'sweetalert2'; // Add this if not already imported
 import { userAuth } from '~/store/userAuth';
+
 
 // Set PDF.js worker
 const pdfjsWorker = await import('pdfjs-dist/build/pdf.worker.entry');
@@ -233,6 +237,7 @@ pdfjs.GlobalWorkerOptions.workerSrc = pdfjsWorker;
 // Initialize auth and router
 const router = useRouter();
 const authStore = userAuth();
+
 
 // Initialize auth on mounted with better error handling
 onMounted(async () => {
@@ -257,6 +262,7 @@ const isAuthenticated = computed(() => {
 });
 
 const pdfSelector = ref(null); // Add this line to create the ref
+
 const tab = ref('document');
 const sheet = ref(false);
 const snackbar = ref(false);
@@ -271,6 +277,7 @@ const pageSelection = ref('');
 const selectionMode = ref('text');
 const selectedPages = ref(new Set());
 const pdfDocRef = ref(null);
+const pdfSelector = ref(null);
 
 const options = ref([
   { label: 'Document', value: 'document' },
@@ -361,7 +368,9 @@ const showSnackbar = (message) => {
   snackbar.value = true;
 };
 
+
 // Add auth check function
+
 const checkAuth = () => {
   if (!authStore.isLoggedIn) {
     Swal.fire({
@@ -446,6 +455,7 @@ const generateSummary = async () => {
       title: 'Error',
       text: error.message || 'Failed to generate summary'
     });
+
   } finally {
     loading.value = false;
   }
