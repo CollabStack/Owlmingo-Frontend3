@@ -52,17 +52,9 @@ onBeforeMount( async () => {
   }
 
   if(hash.startsWith("#/token=")){
-    const encodedData = hash.replace("#/token=", "");
+    const token = hash.replace("#/token=", "");
     try {
-      let userData = decodeBase64(encodedData);
-      if (userData) {
-        console.log("User Data:", userData);
-        const response = await userAuthStore.telegramOAuth(userData);
-        console.log("SSO Response Page:", response);
-        if (response.status === 200) {
-          navigateTo("/");
-        }
-      }
+      userAuthStore.setToken(token);
     } catch (error) {
       console.error("Error decoding SSO Result:", error);
       Swal.fire({
