@@ -6,6 +6,8 @@ export async function processFile(file: File | Blob) {
   const config = useRuntimeConfig();
   const url = `${config.public.USER_PRIVATE_API}process-file`;
   
+  console.log('OCR Service - Starting file processing');
+  
   // Initialize auth if needed
   if (!authStore.isLoggedIn) {
     authStore.init();
@@ -29,6 +31,10 @@ export async function processFile(file: File | Blob) {
     const formData = new FormData();
     formData.append('file', file);
 
+    console.log('OCR Service - Sending request to:', url);
+    console.log('OCR Service - File type:', file.type);
+    console.log('OCR Service - File size:', file.size);
+    
     const response = await fetch(url, {
       method: 'POST',
       headers: {
@@ -38,16 +44,21 @@ export async function processFile(file: File | Blob) {
       credentials: 'include'
     });
 
+    console.log('OCR Service - Response status:', response.status);
+    
     if (!response.ok) {
       if (response.status === 401) {
         authStore.logout();
         throw new Error('Authentication expired');
       }
       const errorData = await response.json();
+      console.error('OCR Service - Error response:', errorData);
       throw new Error(errorData.message || 'Failed to process file');
     }
 
-    return await response.json();
+    const responseData = await response.json();
+    console.log('OCR Service - Response data:', JSON.stringify(responseData, null, 2));
+    return responseData;
 
   } catch (error) {
     console.error('OCR processing error:', error);
