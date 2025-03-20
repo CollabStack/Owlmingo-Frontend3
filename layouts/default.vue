@@ -1,7 +1,7 @@
 <template>
   <v-app>
     <!-- <v-app-bar> -->
-      <UserNavbar />
+      <UserNavbar v-if="!hideFooter" />
     <!-- </v-app-bar> -->
     <v-main>
       <transition name="fade" mode="out-in">
@@ -18,7 +18,7 @@
 import { useRoute } from 'vue-router';
 import { onBeforeMount } from 'vue';
 const route = useRoute();
-const hideFooter = computed(() => route.path === '/auth' || route.path === '/auth/sign-up');
+const hideFooter = computed(() => route.path === '/auth' || route.path === '/auth/sign-up' || route.path === '/quiz/do-quiz');
 
 // onBeforeMount(() => {
 //   const route = useRoute();
