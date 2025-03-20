@@ -44,4 +44,5 @@ export default defineNuxtRouteMiddleware(async (to) => {
     console.error('Auth middleware error:', error);
     return navigateTo('/auth');
   }
+  
 });
