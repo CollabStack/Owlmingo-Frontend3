@@ -11,7 +11,9 @@
 </template>
 
 <script setup lang="ts">
-import SummaryUpload from '~/components/summary/SummaryUpload.vue';
+
+import SummaryUpload from '~/components/summary/SmmaryUpload.vue';
+
 </script>
 
 <style scoped>

@@ -137,19 +137,11 @@
     };
 
     const googleOAuth = async () => {
-        const {$UserPublicAxios} = useNuxtApp(); // Use full Nuxt app instance
-        console.log('Google OAuth');
-        const response = await $UserPublicAxios.post('/google');
-        // console.log('Google OAuth Response:', response);
+        window.location.href = `${runtimeConfig.public.USER_PUBLIC_API}google`;
     };
 
     const githubOAuth = async () => {
-        console.log('Github OAuth');
-        const {$UserPublicAxios} = useNuxtApp(); // Use full Nuxt app instance
-        // const response = await $UserPublicAxios.get('/github');
-        window.location.href = "https://owlmingo-16f448c07f1f.herokuapp.com/api/v1/user/github";
-        console.log('Github OAuth Response:', response);
-
+        window.location.href = `${runtimeConfig.public.USER_PUBLIC_API}github`;
     };
 
     const gotoForgotPassword = () => {
