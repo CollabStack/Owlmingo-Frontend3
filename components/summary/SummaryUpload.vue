@@ -220,14 +220,20 @@ import { ref, computed, watch } from 'vue';
 import FileUploader from '../common/FileUploader.vue';
 import PdfPageSelector from './PdfPageSelector.vue';
 import { useRouter } from 'vue-router';
+import { userAuth } from '~/store/userAuth';
+import { useSummaryStore } from '~/store/summaryStore';
 import { PDFDocument } from 'pdf-lib';
 import * as pdfjs from 'pdfjs-dist';
+import Swal from 'sweetalert2';
 
 // Set PDF.js worker
 const pdfjsWorker = await import('pdfjs-dist/build/pdf.worker.entry');
 pdfjs.GlobalWorkerOptions.workerSrc = pdfjsWorker;
 
 const router = useRouter();
+const authStore = userAuth();
+const summaryStore = useSummaryStore();
+
 const tab = ref('document');
 const sheet = ref(false);
 const snackbar = ref(false);
@@ -242,6 +248,7 @@ const pageSelection = ref('');
 const selectionMode = ref('text');
 const selectedPages = ref(new Set());
 const pdfDocRef = ref(null);
+const pdfSelector = ref(null);
 
 const options = ref([
   { label: 'Document', value: 'document' },
@@ -332,34 +339,101 @@ const showSnackbar = (message) => {
   snackbar.value = true;
 };
 
-// Generate Summary - Updated to use the getMergedPdf method
+// Check if the user is authenticated before allowing summary generation
+const checkAuth = () => {
+  if (!authStore.isLoggedIn) {
+    Swal.fire({
+      title: 'Authentication Required',
+      text: 'You need to login or sign up to generate summaries',
+      icon: 'warning',
+      showCancelButton: true,
+      confirmButtonText: 'Login',
+      cancelButtonText: 'Sign Up'
+    }).then((result) => {
+      if (result.isConfirmed) {
+        // User chose to login
+        router.push('/auth');
+      } else if (result.dismiss === Swal.DismissReason.cancel) {
+        // User chose to sign up
+        router.push('/auth/sign-up');
+      }
+    });
+    return false;
+  }
+  return true;
+};
+
+// Generate Summary - Updated to use the getMergedPdf method and check authentication
 const generateSummary = async () => {
+  // First check if user is authenticated
+  if (!checkAuth()) return;
+  
   loading.value = true;
   
   try {
-    // For PDF files with page selection
-    if (isPdfFile.value && pdfSelector.value) {
-      const mergedPdfBlob = await pdfSelector.value.getMergedPdf();
-      
-      if (mergedPdfBlob) {
-        console.log('Merged PDF created with selected pages:', Array.from(selectedPages.value).sort((a, b) => a - b));
-        
-        // Here you would send the mergedPdfBlob to your API
-        // const formData = new FormData();
-        // formData.append('pdf', mergedPdfBlob, 'document.pdf');
-        // await fetch('/your-api-endpoint', { method: 'POST', body: formData });
-      }
+    let data;
+    let type;
+    
+    // Determine which type of content we're using based on the active tab
+    switch (tab.value) {
+      case 'document':
+        // For PDF files with page selection
+        if (isPdfFile.value && pdfSelector.value) {
+          const mergedPdfBlob = await pdfSelector.value.getMergedPdf();
+          
+          if (mergedPdfBlob) {
+            console.log('Merged PDF created with selected pages:', Array.from(selectedPages.value).sort((a, b) => a - b));
+            data = mergedPdfBlob;
+          } else {
+            data = documentFile.value;
+          }
+        } else {
+          data = documentFile.value;
+        }
+        type = 'document';
+        break;
+      case 'text':
+        data = textContent.value;
+        type = 'text';
+        break;
+      case 'image':
+        data = imageFile.value;
+        type = 'image';
+        break;
+      case 'link':
+        data = textContent.value;
+        type = 'link';
+        break;
+      case 'video':
+        data = videoFile.value;
+        type = 'video';
+        break;
     }
     
-    // Simulate API call with timeout (replace with actual API call)
-    setTimeout(() => {
-      loading.value = false;
+    // Call the summary store to generate the summary
+    const result = await summaryStore.generateSummary(data, type);
+    
+    if (!result.authenticated) {
+      // This shouldn't happen since we already checked auth, but just in case
+      checkAuth();
+      return;
+    }
+    
+    if (result.success) {
       showSnackbar('Summary generated successfully!');
-    }, 2000);
+      // Navigate to the summary view page with the generated summary
+      router.push({
+        path: '/summary/view',
+        query: { summary: JSON.stringify(result.data) }
+      });
+    } else {
+      showSnackbar('Failed to generate summary: ' + result.error);
+    }
   } catch (error) {
     console.error('Error generating summary:', error);
+    showSnackbar('Error generating summary: ' + (error.message || 'Unknown error'));
+  } finally {
     loading.value = false;
-    showSnackbar('Error generating summary');
   }
 };
 </script>

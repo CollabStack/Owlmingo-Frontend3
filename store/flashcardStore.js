@@ -2,21 +2,21 @@ import { defineStore } from 'pinia';
 import { useNuxtApp } from '#app';
 import { userAuth } from './userAuth';
 
-export const useQuizStore = defineStore('quizStore', {
+export const useFlashcardStore = defineStore('flashcardStore', {
   state: () => ({
     isGenerating: false,
-    currentQuiz: null,
-    quizzes: [],
+    currentDeck: null,
+    decks: [],
     error: null
   }),
   
   actions: {
     /**
-     * Generate a quiz using the auth-protected API
-     * @param {Object} data - The data to generate the quiz from (text, file, etc)
+     * Generate flashcards using the auth-protected API
+     * @param {Object} data - The data to generate the flashcards from (text, file, etc)
      * @param {String} type - The type of input (document, text, image, video, link)
      */
-    async generateQuiz(data, type) {
+    async generateFlashcards(data, type) {
       const authStore = userAuth();
       const { $UserPrivateAxios } = useNuxtApp();
       
@@ -31,7 +31,7 @@ export const useQuizStore = defineStore('quizStore', {
       
       try {
         let formData = new FormData();
-        let endpoint = '/quiz/generate';
+        let endpoint = '/flashcards/generate';
         
         // Prepare request based on type
         switch (type) {
@@ -41,21 +41,21 @@ export const useQuizStore = defineStore('quizStore', {
             } else {
               formData.append('file', data);
             }
-            endpoint = '/quiz/generate-from-file';
+            endpoint = '/flashcards/generate-from-file';
             break;
           case 'image':
             formData.append('file', data);
-            endpoint = '/quiz/generate-from-image';
+            endpoint = '/flashcards/generate-from-image';
             break;
           case 'video':
             formData.append('file', data);
-            endpoint = '/quiz/generate-from-video';
+            endpoint = '/flashcards/generate-from-video';
             break;
           case 'text':
             // For text-based input we use JSON instead of FormData
             break;
           case 'link':
-            endpoint = '/quiz/generate-from-url';
+            endpoint = '/flashcards/generate-from-url';
             break;
         }
         
@@ -68,14 +68,36 @@ export const useQuizStore = defineStore('quizStore', {
           }
         );
         
-        this.currentQuiz = response.data.data;
+        this.currentDeck = response.data.data;
         return { authenticated: true, success: true, data: response.data.data };
       } catch (error) {
-        console.error('Quiz generation error:', error);
-        this.error = error.response?.data?.message || 'Failed to generate quiz';
+        console.error('Flashcard generation error:', error);
+        this.error = error.response?.data?.message || 'Failed to generate flashcards';
         return { authenticated: true, success: false, error: this.error };
       } finally {
         this.isGenerating = false;
+      }
+    },
+    
+    /**
+     * Get all flashcard decks for the current user
+     */
+    async getDecks() {
+      const authStore = userAuth();
+      const { $UserPrivateAxios } = useNuxtApp();
+      
+      if (!authStore.isLoggedIn) {
+        return { authenticated: false };
+      }
+      
+      try {
+        const response = await $UserPrivateAxios.get('/flashcards');
+        this.decks = response.data.data;
+        return { authenticated: true, success: true, data: this.decks };
+      } catch (error) {
+        console.error('Error fetching flashcard decks:', error);
+        this.error = error.response?.data?.message || 'Failed to fetch flashcard decks';
+        return { authenticated: true, success: false, error: this.error };
       }
     }
   }

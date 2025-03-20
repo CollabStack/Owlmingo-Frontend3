@@ -2,21 +2,21 @@ import { defineStore } from 'pinia';
 import { useNuxtApp } from '#app';
 import { userAuth } from './userAuth';
 
-export const useQuizStore = defineStore('quizStore', {
+export const useSummaryStore = defineStore('summaryStore', {
   state: () => ({
     isGenerating: false,
-    currentQuiz: null,
-    quizzes: [],
+    currentSummary: null,
+    summaries: [],
     error: null
   }),
   
   actions: {
     /**
-     * Generate a quiz using the auth-protected API
-     * @param {Object} data - The data to generate the quiz from (text, file, etc)
+     * Generate a summary using the auth-protected API
+     * @param {Object} data - The data to generate the summary from (text, file, etc)
      * @param {String} type - The type of input (document, text, image, video, link)
      */
-    async generateQuiz(data, type) {
+    async generateSummary(data, type) {
       const authStore = userAuth();
       const { $UserPrivateAxios } = useNuxtApp();
       
@@ -31,7 +31,7 @@ export const useQuizStore = defineStore('quizStore', {
       
       try {
         let formData = new FormData();
-        let endpoint = '/quiz/generate';
+        let endpoint = '/summary/generate';
         
         // Prepare request based on type
         switch (type) {
@@ -41,21 +41,22 @@ export const useQuizStore = defineStore('quizStore', {
             } else {
               formData.append('file', data);
             }
-            endpoint = '/quiz/generate-from-file';
+            endpoint = '/summary/generate-from-file';
             break;
           case 'image':
             formData.append('file', data);
-            endpoint = '/quiz/generate-from-image';
+            endpoint = '/summary/generate-from-image';
             break;
           case 'video':
             formData.append('file', data);
-            endpoint = '/quiz/generate-from-video';
+            endpoint = '/summary/generate-from-video';
             break;
           case 'text':
-            // For text-based input we use JSON instead of FormData
+            // formData.append('content', data);
             break;
           case 'link':
-            endpoint = '/quiz/generate-from-url';
+            // formData.append('url', data);
+            endpoint = '/summary/generate-from-url';
             break;
         }
         
@@ -68,11 +69,11 @@ export const useQuizStore = defineStore('quizStore', {
           }
         );
         
-        this.currentQuiz = response.data.data;
+        this.currentSummary = response.data.data;
         return { authenticated: true, success: true, data: response.data.data };
       } catch (error) {
-        console.error('Quiz generation error:', error);
-        this.error = error.response?.data?.message || 'Failed to generate quiz';
+        console.error('Summary generation error:', error);
+        this.error = error.response?.data?.message || 'Failed to generate summary';
         return { authenticated: true, success: false, error: this.error };
       } finally {
         this.isGenerating = false;
