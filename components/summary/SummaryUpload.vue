@@ -10,6 +10,8 @@
       Upload a document, paste your notes, or select a video to automatically generate summaries with AI.
     </p>
 
+    <!-- Remove the login prompt alert banner, will use popup instead -->
+
     <!-- Tabs and Options -->
     <v-row class="align-center" v-motion :initial="{ opacity: 0, y: 20 }"
       :enter="{ opacity: 1, y: 0, transition: { duration: 600, delay: 300 } }">
@@ -387,17 +389,8 @@ const checkAuth = () => {
 
 // Generate Summary with better auth handling
 const generateSummary = async () => {
-  if (!isAuthenticated.value) {
-    Swal.fire({
-      title: 'Authentication Required',
-      text: 'Please log in to continue',
-      icon: 'warning',
-      showConfirmButton: true
-    }).then(() => {
-      router.push('/auth');
-    });
-    return;
-  }
+  // Use the checkAuth function which shows the alert dialog
+  if (!checkAuth()) return;
 
   try {
     loading.value = true;

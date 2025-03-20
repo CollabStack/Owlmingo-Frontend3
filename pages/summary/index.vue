@@ -13,9 +13,10 @@
 <script setup lang="ts">
 import SummaryUpload from '~/components/summary/SummaryUpload.vue';
 
-definePageMeta({
-  middleware: ['auth']
-});
+// Remove the auth middleware to prevent automatic redirects
+// definePageMeta({
+//   middleware: ['auth']
+// });
 </script>
 
 <style scoped>
