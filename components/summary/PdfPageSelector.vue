@@ -96,15 +96,18 @@
 import { ref, reactive, watch, onMounted, computed } from 'vue';
 import * as pdfjs from 'pdfjs-dist';
 
-// Set PDF.js worker if not already set
-try {
-  if (!pdfjs.GlobalWorkerOptions.workerSrc) {
-    const pdfjsWorker = await import('pdfjs-dist/build/pdf.worker.entry');
-    pdfjs.GlobalWorkerOptions.workerSrc = pdfjsWorker;
+// Fix PDF.js worker setup
+onMounted(async () => {
+  try {
+    if (!pdfjs.GlobalWorkerOptions.workerSrc) {
+      const pdfjsWorker = await import('pdfjs-dist/build/pdf.worker.entry');
+      pdfjs.GlobalWorkerOptions.workerSrc = pdfjsWorker.default;
+    }
+    generateThumbnails();
+  } catch (error) {
+    console.error('Could not set PDF worker:', error);
   }
-} catch (error) {
-  console.warn('Could not set PDF worker:', error);
-}
+});
 
 const props = defineProps({
   file: {
@@ -194,30 +197,19 @@ const generateThumbnails = async () => {
     const pdf = await loadingTask.promise;
     const maxPages = Math.min(props.totalPages, 50); // Limit to 50 pages
     
-    // Process pages in a more optimized way
-    for (let i = 0; i < maxPages; i++) {
-      try {
-        const page = await pdf.getPage(i + 1);
-        const viewport = page.getViewport({ scale: 0.5 });
-        
-        // Create canvas
-        const canvas = document.createElement('canvas');
-        const context = canvas.getContext('2d');
-        canvas.width = viewport.width;
-        canvas.height = viewport.height;
-        
-        // Render page to canvas
-        await page.render({
-          canvasContext: context,
-          viewport: viewport
-        }).promise;
-        
-        // Convert canvas to base64 image (lower quality for better performance)
-        thumbnailsData.value[i] = canvas.toDataURL('image/jpeg', 0.4);
-      } catch (err) {
-        console.warn(`Error generating thumbnail for page ${i + 1}:`, err);
-        thumbnailsData.value[i] = null;
+    // Process pages in batches for better performance
+    const batchSize = 5;
+    for (let i = 0; i < maxPages; i += batchSize) {
+      const pagePromises = [];
+      
+      // Create batch of page render promises
+      for (let j = 0; j < batchSize && i + j < maxPages; j++) {
+        const pageIndex = i + j;
+        pagePromises.push(renderPage(pdf, pageIndex + 1, pageIndex));
       }
+      
+      // Wait for batch to complete
+      await Promise.all(pagePromises);
     }
   } catch (error) {
     console.error('Error generating thumbnails:', error);
@@ -226,10 +218,30 @@ const generateThumbnails = async () => {
   }
 };
 
-// Initialize thumbnails immediately without delay
-onMounted(() => {
-  generateThumbnails();
-});
+// Helper function to render a single page thumbnail
+const renderPage = async (pdf, pageNum, index) => {
+  try {
+    const page = await pdf.getPage(pageNum);
+    const viewport = page.getViewport({ scale: 0.5 });
+    
+    // Create canvas
+    const canvas = document.createElement('canvas');
+    const context = canvas.getContext('2d');
+    canvas.width = viewport.width;
+    canvas.height = viewport.height;
+    
+    // Render page to canvas
+    await page.render({
+      canvasContext: context,
+      viewport: viewport
+    }).promise;
+    
+    // Convert canvas to base64 image (lower quality for better performance)
+    thumbnailsData.value[index] = canvas.toDataURL('image/jpeg', 0.4);
+  } catch (err) {
+    console.warn(`Error generating thumbnail for page ${pageNum}:`, err);
+  }
+};
 </script>
 
 <style scoped>
