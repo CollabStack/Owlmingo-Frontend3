@@ -224,10 +224,13 @@ import { userAuth } from '~/store/userAuth';
 import { useSummaryStore } from '~/store/summaryStore';
 import { PDFDocument } from 'pdf-lib';
 import * as pdfjs from 'pdfjs-dist';
-
+<<<<<<<<< Temporary merge branch 1
+import Swal from 'sweetalert2';
+=========
 import { processFile } from '~/services/ocrService';
 import Swal from 'sweetalert2'; // Add this if not already imported
 import { userAuth } from '~/store/userAuth';
+>>>>>>>>> Temporary merge branch 2
 
 // Set PDF.js worker
 const pdfjsWorker = await import('pdfjs-dist/build/pdf.worker.entry');
@@ -236,7 +239,10 @@ pdfjs.GlobalWorkerOptions.workerSrc = pdfjsWorker;
 // Initialize auth and router
 const router = useRouter();
 const authStore = userAuth();
+<<<<<<<<< Temporary merge branch 1
+const summaryStore = useSummaryStore();
 
+=========
 
 // Initialize auth on mounted with better error handling
 onMounted(async () => {
@@ -367,9 +373,12 @@ const showSnackbar = (message) => {
   snackbar.value = true;
 };
 
-
+<<<<<<<<< Temporary merge branch 1
+// Check if the user is authenticated before allowing summary generation
+=========
 // Add auth check function
-
+>>>>>>>>> Temporary merge branch 2
+const checkAuth = () => {
   if (!authStore.isLoggedIn) {
     Swal.fire({
       title: 'Authentication Required',
@@ -392,6 +401,77 @@ const showSnackbar = (message) => {
   return true;
 };
 
+<<<<<<<<< Temporary merge branch 1
+// Generate Summary - Updated to use the getMergedPdf method and check authentication
+const generateSummary = async () => {
+  // First check if user is authenticated
+  if (!checkAuth()) return;
+  
+  loading.value = true;
+  
+  try {
+    let data;
+    let type;
+    
+    // Determine which type of content we're using based on the active tab
+    switch (tab.value) {
+      case 'document':
+        // For PDF files with page selection
+        if (isPdfFile.value && pdfSelector.value) {
+          const mergedPdfBlob = await pdfSelector.value.getMergedPdf();
+          
+          if (mergedPdfBlob) {
+            console.log('Merged PDF created with selected pages:', Array.from(selectedPages.value).sort((a, b) => a - b));
+            data = mergedPdfBlob;
+          } else {
+            data = documentFile.value;
+          }
+        } else {
+          data = documentFile.value;
+        }
+        type = 'document';
+        break;
+      case 'text':
+        data = textContent.value;
+        type = 'text';
+        break;
+      case 'image':
+        data = imageFile.value;
+        type = 'image';
+        break;
+      case 'link':
+        data = textContent.value;
+        type = 'link';
+        break;
+      case 'video':
+        data = videoFile.value;
+        type = 'video';
+        break;
+    }
+    
+    // Call the summary store to generate the summary
+    const result = await summaryStore.generateSummary(data, type);
+    
+    if (!result.authenticated) {
+      // This shouldn't happen since we already checked auth, but just in case
+      checkAuth();
+      return;
+    }
+    
+    if (result.success) {
+      showSnackbar('Summary generated successfully!');
+      // Navigate to the summary view page with the generated summary
+      router.push({
+        path: '/summary/view',
+        query: { summary: JSON.stringify(result.data) }
+      });
+    } else {
+      showSnackbar('Failed to generate summary: ' + result.error);
+    }
+  } catch (error) {
+    console.error('Error generating summary:', error);
+    showSnackbar('Error generating summary: ' + (error.message || 'Unknown error'));
+=========
 // Generate Summary with better auth handling
 const generateSummary = async () => {
   if (!isAuthenticated.value) {
@@ -453,7 +533,7 @@ const generateSummary = async () => {
       title: 'Error',
       text: error.message || 'Failed to generate summary'
     });
-
+>>>>>>>>> Temporary merge branch 2
   } finally {
     loading.value = false;
   }
