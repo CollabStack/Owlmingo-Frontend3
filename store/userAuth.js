@@ -42,7 +42,7 @@ export const userAuth = defineStore('userAuth', {
                 expires: 7, // 7 days
                 path: '/',
                 secure: process.env.NODE_ENV === 'production',
-                sameSite: 'Lax' // Important for cross-site requests
+                // sameSite: 'Lax' // Important for cross-site requests
             });
             
             // Also store in localStorage as backup
@@ -87,7 +87,7 @@ export const userAuth = defineStore('userAuth', {
             console.log("password", password);
             const {$UserPublicAxios} = useNuxtApp();
             try {
-                const response = await $UserPublicAxios.post('/login', {
+                const response = await $UserPublicAxios.post('login', {
                     email: email,
                     password: password
                 });
