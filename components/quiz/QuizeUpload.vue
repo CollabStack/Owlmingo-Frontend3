@@ -193,7 +193,7 @@
         <div class="button-container" style="margin: 12px 0;">
           <v-btn color="royal_blue" min-width="92" variant="outlined"
             class="custom-btn text-none animated-btn outfit outfit-medium" 
-            @click="generateQuiz"
+            @click="generateSumary"
             :disabled="!videoFile" 
             rounded="xl">
             <span class="d-flex align-center">
@@ -226,25 +226,48 @@
 </template>
 
 <script setup>
-import { ref, computed } from 'vue';
+import { ref, computed, watch, onMounted } from 'vue';
 import FileUploader from '../common/FileUploader.vue';
 import PdfPageSelector from '../summary/PdfPageSelector.vue';
 import { useRouter } from 'vue-router';
-import { userAuth } from '~/store/userAuth';
-import { useQuizStore } from '~/store/quizStore';
 import { PDFDocument } from 'pdf-lib';
 import * as pdfjs from 'pdfjs-dist';
-import Swal from 'sweetalert2';
+import { processFile } from '~/services/ocrService';
+import Swal from 'sweetalert2'; // Add this if not already imported
+import { userAuth } from '~/store/userAuth';
 
 // Set PDF.js worker
 const pdfjsWorker = await import('pdfjs-dist/build/pdf.worker.entry');
 pdfjs.GlobalWorkerOptions.workerSrc = pdfjsWorker;
-  
+
+// Initialize auth and router
 const router = useRouter();
 const authStore = userAuth();
-const quizStore = useQuizStore();
 
-const tab = ref('document'); // Default tab
+// Initialize auth on mounted with better error handling
+onMounted(async () => {
+  try {
+    // Ensure auth is initialized
+    authStore.init();
+    
+    // Check token validity silently, don't redirect here
+    const isValid = await authStore.checkTokenExpired();
+    if (!isValid) {
+      console.warn('Token validation failed in component');
+      // Don't redirect - let middleware handle it
+    }
+  } catch (error) {
+    console.error('Auth initialization error:', error);
+  }
+});
+
+// Use a more reliable auth check without redirects
+const isAuthenticated = computed(() => {
+  return authStore.isLoggedIn && !!authStore.getToken();
+});
+
+const pdfSelector = ref(null); // Add this line to create the ref
+const tab = ref('document');
 const sheet = ref(false);
 const snackbar = ref(false);
 const snackbarMessage = ref('');
@@ -258,7 +281,6 @@ const pageSelection = ref('');
 const selectionMode = ref('text');
 const selectedPages = ref(new Set());
 const pdfDocRef = ref(null);
-const pdfSelector = ref(null);
 
 const options = ref([
   { label: 'Document', value: 'document' },
@@ -349,12 +371,12 @@ const showSnackbar = (message) => {
   snackbar.value = true;
 };
 
-// Check if the user is authenticated before allowing quiz generation
+// Add auth check function
 const checkAuth = () => {
   if (!authStore.isLoggedIn) {
     Swal.fire({
       title: 'Authentication Required',
-      text: 'You need to login or sign up to generate quizzes',
+      text: 'You need to login or sign up to generate summaries',
       icon: 'warning',
       showCancelButton: true,
       confirmButtonText: 'Login',
@@ -373,75 +395,58 @@ const checkAuth = () => {
   return true;
 };
 
-// Generate Quiz
+// Generate Summary with better auth handling
 const generateQuiz = async () => {
-  // First check if user is authenticated
+  // Use the checkAuth function which shows the alert dialog
   if (!checkAuth()) return;
-  
-  loading.value = true;
-  
+
   try {
-    let data;
-    let type;
-    
-    // Determine which type of content we're using based on the active tab
-    switch (tab.value) {
-      case 'document':
-        // For PDF files with page selection
-        if (isPdfFile.value && pdfSelector.value) {
-          const mergedPdfBlob = await pdfSelector.value.getMergedPdf();
-          
-          if (mergedPdfBlob) {
-            console.log('Merged PDF created with selected pages:', Array.from(selectedPages.value).sort((a, b) => a - b));
-            data = mergedPdfBlob;
-          } else {
-            data = documentFile.value;
-          }
-        } else {
-          data = documentFile.value;
-        }
-        type = 'document';
-        break;
-      case 'text':
-        data = textContent.value;
-        type = 'text';
-        break;
-      case 'image':
-        data = imageFile.value;
-        type = 'image';
-        break;
-      case 'link':
-        data = textContent.value;
-        type = 'link';
-        break;
-      case 'video':
-        data = videoFile.value;
-        type = 'video';
-        break;
+    loading.value = true;
+
+    // Get fresh token before API request
+    const isValid = await authStore.checkTokenExpired();
+    if (!isValid) {
+      throw new Error('Authentication expired');
     }
+
+    // Proceed with file processing...
+    if (isPdfFile.value && pdfSelector.value) {
+      const mergedPdfBlob = await pdfSelector.value.getMergedPdf();
+      if (mergedPdfBlob) {
+        const response = await processFile(mergedPdfBlob);
+        if (response.status === 'success') {
+          Swal.fire({
+            icon: 'success',
+            title: 'Success!',
+            text: 'Summary generated successfully',
+            timer: 2000,
+            showConfirmButton: false
+          });
+        } else {
+          throw new Error(response.message || 'Failed to generate summary');
+        }
+      }
+    } else if (imageFile.value) {
+      const response = await processFile(imageFile.value);
+      // ...rest of existing image handling...
+    } else if (textContent.value) {
+      // ...rest of existing text handling...
+    }
+
+  } catch (error) {
+    console.error('Error generating summary:', error);
     
-    // Call the quiz store to generate the quiz
-    const result = await quizStore.generateQuiz(data, type);
-    
-    if (!result.authenticated) {
-      // This shouldn't happen since we already checked auth, but just in case
-      checkAuth();
+    if (error.message?.includes('Authentication')) {
+      authStore.logout();
+      router.push('/auth');
       return;
     }
-    
-    if (result.success) {
-      showSnackbar('Quiz generated successfully!');
-      // Navigate to the quiz page with the generated quiz
-      router.push({
-        path: '/quiz/do-quiz',
-        query: { questions: JSON.stringify(result.data.questions) }
-      });
-    } else {
-      showSnackbar('Failed to generate quiz: ' + result.error);
-    }
-  } catch (error) {
-    console.error('Error generating quiz:', error);
-    showSnackbar('Error generating quiz: ' + (error.message || 'Unknown error'));
+
+    Swal.fire({
+      icon: 'error', 
+      title: 'Error',
+      text: error.message || 'Failed to generate summary'
+    });
   } finally {
     loading.value = false;
   }
