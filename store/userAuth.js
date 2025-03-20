@@ -6,7 +6,8 @@ export const userAuth = defineStore('userAuth', {
     state: () => ({
         token: Cookies.get('token') || null,
         user: null, 
-        isLoggedIn: false,
+        isLoggedIn: !!Cookies.get('token'),
+        tokenInitialized: false // Add a flag to track initialization
     }),
     actions: {
         // User management methods
@@ -14,13 +15,56 @@ export const userAuth = defineStore('userAuth', {
             this.user = user;
         },
         
+        // Add initialization method
+        init() {
+            if (this.tokenInitialized) return; // Prevent multiple initializations
+            
+            const token = this.getToken();
+            if (token) {
+                this.token = token;
+                this.isLoggedIn = true;
+                this.tokenInitialized = true;
+                
+                // Add a timeout to allow component mount before refresh
+                setTimeout(() => {
+                    this.refreshToken();
+                }, 300);
+            }
+        },
+
         setToken(token) {
             this.token = token;
-            Cookies.set('token', token);
+            this.isLoggedIn = true;
+            this.tokenInitialized = true;
+            
+            // Use more complete cookie options
+            Cookies.set('token', token, { 
+                expires: 7, // 7 days
+                path: '/',
+                secure: process.env.NODE_ENV === 'production',
+                sameSite: 'Lax' // Important for cross-site requests
+            });
+            
+            // Also store in localStorage as backup
+            localStorage.setItem('auth_token_backup', token);
         },
         
         getToken() {
-            return Cookies.get('token');
+            // Try to get token from cookie first, then from localStorage as backup
+            let token = Cookies.get('token');
+            if (!token) {
+                token = localStorage.getItem('auth_token_backup');
+                // If found in localStorage but not in cookies, restore the cookie
+                if (token) {
+                    Cookies.set('token', token, { 
+                        expires: 7,
+                        path: '/',
+                        secure: process.env.NODE_ENV === 'production',
+                        sameSite: 'Lax'
+                    });
+                }
+            }
+            return token;
         },
         
         getUser() {
@@ -274,7 +318,9 @@ export const userAuth = defineStore('userAuth', {
             this.user = null;
             this.token = null;
             this.isLoggedIn = false;
-            Cookies.remove('token');
+            this.tokenInitialized = false;
+            Cookies.remove('token', { path: '/' });
+            localStorage.removeItem('auth_token_backup');
         },
 
         async telegramOAuth(data) {
@@ -303,43 +349,62 @@ export const userAuth = defineStore('userAuth', {
         },
         
         async refreshToken() {
-            try{
-                const {$UserPrivateAxios} = useNuxtApp(); // Use full Nuxt app instance
+            try {
+                const {$UserPrivateAxios} = useNuxtApp();
                 const response = await $UserPrivateAxios.post('/refresh-token');
-                const token = response.data.data['token'];
-                if (!token) {
-                    this.logout();
+                
+                if (!response.data || !response.data.data || !response.data.data.token) {
+                    console.error('Invalid refresh token response', response);
                     return;
                 }
+                
+                const token = response.data.data.token;
                 this.setToken(token);
-            }catch(error){
-                console.log("Refresh Token Error: ", error);
-                this.logout();
+                
+                // Schedule next token refresh (every 15 minutes)
+                setTimeout(() => {
+                    this.refreshToken();
+                }, 15 * 60 * 1000);
+                
+                return token;
+            } catch (error) {
+                console.error("Refresh Token Error:", error);
+                // Don't logout on refresh failures - just try again later
+                setTimeout(() => {
+                    this.refreshToken();
+                }, 60 * 1000);
             }
         },
         
         async checkTokenExpired() {
-            this.token = this.getToken();
-            if (!this.token) {
-              this.logout();
-              return false;
-            }
-          
-            try {
-              // Split the JWT token and decode the payload
-              const payloadBase64 = this.token.split('.')[1]; // Get the payload part
-              const payload = JSON.parse(atob(payloadBase64)); // Decode and parse it
-          
-              const currentTime = Date.now() / 1000; // Current time in seconds
-              if (payload.exp && payload.exp < currentTime) {
-                this.logout(); // Token expired, log out the user
+            let token = this.getToken();
+            if (!token) {
                 return false;
-              }
-              this.isLoggedIn = true;
-              return true; // Token is valid
+            }
+            
+            try {
+                const parts = token.split('.');
+                if (parts.length !== 3) {
+                    throw new Error('Invalid token format');
+                }
+                
+                const payload = JSON.parse(atob(parts[1]));
+                const currentTime = Math.floor(Date.now() / 1000);
+                
+                // If token is expired or close to expiry, refresh it
+                if (!payload.exp || payload.exp < currentTime) {
+                    console.log('Token expired, getting new one');
+                    token = await this.refreshToken();
+                    return !!token;
+                } else if (payload.exp - currentTime < 900) { // 15 minutes
+                    console.log('Token expiring soon, refreshing');
+                    this.refreshToken(); // Don't await, let it refresh in background
+                }
+                
+                return true;
             } catch (error) {
-              this.logout(); // Logout on invalid token
-              return false;
+                console.error('Token validation error:', error);
+                return false;
             }
         },
         

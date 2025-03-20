@@ -11,9 +11,11 @@
 </template>
 
 <script setup lang="ts">
-
 import SummaryUpload from '~/components/summary/SummaryUpload.vue';
 
+definePageMeta({
+  middleware: ['auth']
+});
 </script>
 
 <style scoped>

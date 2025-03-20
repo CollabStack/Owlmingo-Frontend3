@@ -216,18 +216,47 @@
 </template>
 
 <script setup>
-import { ref, computed, watch } from 'vue';
+import { ref, computed, watch, onMounted } from 'vue';
 import FileUploader from '../common/FileUploader.vue';
 import PdfPageSelector from './PdfPageSelector.vue';
 import { useRouter } from 'vue-router';
 import { PDFDocument } from 'pdf-lib';
 import * as pdfjs from 'pdfjs-dist';
+import { processFile } from '~/services/ocrService';
+import Swal from 'sweetalert2'; // Add this if not already imported
+import { userAuth } from '~/store/userAuth';
 
 // Set PDF.js worker
 const pdfjsWorker = await import('pdfjs-dist/build/pdf.worker.entry');
 pdfjs.GlobalWorkerOptions.workerSrc = pdfjsWorker;
 
+// Initialize auth and router
 const router = useRouter();
+const authStore = userAuth();
+
+// Initialize auth on mounted with better error handling
+onMounted(async () => {
+  try {
+    // Ensure auth is initialized
+    authStore.init();
+    
+    // Check token validity silently, don't redirect here
+    const isValid = await authStore.checkTokenExpired();
+    if (!isValid) {
+      console.warn('Token validation failed in component');
+      // Don't redirect - let middleware handle it
+    }
+  } catch (error) {
+    console.error('Auth initialization error:', error);
+  }
+});
+
+// Use a more reliable auth check without redirects
+const isAuthenticated = computed(() => {
+  return authStore.isLoggedIn && !!authStore.getToken();
+});
+
+const pdfSelector = ref(null); // Add this line to create the ref
 const tab = ref('document');
 const sheet = ref(false);
 const snackbar = ref(false);
@@ -332,34 +361,93 @@ const showSnackbar = (message) => {
   snackbar.value = true;
 };
 
-// Generate Summary - Updated to use the getMergedPdf method
+// Add auth check function
+const checkAuth = () => {
+  if (!authStore.isLoggedIn) {
+    Swal.fire({
+      title: 'Authentication Required',
+      text: 'You need to login or sign up to generate summaries',
+      icon: 'warning',
+      showCancelButton: true,
+      confirmButtonText: 'Login',
+      cancelButtonText: 'Sign Up'
+    }).then((result) => {
+      if (result.isConfirmed) {
+        // User chose to login
+        router.push('/auth');
+      } else if (result.dismiss === Swal.DismissReason.cancel) {
+        // User chose to sign up
+        router.push('/auth/sign-up');
+      }
+    });
+    return false;
+  }
+  return true;
+};
+
+// Generate Summary with better auth handling
 const generateSummary = async () => {
-  loading.value = true;
-  
+  if (!isAuthenticated.value) {
+    Swal.fire({
+      title: 'Authentication Required',
+      text: 'Please log in to continue',
+      icon: 'warning',
+      showConfirmButton: true
+    }).then(() => {
+      router.push('/auth');
+    });
+    return;
+  }
+
   try {
-    // For PDF files with page selection
+    loading.value = true;
+
+    // Get fresh token before API request
+    const isValid = await authStore.checkTokenExpired();
+    if (!isValid) {
+      throw new Error('Authentication expired');
+    }
+
+    // Proceed with file processing...
     if (isPdfFile.value && pdfSelector.value) {
       const mergedPdfBlob = await pdfSelector.value.getMergedPdf();
-      
       if (mergedPdfBlob) {
-        console.log('Merged PDF created with selected pages:', Array.from(selectedPages.value).sort((a, b) => a - b));
-        
-        // Here you would send the mergedPdfBlob to your API
-        // const formData = new FormData();
-        // formData.append('pdf', mergedPdfBlob, 'document.pdf');
-        // await fetch('/your-api-endpoint', { method: 'POST', body: formData });
+        const response = await processFile(mergedPdfBlob);
+        if (response.status === 'success') {
+          Swal.fire({
+            icon: 'success',
+            title: 'Success!',
+            text: 'Summary generated successfully',
+            timer: 2000,
+            showConfirmButton: false
+          });
+        } else {
+          throw new Error(response.message || 'Failed to generate summary');
+        }
       }
+    } else if (imageFile.value) {
+      const response = await processFile(imageFile.value);
+      // ...rest of existing image handling...
+    } else if (textContent.value) {
+      // ...rest of existing text handling...
     }
-    
-    // Simulate API call with timeout (replace with actual API call)
-    setTimeout(() => {
-      loading.value = false;
-      showSnackbar('Summary generated successfully!');
-    }, 2000);
+
   } catch (error) {
     console.error('Error generating summary:', error);
+    
+    if (error.message?.includes('Authentication')) {
+      authStore.logout();
+      router.push('/auth');
+      return;
+    }
+
+    Swal.fire({
+      icon: 'error', 
+      title: 'Error',
+      text: error.message || 'Failed to generate summary'
+    });
+  } finally {
     loading.value = false;
-    showSnackbar('Error generating summary');
   }
 };
 </script>
