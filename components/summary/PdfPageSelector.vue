@@ -93,8 +93,9 @@
 </template>
 
 <script setup>
-import { ref, reactive, watch, onMounted, computed } from 'vue';
+import { ref, reactive, watch, onMounted, computed, nextTick } from 'vue';
 import * as pdfjs from 'pdfjs-dist';
+import { PDFDocument } from 'pdf-lib'; 
 
 // Fix PDF.js worker setup
 onMounted(async () => {
@@ -103,7 +104,10 @@ onMounted(async () => {
       const pdfjsWorker = await import('pdfjs-dist/build/pdf.worker.entry');
       pdfjs.GlobalWorkerOptions.workerSrc = pdfjsWorker.default;
     }
-    generateThumbnails();
+    // Wait a brief moment to ensure component is fully mounted
+    setTimeout(() => {
+      generateThumbnails();
+    }, 100);
   } catch (error) {
     console.error('Could not set PDF worker:', error);
   }
@@ -150,6 +154,25 @@ watch(() => props.selectedPages, (newValue) => {
   }
 }, { deep: true });
 
+// Watch for changes to the file prop to regenerate thumbnails when a new file is uploaded
+watch(() => props.file, (newFile, oldFile) => {
+  // Only regenerate if the file has actually changed (compare by name to be safe)
+  if (newFile && (!oldFile || newFile.name !== oldFile.name)) {
+    console.log('File changed, regenerating thumbnails');
+    // Reset thumbnails data
+    thumbnailsData.value = [];
+    loadingThumbnails.value = false;
+    
+    // Force Vue to rerender by using nextTick
+    nextTick(() => {
+      // Call generate thumbnails with a small delay
+      setTimeout(() => {
+        generateThumbnails();
+      }, 200);
+    });
+  }
+}, { immediate: true });
+
 // Toggle selection of a page - optimized for immediate response
 const togglePageSelection = (pageNum) => {
   if (internalState.selectedPages.has(pageNum)) {
@@ -183,34 +206,63 @@ const clearPageSelection = () => {
   emit('update:selectedPages', new Set());
 };
 
-// Generate thumbnails with error handling - optimized for performance
+// Generate thumbnails with improved error handling and retry mechanism
 const generateThumbnails = async () => {
-  if (loadingThumbnails.value || thumbnailsData.value.length > 0) return;
+  if (loadingThumbnails.value || !props.file) return;
   
+  console.log('Starting thumbnail generation for file:', props.fileName);
   loadingThumbnails.value = true;
   thumbnailsData.value = new Array(props.totalPages).fill(null);
   
   try {
-    // Load the PDF using PDF.js
+    // Load the PDF using PDF.js with explicit type checking
     const arrayBuffer = await props.file.arrayBuffer();
-    const loadingTask = pdfjs.getDocument({ data: arrayBuffer });
+    
+    // Verify we have valid data
+    if (!arrayBuffer || arrayBuffer.byteLength === 0) {
+      throw new Error('Empty file data');
+    }
+    
+    // Create a Uint8Array from arrayBuffer for PDF.js
+    const uint8Array = new Uint8Array(arrayBuffer);
+    
+    // Load the PDF with extra options for robustness
+    const loadingTask = pdfjs.getDocument({
+      data: uint8Array,
+      cMapUrl: 'https://cdn.jsdelivr.net/npm/pdfjs-dist@2.16.105/cmaps/',
+      cMapPacked: true,
+      disableFontFace: true, // Prevent font loading issues
+    });
+    
     const pdf = await loadingTask.promise;
     const maxPages = Math.min(props.totalPages, 50); // Limit to 50 pages
     
-    // Process pages in batches for better performance
-    const batchSize = 5;
+    console.log(`PDF loaded successfully. Processing ${maxPages} pages.`);
+    
+    // Clear any existing thumbnails
+    thumbnailsData.value = new Array(props.totalPages).fill(null);
+    
+    // Process pages in smaller batches for better reliability
+    const batchSize = 2; // Reduce batch size for more stability
     for (let i = 0; i < maxPages; i += batchSize) {
       const pagePromises = [];
       
       // Create batch of page render promises
       for (let j = 0; j < batchSize && i + j < maxPages; j++) {
         const pageIndex = i + j;
-        pagePromises.push(renderPage(pdf, pageIndex + 1, pageIndex));
+        pagePromises.push(renderPageWithRetry(pdf, pageIndex + 1, pageIndex));
       }
       
-      // Wait for batch to complete
+      // Wait for batch to complete before moving to next batch
       await Promise.all(pagePromises);
+      
+      // Small delay between batches to prevent browser from becoming unresponsive
+      if (i + batchSize < maxPages) {
+        await new Promise(resolve => setTimeout(resolve, 100)); // Increase delay
+      }
     }
+    
+    console.log('Thumbnail generation completed successfully');
   } catch (error) {
     console.error('Error generating thumbnails:', error);
   } finally {
@@ -218,30 +270,114 @@ const generateThumbnails = async () => {
   }
 };
 
-// Helper function to render a single page thumbnail
-const renderPage = async (pdf, pageNum, index) => {
+// Helper function to render a page with retry mechanism
+const renderPageWithRetry = async (pdf, pageNum, index, retryCount = 0) => {
   try {
+    // Get the page - this can sometimes fail
+    console.log(`Rendering page ${pageNum}...`);
     const page = await pdf.getPage(pageNum);
-    const viewport = page.getViewport({ scale: 0.5 });
     
-    // Create canvas
+    // Create a properly sized viewport with lower scale for thumbnails
+    const originalViewport = page.getViewport({ scale: 1.0 });
+    // Use a fixed scale for consistency
+    const scale = 0.3;
+    const viewport = page.getViewport({ scale });
+    
+    // Create canvas with proper dimensions
     const canvas = document.createElement('canvas');
-    const context = canvas.getContext('2d');
     canvas.width = viewport.width;
     canvas.height = viewport.height;
+    const context = canvas.getContext('2d', { 
+      alpha: false,
+      willReadFrequently: true // Optimize for image data reading
+    });
     
-    // Render page to canvas
-    await page.render({
+    // Clear the canvas with white background
+    context.fillStyle = 'white';
+    context.fillRect(0, 0, canvas.width, canvas.height);
+    
+    // Render page to canvas with specific settings
+    const renderContext = {
       canvasContext: context,
-      viewport: viewport
-    }).promise;
+      viewport: viewport,
+      enableWebGL: false,
+      renderInteractiveForms: false
+    };
     
-    // Convert canvas to base64 image (lower quality for better performance)
-    thumbnailsData.value[index] = canvas.toDataURL('image/jpeg', 0.4);
+    const renderTask = page.render(renderContext);
+    await renderTask.promise;
+    
+    // Convert canvas to base64 image - use JPG for better performance
+    try {
+      const dataUrl = canvas.toDataURL('image/jpeg', 0.5);
+      if (dataUrl && dataUrl !== 'data:,') {
+        thumbnailsData.value[index] = dataUrl;
+        console.log(`Successfully generated thumbnail for page ${pageNum}`);
+      } else {
+        throw new Error('Generated empty data URL');
+      }
+    } catch (canvasError) {
+      console.error(`Canvas conversion error for page ${pageNum}:`, canvasError);
+      thumbnailsData.value[index] = null;
+    }
+    
+    // Clean up to prevent memory leaks
+    context.clearRect(0, 0, canvas.width, canvas.height);
+    canvas.width = 0;
+    canvas.height = 0;
   } catch (err) {
     console.warn(`Error generating thumbnail for page ${pageNum}:`, err);
+    
+    // Implement retry logic (up to 2 times)
+    if (retryCount < 2) {
+      console.log(`Retrying thumbnail for page ${pageNum} (attempt ${retryCount + 1})...`);
+      await new Promise(resolve => setTimeout(resolve, 200)); // Longer wait before retrying
+      return renderPageWithRetry(pdf, pageNum, index, retryCount + 1);
+    } else {
+      console.error(`Failed to generate thumbnail for page ${pageNum} after retries`);
+      // If all retries fail, ensure the placeholder is properly set
+      thumbnailsData.value[index] = null;
+    }
   }
 };
+
+// Merge selected pages into a single PDF document and return it as a Blob
+const getMergedPdf = async () => {
+  if (internalState.selectedPages.size === 0) return null;
+  
+  try {
+    // Get the source PDF document
+    const arrayBuffer = await props.file.arrayBuffer();
+    const sourcePdfDoc = await PDFDocument.load(arrayBuffer);
+    
+    // Create a new document to hold selected pages
+    const mergedPdf = await PDFDocument.create();
+    
+    // Get selected pages in order
+    const selectedPageNumbers = Array.from(internalState.selectedPages).sort((a, b) => a - b);
+    
+    // Copy each selected page to the new document
+    for (const pageNum of selectedPageNumbers) {
+      // PDFDocument uses 0-based page indexing, our UI uses 1-based
+      const [copiedPage] = await mergedPdf.copyPages(sourcePdfDoc, [pageNum - 1]);
+      mergedPdf.addPage(copiedPage);
+    }
+    
+    // Generate the merged PDF as a binary array
+    const mergedPdfBytes = await mergedPdf.save();
+    
+    // Return the PDF as a blob that can be used for upload or download
+    return new Blob([mergedPdfBytes], { type: 'application/pdf' });
+  } catch (error) {
+    console.error('Error merging PDF pages:', error);
+    return null;
+  }
+};
+
+// Emit the merged PDF to parent component
+defineExpose({
+  getMergedPdf
+});
 </script>
 
 <style scoped>

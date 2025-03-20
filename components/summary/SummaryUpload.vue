@@ -69,8 +69,9 @@
           @file-selected="handleFileSelected('document', $event)" @file-removed="handleFileRemoved('document')"
           @error="showSnackbar" />
         
-        <!-- PDF page selector component -->
+        <!-- PDF page selector component with ref -->
         <PdfPageSelector
+          ref="pdfSelector"
           v-if="documentFile && isPdfFile"
           :file="documentFile"
           :total-pages="totalPages"
@@ -259,33 +260,20 @@ const isPdfFile = computed(() => {
 // File selection handler
 const handleFileSelected = async (type, file) => {
   if (type === 'document') {
-    documentFile.value = file;
-    
-    // Reset page selection
+    // Clean up any previous file data first
+    totalPages.value = 0;
     pageSelection.value = '';
     selectedPages.value = new Set();
+    pdfDocRef.value = null;
     
-    if (isPdfFile.value) {
-      try {
-        const arrayBuffer = await file.arrayBuffer();
-        const pdfDoc = await PDFDocument.load(arrayBuffer);
-        
-        const pages = pdfDoc.getPageCount();
-        totalPages.value = pages;
-        
-        // Select all pages by default
-        for (let i = 1; i <= pages; i++) {
-          selectedPages.value.add(i);
-        }
-        pageSelection.value = pages > 1 ? `1-${pages}` : '1';
-        
-        // Store PDF document for later use
-        pdfDocRef.value = pdfDoc;
-      } catch (error) {
-        console.error('Error loading PDF:', error);
-        showSnackbar('Error reading PDF file');
+    // Set the new file after a small delay to ensure clean state
+    setTimeout(() => {
+      documentFile.value = file;
+      
+      if (isPdfFile.value) {
+        processPdfFile(file);
       }
-    }
+    }, 50);
   } else if (type === 'image') {
     imageFile.value = file;
   } else if (type === 'video') {
@@ -293,7 +281,37 @@ const handleFileSelected = async (type, file) => {
   }
 };
 
-// Handle file removal
+// Extract PDF processing logic to a separate function
+const processPdfFile = async (file) => {
+  try {
+    console.log('Processing PDF file:', file.name);
+    const arrayBuffer = await file.arrayBuffer();
+    const pdfDoc = await PDFDocument.load(arrayBuffer);
+    
+    const pages = pdfDoc.getPageCount();
+    console.log(`PDF has ${pages} pages`);
+    totalPages.value = pages;
+    
+    // Select all pages by default
+    selectedPages.value = new Set();
+    for (let i = 1; i <= pages; i++) {
+      selectedPages.value.add(i);
+    }
+    pageSelection.value = pages > 1 ? `1-${pages}` : '1';
+    
+    // Store PDF document for later use
+    pdfDocRef.value = pdfDoc;
+  } catch (error) {
+    console.error('Error loading PDF:', error);
+    showSnackbar('Error reading PDF file');
+    
+    // Reset on error
+    documentFile.value = null;
+    totalPages.value = 0;
+  }
+};
+
+// Handle file removal with proper cleanup
 const handleFileRemoved = (type) => {
   if (type === 'document') {
     documentFile.value = null;
@@ -314,18 +332,23 @@ const showSnackbar = (message) => {
   snackbar.value = true;
 };
 
-// Generate Summary
+// Generate Summary - Updated to use the getMergedPdf method
 const generateSummary = async () => {
   loading.value = true;
   
   try {
     // For PDF files with page selection
-    if (isPdfFile.value) {
-      const pagesToProcess = Array.from(selectedPages.value).sort((a, b) => a - b);
-      console.log('Processing PDF pages:', pagesToProcess);
+    if (isPdfFile.value && pdfSelector.value) {
+      const mergedPdfBlob = await pdfSelector.value.getMergedPdf();
       
-      // Here you would extract the selected pages and process them
-      // This is where you'd integrate with your backend API
+      if (mergedPdfBlob) {
+        console.log('Merged PDF created with selected pages:', Array.from(selectedPages.value).sort((a, b) => a - b));
+        
+        // Here you would send the mergedPdfBlob to your API
+        // const formData = new FormData();
+        // formData.append('pdf', mergedPdfBlob, 'document.pdf');
+        // await fetch('/your-api-endpoint', { method: 'POST', body: formData });
+      }
     }
     
     // Simulate API call with timeout (replace with actual API call)
