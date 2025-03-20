@@ -51,8 +51,8 @@ onBeforeMount( async () => {
     }
   }
 
-  if(hash.startsWith("#/token=")){
-    const token = hash.replace("#/token=", "");
+  if(hash.startsWith("#token=")){
+    const token = hash.replace("#token=", "");
     try {
       userAuthStore.setToken(token);
     } catch (error) {
