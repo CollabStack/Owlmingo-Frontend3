@@ -21,7 +21,7 @@
       item-title="text"
       item-value="value"
       variant="flat"
-      class="mt-2 rounded bg-blue-lighten-5 w-25"
+      class="mt-2 border-radius bg-blue-lighten-5 w-25"
       density="compact"
       hide-details
       @update:modelValue="resetAnswers"
@@ -30,7 +30,7 @@
     <v-label class="mt-4">Question</v-label>
     <v-textarea
       v-model="localQuestion.text"
-      class="mt-2 rounded-lg bg-blue-lighten-5 w-75"
+      class="mt-2 border-radius bg-blue-lighten-5 w-75"
       variant="flat"
       auto-grow
       rows="2"
@@ -49,7 +49,7 @@
               <v-radio :value="option.value" color="blue" />
             </v-col>
             <v-col>
-              <v-text-field v-model="option.text" variant="flat" hide-details class="rounded-lg bg-blue-lighten-5" placeholder="Enter answer" @update:modelValue="emitUpdatedQuestion" />
+              <v-text-field v-model="option.text" variant="flat" hide-details class="border-radius bg-blue-lighten-5" placeholder="Enter answer" @update:modelValue="emitUpdatedQuestion" />
             </v-col>
           </v-row>
         </v-col>
@@ -64,7 +64,7 @@
               <v-checkbox v-model="localQuestion.selectedAnswers" :value="option.value" color="blue" />
             </v-col>
             <v-col>
-              <v-text-field v-model="option.text" variant="flat" hide-details class="rounded-lg bg-blue-lighten-5" placeholder="Enter answer" @update:modelValue="emitUpdatedQuestion" />
+              <v-text-field v-model="option.text" variant="flat" hide-details class="border-radius bg-blue-lighten-5" placeholder="Enter answer" @update:modelValue="emitUpdatedQuestion" />
             </v-col>
           </v-row>
         </v-col>
@@ -116,12 +116,26 @@ const emitUpdatedQuestion = () => {
 };
 </script>
 
-
-
 <style scoped>
-.icon-size {
-  width: 30px;
-  height: 30px;
-  cursor: pointer;
-}
+  @import url('https://fonts.googleapis.com/css2?family=Outfit:wght@100..900&display=swap');
+
+  /* Outfit font classes */
+  .outfit {
+    font-family: "Outfit", sans-serif;
+    font-optical-sizing: auto;
+    font-style: normal;
+  }
+
+  .outfit-regular { font-weight: 400; }
+  .outfit-medium { font-weight: 500; }
+  .outfit-bold { font-weight: 700; }
+  
+  .icon-size {
+    width: 30px;
+    height: 30px;
+    cursor: pointer;
+  }
+  .border-radius{
+    border-radius: 12px;
+  }
 </style>
