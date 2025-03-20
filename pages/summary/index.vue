@@ -12,7 +12,7 @@
 
 <script setup lang="ts">
 
-import SummaryUpload from '~/components/summary/SmmaryUpload.vue';
+import SummaryUpload from '~/components/summary/SummaryUpload.vue';
 
 </script>
 
