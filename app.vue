@@ -55,6 +55,7 @@ onBeforeMount( async () => {
     const token = hash.replace("#token=", "");
     try {
       userAuthStore.setToken(token);
+      navigateTo("/");
     } catch (error) {
       console.error("Error decoding SSO Result:", error);
       Swal.fire({
