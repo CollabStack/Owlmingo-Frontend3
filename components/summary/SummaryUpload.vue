@@ -1,42 +1,42 @@
 <template>
   <v-container>
-    <!-- Show upload interface when not in summary display mode -->
-    <div v-if="!showSummaryDisplay">
-      <!-- Header -->
-      <h1 class="text-h4 font-weight-bold text-primary mb-3 outfit outfit-bold" v-motion :initial="{ opacity: 0, y: 20 }"
-        :enter="{ opacity: 1, y: 0, transition: { duration: 600 } }">
-        AI Summary Generator
-      </h1>
-      <p class="text-subtitle-1 text-grey-darken-1 mb-6 outfit outfit-regular" v-motion :initial="{ opacity: 0, y: 20 }"
-        :enter="{ opacity: 1, y: 0, transition: { duration: 600, delay: 200 } }">
-        Upload a document, paste your notes, or select a video to automatically generate summaries with AI.
-      </p>
+    <!-- Header -->
+    <h1 class="text-h4 font-weight-bold text-primary mb-3 outfit outfit-bold" v-motion :initial="{ opacity: 0, y: 20 }"
+      :enter="{ opacity: 1, y: 0, transition: { duration: 600 } }">
+      AI Summary Generator
+    </h1>
+    <p class="text-subtitle-1 text-grey-darken-1 mb-6 outfit outfit-regular" v-motion :initial="{ opacity: 0, y: 20 }"
+      :enter="{ opacity: 1, y: 0, transition: { duration: 600, delay: 200 } }">
+      Upload a document, paste your notes, or select a video to automatically generate summaries with AI.
+    </p>
 
-      <!-- Tabs and Options -->
-      <v-row class="align-center" v-motion :initial="{ opacity: 0, y: 20 }"
-        :enter="{ opacity: 1, y: 0, transition: { duration: 600, delay: 300 } }">
-        <v-col cols="9">
-          <v-btn-toggle v-model="tab" style="width: 50%; height: 50px;"
-            class="px-1 py-2 d-flex align-center justify-center rounded-xl custom-tab-group bg-water"
-            color="deep-purple-accent-3" group>
-            <v-btn style="width: 25%; height: 45px;" v-for="(option, index) in options" :key="index" :value="option.value"
-              class="custom-tab bg-none text-primary" :class="{ 'animated-tab': tab === option.value }" rounded="xl"
-              variant="text" color="primary" v-motion :initial="{ opacity: 0, y: 10 }"
-              :enter="{ opacity: 1, y: 0, transition: { delay: 100 * index, duration: 500 } }">
-              {{ option.label }}
-            </v-btn>
-          </v-btn-toggle>
-        </v-col>
-        <v-col cols="3" class="d-flex justify-end">
-          <v-btn rounded="xl" color="medium-emphasis" min-width="92" variant="outlined"
-            class="custom-btn text-none animated-btn outfit outfit-medium" @click="sheet = true">
-            <span class="d-flex align-center">
-              Options
-              <v-icon class="ms-2 btn-icon">mdi-cog</v-icon>
-            </span>
+    <!-- Remove the login prompt alert banner, will use popup instead -->
+
+    <!-- Tabs and Options -->
+    <v-row class="align-center" v-motion :initial="{ opacity: 0, y: 20 }"
+      :enter="{ opacity: 1, y: 0, transition: { duration: 600, delay: 300 } }">
+      <v-col cols="9">
+        <v-btn-toggle v-model="tab" style="width: 50%; height: 50px;"
+          class="px-1 py-2 d-flex align-center justify-center rounded-xl custom-tab-group bg-water"
+          color="deep-purple-accent-3" group>
+          <v-btn style="width: 25%; height: 45px;" v-for="(option, index) in options" :key="index" :value="option.value"
+            class="custom-tab bg-none text-primary" :class="{ 'animated-tab': tab === option.value }" rounded="xl"
+            variant="text" color="primary" v-motion :initial="{ opacity: 0, y: 10 }"
+            :enter="{ opacity: 1, y: 0, transition: { delay: 100 * index, duration: 500 } }">
+            {{ option.label }}
           </v-btn>
-        </v-col>
-      </v-row>
+        </v-btn-toggle>
+      </v-col>
+      <v-col cols="3" class="d-flex justify-end">
+        <v-btn rounded="xl" color="medium-emphasis" min-width="92" variant="outlined"
+          class="custom-btn text-none animated-btn outfit outfit-medium" @click="sheet = true">
+          <span class="d-flex align-center">
+            Options
+            <v-icon class="ms-2 btn-icon">mdi-cog</v-icon>
+          </span>
+        </v-btn>
+      </v-col>
+    </v-row>
 
       <!-- Bottom Sheet -->
       <v-bottom-sheet v-model="sheet" inset>
@@ -380,6 +380,7 @@ const showSnackbar = (message) => {
 
 // Enhanced generateSummary function that uses the service
 const handleGenerateSummary = async () => {
+
   try {
     if (!isAuthenticated.value) {
       console.log("User not authenticated, authentication will be handled by the service");
@@ -423,6 +424,7 @@ const handleGenerateSummary = async () => {
     console.error('Error in handleGenerateSummary:', error);
     showSnackbar(error.message || 'Failed to process your request');
   }
+
 };
 
 // Use resetSummary from service
