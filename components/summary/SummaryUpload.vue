@@ -1,219 +1,227 @@
 <template>
   <v-container>
-    <!-- Header -->
-    <h1 class="text-h4 font-weight-bold text-primary mb-3 outfit outfit-bold" v-motion :initial="{ opacity: 0, y: 20 }"
-      :enter="{ opacity: 1, y: 0, transition: { duration: 600 } }">
-      AI Summary Generator
-    </h1>
-    <p class="text-subtitle-1 text-grey-darken-1 mb-6 outfit outfit-regular" v-motion :initial="{ opacity: 0, y: 20 }"
-      :enter="{ opacity: 1, y: 0, transition: { duration: 600, delay: 200 } }">
-      Upload a document, paste your notes, or select a video to automatically generate summaries with AI.
-    </p>
+    <!-- Show upload interface when not in summary display mode -->
+    <div v-if="!showSummaryDisplay">
+      <!-- Header -->
+      <h1 class="text-h4 font-weight-bold text-primary mb-3 outfit outfit-bold" v-motion :initial="{ opacity: 0, y: 20 }"
+        :enter="{ opacity: 1, y: 0, transition: { duration: 600 } }">
+        AI Summary Generator
+      </h1>
+      <p class="text-subtitle-1 text-grey-darken-1 mb-6 outfit outfit-regular" v-motion :initial="{ opacity: 0, y: 20 }"
+        :enter="{ opacity: 1, y: 0, transition: { duration: 600, delay: 200 } }">
+        Upload a document, paste your notes, or select a video to automatically generate summaries with AI.
+      </p>
 
-    <!-- Remove the login prompt alert banner, will use popup instead -->
-
-    <!-- Tabs and Options -->
-    <v-row class="align-center" v-motion :initial="{ opacity: 0, y: 20 }"
-      :enter="{ opacity: 1, y: 0, transition: { duration: 600, delay: 300 } }">
-      <v-col cols="9">
-        <v-btn-toggle v-model="tab" style="width: 50%; height: 50px;"
-          class="px-1 py-2 d-flex align-center justify-center rounded-xl custom-tab-group bg-water"
-          color="deep-purple-accent-3" group>
-          <v-btn style="width: 25%; height: 45px;" v-for="(option, index) in options" :key="index" :value="option.value"
-            class="custom-tab bg-none text-primary" :class="{ 'animated-tab': tab === option.value }" rounded="xl"
-            variant="text" color="primary" v-motion :initial="{ opacity: 0, y: 10 }"
-            :enter="{ opacity: 1, y: 0, transition: { delay: 100 * index, duration: 500 } }">
-            {{ option.label }}
-          </v-btn>
-        </v-btn-toggle>
-      </v-col>
-      <v-col cols="3" class="d-flex justify-end">
-        <v-btn rounded="xl" color="medium-emphasis" min-width="92" variant="outlined"
-          class="custom-btn text-none animated-btn outfit outfit-medium" @click="sheet = true">
-          <span class="d-flex align-center">
-            Options
-            <v-icon class="ms-2 btn-icon">mdi-cog</v-icon>
-          </span>
-        </v-btn>
-      </v-col>
-    </v-row>
-
-    <!-- Bottom Sheet -->
-    <v-bottom-sheet v-model="sheet" inset>
-      <v-card class="text-center py-5 px-5" rounded="lg">
-        <v-card-text class="d-flex justify-space-between align-center">
-          <p class="text-h5 text-primary">Option</p>
-          <v-icon color="primary" @click="sheet = false" class="clickable-icon">mdi-close</v-icon>
-        </v-card-text>
-
-        <v-divider></v-divider>
-
-        <!-- Select Option -->
-        <v-container>
-          <p class="text-primary text-h6 text-left">Question Type</p>
-          <v-select clearable chips label="Multiple Choice" :items="['Multiple Choice', 'True/False', 'Open Ended']"
-            class="my-3 animated-input"></v-select>
-
-          <p class="text-primary text-h6 text-left">Max Questions</p>
-          <v-select clearable chips label="Auto" :items="['Auto', '5', '10']" class="my-3 animated-input"></v-select>
-        </v-container>
-      </v-card>
-    </v-bottom-sheet>
-
-    <!-- Tab Content -->
-    <v-window v-model="tab" class="mt-5">
-      <!-- Document Upload -->
-      <v-window-item value="document">
-        <FileUploader icon="mdi-file-upload" placeholder="Drag a PDF or DOC file here"
-          acceptedFileTypes="application/pdf,application/msword,application/vnd.openxmlformats-officedocument.wordprocessingml.document"
-          buttonText="Browse Files" buttonIcon="mdi-upload" :maxFileSize="20"
-          fileTypeErrorMessage="Invalid file type! Only PDF and DOC files are allowed."
-          @file-selected="handleFileSelected('document', $event)" @file-removed="handleFileRemoved('document')"
-          @error="showSnackbar" />
-        
-        <!-- PDF page selector component with ref -->
-        <PdfPageSelector
-          ref="pdfSelector"
-          v-if="documentFile && isPdfFile"
-          :file="documentFile"
-          :total-pages="totalPages"
-          :file-name="documentFile.name"
-          v-model:selection-mode="selectionMode"
-          v-model:page-selection="pageSelection"
-          v-model:selected-pages="selectedPages"
-        />
-        
-        <div class="button-container" style="margin: 12px 0;">
-          <v-btn color="royal_blue" min-width="92" variant="outlined"
-            class="custom-btn text-none animated-btn outfit outfit-medium" 
-            @click="generateSummary"
-            :disabled="!documentFile || (isPdfFile && selectedPages.size === 0)" 
-            rounded="xl">
+      <!-- Tabs and Options -->
+      <v-row class="align-center" v-motion :initial="{ opacity: 0, y: 20 }"
+        :enter="{ opacity: 1, y: 0, transition: { duration: 600, delay: 300 } }">
+        <v-col cols="9">
+          <v-btn-toggle v-model="tab" style="width: 50%; height: 50px;"
+            class="px-1 py-2 d-flex align-center justify-center rounded-xl custom-tab-group bg-water"
+            color="deep-purple-accent-3" group>
+            <v-btn style="width: 25%; height: 45px;" v-for="(option, index) in options" :key="index" :value="option.value"
+              class="custom-tab bg-none text-primary" :class="{ 'animated-tab': tab === option.value }" rounded="xl"
+              variant="text" color="primary" v-motion :initial="{ opacity: 0, y: 10 }"
+              :enter="{ opacity: 1, y: 0, transition: { delay: 100 * index, duration: 500 } }">
+              {{ option.label }}
+            </v-btn>
+          </v-btn-toggle>
+        </v-col>
+        <v-col cols="3" class="d-flex justify-end">
+          <v-btn rounded="xl" color="medium-emphasis" min-width="92" variant="outlined"
+            class="custom-btn text-none animated-btn outfit outfit-medium" @click="sheet = true">
             <span class="d-flex align-center">
-              Generate
-              <v-icon class="ms-2 btn-icon">mdi-lightning-bolt</v-icon>
+              Options
+              <v-icon class="ms-2 btn-icon">mdi-cog</v-icon>
             </span>
           </v-btn>
-        </div>
-        <p class="mt-2 animated-link">Looking for flashcards instead? Try the <nuxt-link to="/"
-            style="text-decoration: none;"> AI Flashcard Generator</nuxt-link></p>
-      </v-window-item>
+        </v-col>
+      </v-row>
 
-      <!-- Text Upload -->
-      <v-window-item value="text">
-        <div class="ma-4 pa-4" outlined v-motion :initial="{ opacity: 0, y: 20 }"
-          :enter="{ opacity: 1, y: 0, transition: { duration: 600 } }">
-          <v-textarea clearable clear-icon="mdi-close-circle" label="Notes" placeholder="Paste your study notes here..."
-            hide-details="auto" class="clean-textarea" v-model="textContent" bg-color="white" rows="8" color="secondary"
-            counter="4000" variant="plain">
-          </v-textarea>
-          <div class="button-container">
+      <!-- Bottom Sheet -->
+      <v-bottom-sheet v-model="sheet" inset>
+        <v-card class="text-center py-5 px-5" rounded="lg">
+          <v-card-text class="d-flex justify-space-between align-center">
+            <p class="text-h5 text-primary">Option</p>
+            <v-icon color="primary" @click="sheet = false" class="clickable-icon">mdi-close</v-icon>
+          </v-card-text>
+
+          <v-divider></v-divider>
+
+          <!-- Select Option -->
+          <v-container>
+            <p class="text-primary text-h6 text-left">Question Type</p>
+            <v-select clearable chips label="Multiple Choice" :items="['Multiple Choice', 'True/False', 'Open Ended']"
+              class="my-3 animated-input"></v-select>
+
+            <p class="text-primary text-h6 text-left">Max Questions</p>
+            <v-select clearable chips label="Auto" :items="['Auto', '5', '10']" class="my-3 animated-input"></v-select>
+          </v-container>
+        </v-card>
+      </v-bottom-sheet>
+
+      <!-- Tab Content -->
+      <v-window v-model="tab" class="mt-5">
+        <!-- Document Upload -->
+        <v-window-item value="document">
+          <FileUploader icon="mdi-file-upload" placeholder="Drag a PDF or DOC file here"
+            acceptedFileTypes="application/pdf,application/msword,application/vnd.openxmlformats-officedocument.wordprocessingml.document"
+            buttonText="Browse Files" buttonIcon="mdi-upload" :maxFileSize="20"
+            fileTypeErrorMessage="Invalid file type! Only PDF and DOC files are allowed."
+            @file-selected="handleFileSelected('document', $event)" @file-removed="handleFileRemoved('document')"
+            @error="showSnackbar" />
+          
+          <!-- PDF page selector component with ref -->
+          <PdfPageSelector
+            ref="pdfSelector"
+            v-if="documentFile && isPdfFile"
+            :file="documentFile"
+            :total-pages="totalPages"
+            :file-name="documentFile.name"
+            v-model:selection-mode="selectionMode"
+            v-model:page-selection="pageSelection"
+            v-model:selected-pages="selectedPages"
+          />
+          
+          <div class="button-container" style="margin: 12px 0;">
             <v-btn color="royal_blue" min-width="92" variant="outlined"
-              class="custom-btn text-none animated-btn outfit outfit-medium" @click="generateSummary"
-              :disabled="!textContent" rounded="xl">
+              class="custom-btn text-none animated-btn outfit outfit-medium" 
+              @click="handleGenerateSummary"
+              :disabled="!documentFile || (isPdfFile && selectedPages.size === 0)" 
+              rounded="xl">
               <span class="d-flex align-center">
                 Generate
                 <v-icon class="ms-2 btn-icon">mdi-lightning-bolt</v-icon>
               </span>
             </v-btn>
           </div>
-          <p class="animated-link mt-4">Looking for flashcards instead? Try the <nuxt-link to="/"
+          <p class="mt-2 animated-link">Looking for flashcards instead? Try the <nuxt-link to="/"
               style="text-decoration: none;"> AI Flashcard Generator</nuxt-link></p>
-        </div>
-      </v-window-item>
+        </v-window-item>
 
-      <!-- Image Upload -->
-      <v-window-item value="image">
-        <FileUploader icon="mdi-image" placeholder="Drag an image here to upload" acceptedFileTypes="image/*"
-          buttonText="Browse Images" buttonIcon="mdi-image-search" :maxFileSize="10"
-          fileTypeErrorMessage="Invalid file type! Only image files are allowed."
-          @file-selected="handleFileSelected('image', $event)" @file-removed="handleFileRemoved('image')"
-          @error="showSnackbar" />
-        <div class="button-container" style="margin: 12px 0;">
-          <v-btn color="royal_blue" min-width="92" variant="outlined"
-            class="custom-btn text-none animated-btn outfit outfit-medium" 
-            @click="generateSummary"
-            :disabled="!imageFile" 
-            rounded="xl">
-            <span class="d-flex align-center">
-              Generate
-              <v-icon class="ms-2 btn-icon">mdi-lightning-bolt</v-icon>
-            </span>
-          </v-btn>
-        </div>
-        <p class="mt-2 animated-link">Looking for flashcards instead? Try the <nuxt-link to="/"
-            style="text-decoration: none;"> AI Flashcard Generator</nuxt-link></p>
-      </v-window-item>
+        <!-- Text Upload -->
+        <v-window-item value="text">
+          <div class="ma-4 pa-4" outlined v-motion :initial="{ opacity: 0, y: 20 }"
+            :enter="{ opacity: 1, y: 0, transition: { duration: 600 } }">
+            <v-textarea clearable clear-icon="mdi-close-circle" label="Notes" placeholder="Paste your study notes here..."
+              hide-details="auto" class="clean-textarea" v-model="textContent" bg-color="white" rows="8" color="secondary"
+              counter="4000" variant="plain">
+            </v-textarea>
+            <div class="button-container">
+              <v-btn color="royal_blue" min-width="92" variant="outlined"
+                class="custom-btn text-none animated-btn outfit outfit-medium" @click="handleGenerateSummary"
+                :disabled="!textContent" rounded="xl">
+                <span class="d-flex align-center">
+                  Generate
+                  <v-icon class="ms-2 btn-icon">mdi-lightning-bolt</v-icon>
+                </span>
+              </v-btn>
+            </div>
+            <p class="animated-link mt-4">Looking for flashcards instead? Try the <nuxt-link to="/"
+                style="text-decoration: none;"> AI Flashcard Generator</nuxt-link></p>
+          </div>
+        </v-window-item>
 
-      <!-- Link Upload -->
-      <v-window-item value="link">
-        <div class="ma-4 pa-4" outlined v-motion :initial="{ opacity: 0, y: 20 }"
-          :enter="{ opacity: 1, y: 0, transition: { duration: 600 } }">
-          <v-textarea clearable clear-icon="mdi-close-circle" label="Notes" placeholder="Paste your link here..."
-            hide-details="auto" class="clean-textarea" v-model="textContent" bg-color="white" rows="8" color="secondary"
-            counter="4000" variant="plain">
-          </v-textarea>
-          <div class="button-container">
+        <!-- Image Upload -->
+        <v-window-item value="image">
+          <FileUploader icon="mdi-image" placeholder="Drag an image here to upload" acceptedFileTypes="image/*"
+            buttonText="Browse Images" buttonIcon="mdi-image-search" :maxFileSize="10"
+            fileTypeErrorMessage="Invalid file type! Only image files are allowed."
+            @file-selected="handleFileSelected('image', $event)" @file-removed="handleFileRemoved('image')"
+            @error="showSnackbar" />
+          <div class="button-container" style="margin: 12px 0;">
             <v-btn color="royal_blue" min-width="92" variant="outlined"
-              class="custom-btn text-none animated-btn outfit outfit-medium" @click="generateSummary"
-              :disabled="!textContent" rounded="xl">
+              class="custom-btn text-none animated-btn outfit outfit-medium" 
+              @click="handleGenerateSummary"
+              :disabled="!imageFile" 
+              rounded="xl">
               <span class="d-flex align-center">
                 Generate
                 <v-icon class="ms-2 btn-icon">mdi-lightning-bolt</v-icon>
               </span>
             </v-btn>
           </div>
-          <p class="animated-link mt-4">Looking for flashcards instead? Try the <nuxt-link to="/"
+          <p class="mt-2 animated-link">Looking for flashcards instead? Try the <nuxt-link to="/"
               style="text-decoration: none;"> AI Flashcard Generator</nuxt-link></p>
-        </div>
-      </v-window-item>
+        </v-window-item>
 
-      <!-- Video Upload -->
-      <v-window-item value="video">
-        <FileUploader
-          icon="mdi-video"
-          placeholder="Drag a video file here to upload"
-          acceptedFileTypes="video/*"
-          buttonText="Browse Videos"
-          buttonIcon="mdi-video-plus"
-          :maxFileSize="100"
-          fileTypeErrorMessage="Invalid file type! Only video files are allowed."
-          @file-selected="handleFileSelected('video', $event)"
-          @file-removed="handleFileRemoved('video')"
-          @error="showSnackbar"
-        />
-        <div class="button-container">
-          <v-btn color="royal_blue" min-width="92" variant="outlined"
-            class="custom-btn text-none animated-btn outfit outfit-medium" 
-            @click="generateSummary"
-            :disabled="!videoFile" 
-            rounded="xl">
-            <span class="d-flex align-center">
-              Generate
-              <v-icon class="ms-2 btn-icon">mdi-lightning-bolt</v-icon>
-            </span>
-          </v-btn>
-        </div>
-        <p class="mt-2 animated-link">Looking for flashcards instead? Try the <nuxt-link to="/"
-            style="text-decoration: none;"> AI Flashcard Generator</nuxt-link></p>
-      </v-window-item>
-    </v-window>
+        <!-- Link Upload -->
+        <v-window-item value="link">
+          <div class="ma-4 pa-4" outlined v-motion :initial="{ opacity: 0, y: 20 }"
+            :enter="{ opacity: 1, y: 0, transition: { duration: 600 } }">
+            <v-textarea clearable clear-icon="mdi-close-circle" label="Notes" placeholder="Paste your link here..."
+              hide-details="auto" class="clean-textarea" v-model="textContent" bg-color="white" rows="8" color="secondary"
+              counter="4000" variant="plain">
+            </v-textarea>
+            <div class="button-container">
+              <v-btn color="royal_blue" min-width="92" variant="outlined"
+                class="custom-btn text-none animated-btn outfit outfit-medium" @click="handleGenerateSummary"
+                :disabled="!textContent" rounded="xl">
+                <span class="d-flex align-center">
+                  Generate
+                  <v-icon class="ms-2 btn-icon">mdi-lightning-bolt</v-icon>
+                </span>
+              </v-btn>
+            </div>
+            <p class="animated-link mt-4">Looking for flashcards instead? Try the <nuxt-link to="/"
+                style="text-decoration: none;"> AI Flashcard Generator</nuxt-link></p>
+          </div>
+        </v-window-item>
 
-    <!-- Loading Overlay -->
-    <v-overlay :model-value="loading" class="align-center justify-center">
-      <v-card color="white" width="300" class="pa-4 rounded-xl text-center">
-        <v-progress-circular indeterminate color="primary" size="64"></v-progress-circular>
-        <p class="mt-4">Generating your summary...</p>
-      </v-card>
-    </v-overlay>
+        <!-- Video Upload -->
+        <v-window-item value="video">
+          <FileUploader
+            icon="mdi-video"
+            placeholder="Drag a video file here to upload"
+            acceptedFileTypes="video/*"
+            buttonText="Browse Videos"
+            buttonIcon="mdi-video-plus"
+            :maxFileSize="100"
+            fileTypeErrorMessage="Invalid file type! Only video files are allowed."
+            @file-selected="handleFileSelected('video', $event)"
+            @file-removed="handleFileRemoved('video')"
+            @error="showSnackbar"
+          />
+          <div class="button-container">
+            <v-btn color="royal_blue" min-width="92" variant="outlined"
+              class="custom-btn text-none animated-btn outfit outfit-medium" 
+              @click="handleGenerateSummary"
+              :disabled="!videoFile" 
+              rounded="xl">
+              <span class="d-flex align-center">
+                Generate
+                <v-icon class="ms-2 btn-icon">mdi-lightning-bolt</v-icon>
+              </span>
+            </v-btn>
+          </div>
+          <p class="mt-2 animated-link">Looking for flashcards instead? Try the <nuxt-link to="/"
+              style="text-decoration: none;"> AI Flashcard Generator</nuxt-link></p>
+        </v-window-item>
+      </v-window>
 
-    <!-- Snackbar -->
-    <v-snackbar v-model="snackbar" :timeout="3000" top>
-      {{ snackbarMessage }}
-      <template v-slot:actions>
-        <v-btn color="pink" text @click="snackbar = false">Close</v-btn>
-      </template>
-    </v-snackbar>
+      <!-- Loading Overlay -->
+      <v-overlay :model-value="loading" class="align-center justify-center">
+        <v-card color="white" width="300" class="pa-4 rounded-xl text-center">
+          <v-progress-circular indeterminate color="primary" size="64"></v-progress-circular>
+          <p class="mt-4">Generating your summary...</p>
+        </v-card>
+      </v-overlay>
+
+      <!-- Snackbar -->
+      <v-snackbar v-model="snackbar" :timeout="3000" top>
+        {{ snackbarMessage }}
+        <template v-slot:actions>
+          <v-btn color="pink" text @click="snackbar = false">Close</v-btn>
+        </template>
+      </v-snackbar>
+    </div>
+
+    <!-- Show summary display when summary is generated -->
+    <SummaryDisplay 
+      v-if="showSummaryDisplay" 
+      :summary-data="summaryData" 
+      @back="resetToUpload" 
+    />
   </v-container>
 </template>
 
@@ -221,12 +229,19 @@
 import { ref, computed, watch, onMounted } from 'vue';
 import FileUploader from '../common/FileUploader.vue';
 import PdfPageSelector from './PdfPageSelector.vue';
+import SummaryDisplay from './SummaryDisplay.vue';
 import { useRouter } from 'vue-router';
 import { PDFDocument } from 'pdf-lib';
 import * as pdfjs from 'pdfjs-dist';
-import { processFile } from '~/services/ocrService';
-import Swal from 'sweetalert2'; // Add this if not already imported
 import { userAuth } from '~/store/userAuth';
+import { 
+  generateSummary, 
+  resetSummary, 
+  useSummaryState 
+} from '~/services/summaryService';
+
+// Get summary state from the service
+const { isLoading, summaryData, showSummaryDisplay } = useSummaryState();
 
 // Set PDF.js worker
 const pdfjsWorker = await import('pdfjs-dist/build/pdf.worker.entry');
@@ -235,6 +250,7 @@ pdfjs.GlobalWorkerOptions.workerSrc = pdfjsWorker;
 // Initialize auth and router
 const router = useRouter();
 const authStore = userAuth();
+const loading = isLoading; // Use the shared loading state
 
 // Initialize auth on mounted with better error handling
 onMounted(async () => {
@@ -258,7 +274,7 @@ const isAuthenticated = computed(() => {
   return authStore.isLoggedIn && !!authStore.getToken();
 });
 
-const pdfSelector = ref(null); // Add this line to create the ref
+const pdfSelector = ref(null);
 const tab = ref('document');
 const sheet = ref(false);
 const snackbar = ref(false);
@@ -267,7 +283,6 @@ const documentFile = ref(null);
 const imageFile = ref(null);
 const videoFile = ref(null);
 const textContent = ref('');
-const loading = ref(false);
 const totalPages = ref(0);
 const pageSelection = ref('');
 const selectionMode = ref('text');
@@ -363,85 +378,25 @@ const showSnackbar = (message) => {
   snackbar.value = true;
 };
 
-// Add auth check function
-const checkAuth = () => {
-  if (!authStore.isLoggedIn) {
-    Swal.fire({
-      title: 'Authentication Required',
-      text: 'You need to login or sign up to generate summaries',
-      icon: 'warning',
-      showCancelButton: true,
-      confirmButtonText: 'Login',
-      cancelButtonText: 'Sign Up'
-    }).then((result) => {
-      if (result.isConfirmed) {
-        // User chose to login
-        router.push('/auth');
-      } else if (result.dismiss === Swal.DismissReason.cancel) {
-        // User chose to sign up
-        router.push('/auth/sign-up');
-      }
-    });
-    return false;
+// Enhanced generateSummary function that uses the service
+const handleGenerateSummary = async () => {
+  if (documentFile.value && isPdfFile.value && pdfSelector.value) {
+    const mergedPdfBlob = await pdfSelector.value.getMergedPdf();
+    if (mergedPdfBlob) {
+      await generateSummary({ documentBlob: mergedPdfBlob });
+    }
+  } else if (imageFile.value) {
+    await generateSummary({ imageFile: imageFile.value });
+  } else if (videoFile.value) {
+    await generateSummary({ videoFile: videoFile.value });
+  } else if (textContent.value) {
+    await generateSummary({ textContent: textContent.value });
   }
-  return true;
 };
 
-// Generate Summary with better auth handling
-const generateSummary = async () => {
-  // Use the checkAuth function which shows the alert dialog
-  if (!checkAuth()) return;
-
-  try {
-    loading.value = true;
-
-    // Get fresh token before API request
-    const isValid = await authStore.checkTokenExpired();
-    if (!isValid) {
-      throw new Error('Authentication expired');
-    }
-
-    // Proceed with file processing...
-    if (isPdfFile.value && pdfSelector.value) {
-      const mergedPdfBlob = await pdfSelector.value.getMergedPdf();
-      if (mergedPdfBlob) {
-        const response = await processFile(mergedPdfBlob);
-        if (response.status === 'success') {
-          Swal.fire({
-            icon: 'success',
-            title: 'Success!',
-            text: 'Summary generated successfully',
-            timer: 2000,
-            showConfirmButton: false
-          });
-        } else {
-          throw new Error(response.message || 'Failed to generate summary');
-        }
-      }
-    } else if (imageFile.value) {
-      const response = await processFile(imageFile.value);
-      // ...rest of existing image handling...
-    } else if (textContent.value) {
-      // ...rest of existing text handling...
-    }
-
-  } catch (error) {
-    console.error('Error generating summary:', error);
-    
-    if (error.message?.includes('Authentication')) {
-      authStore.logout();
-      router.push('/auth');
-      return;
-    }
-
-    Swal.fire({
-      icon: 'error', 
-      title: 'Error',
-      text: error.message || 'Failed to generate summary'
-    });
-  } finally {
-    loading.value = false;
-  }
+// Use resetSummary from service
+const resetToUpload = () => {
+  resetSummary();
 };
 </script>
 
