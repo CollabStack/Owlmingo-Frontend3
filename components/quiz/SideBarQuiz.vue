@@ -7,7 +7,7 @@
         <v-label class="mt-5">Lesson Name</v-label>
         <v-text-field 
             v-model="name" 
-            variant="flat" 
+            variant="outlined"
             density="compact" 
             hide-details 
             class="mt-2 bg-blue-lighten-5 border-radius"
