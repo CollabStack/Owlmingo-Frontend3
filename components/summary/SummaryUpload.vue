@@ -64,10 +64,10 @@
       <v-window v-model="tab" class="mt-5">
         <!-- Document Upload -->
         <v-window-item value="document">
-          <FileUploader icon="mdi-file-upload" placeholder="Drag a PDF or DOC file here"
-            acceptedFileTypes="application/pdf,application/msword,application/vnd.openxmlformats-officedocument.wordprocessingml.document"
+          <FileUploader icon="mdi-file-upload" placeholder="Drag a PDF, DOC, or PPTX file here"
+            acceptedFileTypes="application/pdf,application/msword,application/vnd.openxmlformats-officedocument.wordprocessingml.document,application/vnd.openxmlformats-officedocument.presentationml.presentation"
             buttonText="Browse Files" buttonIcon="mdi-upload" :maxFileSize="20"
-            fileTypeErrorMessage="Invalid file type! Only PDF and DOC files are allowed."
+            fileTypeErrorMessage="Invalid file type! Only PDF, DOC, and PowerPoint files are allowed."
             @file-selected="handleFileSelected('document', $event)" @file-removed="handleFileRemoved('document')"
             @error="showSnackbar" />
           
@@ -380,22 +380,48 @@ const showSnackbar = (message) => {
 
 // Enhanced generateSummary function that uses the service
 const handleGenerateSummary = async () => {
-  if (documentFile.value && isPdfFile.value && pdfSelector.value) {
-    const mergedPdfBlob = await pdfSelector.value.getMergedPdf();
-    if (mergedPdfBlob) {
-      await generateSummary({ documentBlob: mergedPdfBlob });
+  try {
+    if (!isAuthenticated.value) {
+      console.log("User not authenticated, authentication will be handled by the service");
     }
-  } else if (imageFile.value) {
-    await generateSummary({ imageFile: imageFile.value });
-  } else if (videoFile.value) {
-    await generateSummary({ videoFile: videoFile.value });
-  } else if (textContent.value) {
-    // Check if we're on the link tab or text tab
-    const isLink = tab.value === 'link';
-    await generateSummary({ 
-      textContent: textContent.value,
-      isLink 
-    });
+    
+    if (documentFile.value) {
+      console.log(`Processing document file: ${documentFile.value.name}, type: ${documentFile.value.type}`);
+      
+      if (isPdfFile.value && pdfSelector.value) {
+        console.log("Processing as PDF with page selection");
+        const mergedPdfBlob = await pdfSelector.value.getMergedPdf();
+        if (mergedPdfBlob) {
+          console.log(`Got merged PDF blob, size: ${mergedPdfBlob.size} bytes`);
+          await generateSummary({ documentBlob: mergedPdfBlob });
+        } else {
+          showSnackbar('Failed to prepare PDF for processing');
+        }
+      } else {
+        // Handle non-PDF documents directly
+        console.log("Processing as non-PDF document");
+        await generateSummary({ documentBlob: documentFile.value });
+      }
+    } else if (imageFile.value) {
+      console.log(`Processing image file: ${imageFile.value.name}, type: ${imageFile.value.type}`);
+      await generateSummary({ imageFile: imageFile.value });
+    } else if (videoFile.value) {
+      console.log(`Processing video file: ${videoFile.value.name}, type: ${videoFile.value.type}`);
+      await generateSummary({ videoFile: videoFile.value });
+    } else if (textContent.value) {
+      // Check if we're on the link tab or text tab
+      const isLink = tab.value === 'link';
+      console.log(`Processing ${isLink ? 'link' : 'text'} content, length: ${textContent.value.length}`);
+      await generateSummary({ 
+        textContent: textContent.value,
+        isLink 
+      });
+    } else {
+      showSnackbar('Please select a file or enter text to generate a summary');
+    }
+  } catch (error) {
+    console.error('Error in handleGenerateSummary:', error);
+    showSnackbar(error.message || 'Failed to process your request');
   }
 };
 
