@@ -390,7 +390,12 @@ const handleGenerateSummary = async () => {
   } else if (videoFile.value) {
     await generateSummary({ videoFile: videoFile.value });
   } else if (textContent.value) {
-    await generateSummary({ textContent: textContent.value });
+    // Check if we're on the link tab or text tab
+    const isLink = tab.value === 'link';
+    await generateSummary({ 
+      textContent: textContent.value,
+      isLink 
+    });
   }
 };
 
