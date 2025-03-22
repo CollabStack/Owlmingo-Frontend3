@@ -4,6 +4,7 @@ import { userAuth } from '~/store/userAuth';
 export async function processFile(file: File | Blob) {
   const authStore = userAuth();
   const config = useRuntimeConfig();
+  // Match the exact endpoint from API documentation
   const url = `${config.public.USER_PRIVATE_API}process-file`;
   
   console.log('OCR Service - Starting file processing');
@@ -29,16 +30,30 @@ export async function processFile(file: File | Blob) {
 
   try {
     const formData = new FormData();
-    formData.append('file', file);
+    
+    // If file is a Blob without name, give it a default name based on type
+    if (file instanceof Blob && !(file instanceof File)) {
+      let fileName = 'document.pdf';
+      if (file.type.includes('image')) {
+        fileName = 'image.jpg';
+      } else if (file.type.includes('video')) {
+        fileName = 'video.mp4';
+      }
+      formData.append('file', file, fileName);
+    } else {
+      formData.append('file', file);
+    }
 
     console.log('OCR Service - Sending request to:', url);
     console.log('OCR Service - File type:', file.type);
-    console.log('OCR Service - File size:', file.size);
+    console.log('OCR Service - File size:', file.size, 'bytes');
+    console.log('OCR Service - FormData contains file:', formData.has('file'));
     
     const response = await fetch(url, {
       method: 'POST',
       headers: {
         'Authorization': `Bearer ${token}`
+        // Let browser set the correct Content-Type for FormData with boundary
       },
       body: formData,
       credentials: 'include'
@@ -51,9 +66,18 @@ export async function processFile(file: File | Blob) {
         authStore.logout();
         throw new Error('Authentication expired');
       }
-      const errorData = await response.json();
-      console.error('OCR Service - Error response:', errorData);
-      throw new Error(errorData.message || 'Failed to process file');
+      
+      // Enhanced error handling
+      try {
+        const errorData = await response.json();
+        console.error('OCR Service - Error response:', errorData);
+        throw new Error(errorData.message || 'Failed to process file');
+      } catch (parseError) {
+        // In case the error response is not JSON
+        const errorText = await response.text();
+        console.error('OCR Service - Non-JSON error response:', errorText);
+        throw new Error(`Server error (${response.status}): Failed to process file`);
+      }
     }
 
     const responseData = await response.json();
