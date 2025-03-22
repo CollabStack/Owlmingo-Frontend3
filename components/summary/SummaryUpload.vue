@@ -68,6 +68,7 @@
             acceptedFileTypes="application/pdf,application/msword,application/vnd.openxmlformats-officedocument.wordprocessingml.document,application/vnd.openxmlformats-officedocument.presentationml.presentation"
             buttonText="Browse Files" buttonIcon="mdi-upload" :maxFileSize="20"
             fileTypeErrorMessage="Invalid file type! Only PDF, DOC, and PowerPoint files are allowed."
+
             @file-selected="handleFileSelected('document', $event)" @file-removed="handleFileRemoved('document')"
             @error="showSnackbar" />
           
@@ -380,6 +381,7 @@ const showSnackbar = (message) => {
 
 // Enhanced generateSummary function that uses the service
 const handleGenerateSummary = async () => {
+
   try {
     if (!isAuthenticated.value) {
       console.log("User not authenticated, authentication will be handled by the service");
@@ -423,6 +425,7 @@ const handleGenerateSummary = async () => {
     console.error('Error in handleGenerateSummary:', error);
     showSnackbar(error.message || 'Failed to process your request');
   }
+
 };
 
 // Use resetSummary from service
