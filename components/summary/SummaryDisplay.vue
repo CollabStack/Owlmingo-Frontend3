@@ -1,56 +1,149 @@
 <template>
-  <v-container>
-    <div class="d-flex align-center mb-4">
-      <v-btn 
-        icon 
-        variant="text" 
-        @click="$emit('back')" 
-        class="mr-2"
-      >
-        <v-icon>mdi-arrow-left</v-icon>
-      </v-btn>
-      <h1 class="text-h4 font-weight-bold text-primary mb-0 outfit outfit-bold">
-        {{ formattedTitle }}
-      </h1>
+  <v-container class="summary-container">
+    <div class="header-section" 
+      v-motion
+      :initial="{ opacity: 0, y: -15 }"
+      :enter="{ opacity: 1, y: 0, transition: { duration: 800 } }">
+      <div class="d-flex align-center mb-5">
+        <v-btn 
+          icon 
+          variant="outlined"
+          color="primary"
+          @click="$emit('back')" 
+          class="mr-3 back-btn elevation-1"
+          size="small"
+        >
+          <v-icon>mdi-arrow-left</v-icon>
+        </v-btn>
+        <h1 class="text-h4 font-weight-bold mb-0 outfit outfit-bold gradient-text">
+          {{ formattedTitle }}
+        </h1>
+      </div>
+  
+      <div class="text-section mb-8">
+        <span class="summary-chip">
+          <v-icon size="small" class="mr-1">mdi-check-circle</v-icon>
+          Summary Complete
+        </span>
+        <p class="text-body-1 text-center text-grey-darken-1 mt-3 outfit outfit-regular">
+          Here's your summarized content. You can edit, copy, or download it using the tools below.
+        </p>
+      </div>
     </div>
-  
-    <p class="text-subtitle-1 text-center text-grey-darken-1 mb-6 outfit outfit-regular">
-      <span class="text-h6 outfit animation">Your text has been summarized! 🎉</span> 
-      <br>We've captured the key points while keeping the original meaning. Review the summary and refine it as needed, or generate a new one anytime!
-    </p>
 
-    <v-card class="border-radius">
-      <v-row>
-        <v-col cols="12">
-          <v-textarea   
-            v-model="displayText"
-            hide-details
-            bg-color="white" 
-            rows="12"
-            auto-grow
-            color="secondary"
-            counter="4000" 
-            variant="flat">
-          </v-textarea>
+    <v-card 
+      class="summary-card mb-6"
+      elevation="3"
+      v-motion
+      :initial="{ opacity: 0, y: 40 }"
+      :enter="{ opacity: 1, y: 0, transition: { duration: 600, delay: 400 } }">
+      <v-card-item class="summary-header pa-4">
+        <div class="d-flex align-center justify-space-between">
+          <span class="text-subtitle-1 outfit outfit-medium">Summarized Content</span>
+          <div class="d-flex align-center">
+            <div v-if="isTyping" class="typing-indicator me-3">
+              <span></span>
+              <span></span>
+              <span></span>
+            </div>
+            <div class="word-count">
+              <v-icon size="small" color="primary" class="mr-1">mdi-text-box-outline</v-icon>
+              <span class="text-body-2 outfit outfit-medium">{{ wordCount }} Words</span>
+            </div>
+          </div>
+        </div>
+      </v-card-item>
+      
+      <v-divider></v-divider>
+      
+      <v-row class="pa-0 ma-0">
+        <v-col cols="12" class="pa-0">
+          <div class="textarea-container">
+            <v-textarea   
+              v-model="displayText"
+              hide-details
+              bg-color="white" 
+              rows="12"
+              auto-grow
+              color="secondary"
+              counter="4000" 
+              variant="plain"
+              class="summary-textarea px-6"
+              :class="{ 'content-loaded': displayText }">
+            </v-textarea>
+            <!-- Removing the cursor element -->
+          </div>
         </v-col>
       </v-row>
   
-      <v-row class="px-3 pb-3">
-        <v-col cols="6">
-          <span class="animation">{{ wordCount }} Words</span>
-        </v-col>
-        <v-col cols="6" class="d-flex justify-end">
-          <v-icon class="mx-1 cursor-pointer animation" @click="clearText">mdi-delete</v-icon>
-          <v-icon class="mx-1 cursor-pointer animation" @click="copyText">mdi-content-copy</v-icon>
-          <v-icon class="mx-1 cursor-pointer animation" @click="downloadText">mdi-download</v-icon>
-        </v-col>
-      </v-row>
+      <v-divider></v-divider>
+      
+      <v-card-actions class="pa-4">
+        <v-row class="ma-0 pa-0">
+          <v-col cols="12" class="d-flex justify-end pa-0">
+            <v-btn 
+              prepend-icon="mdi-delete" 
+              variant="text" 
+              class="action-btn mr-2 animated-btn" 
+              color="error" 
+              @click="clearText"
+              size="small"
+              rounded
+            >
+              Clear
+            </v-btn>
+            
+            <v-btn 
+              prepend-icon="mdi-content-copy" 
+              variant="text" 
+              class="action-btn mr-2 animated-btn" 
+              color="info" 
+              @click="copyText"
+              size="small"
+              rounded
+            >
+              Copy
+            </v-btn>
+            
+            <v-btn 
+              prepend-icon="mdi-download" 
+              variant="tonal" 
+              class="action-btn animated-btn" 
+              color="primary" 
+              @click="downloadText"
+              size="small"
+              rounded
+            >
+              Download
+            </v-btn>
+          </v-col>
+        </v-row>
+      </v-card-actions>
     </v-card>
+
+    <v-snackbar
+      v-model="showCopyToast"
+      timeout="2000"
+      color="success"
+      location="top"
+      rounded="pill"
+      class="copy-toast"
+    >
+      <div class="d-flex align-center">
+        <v-icon class="mr-2">mdi-check-circle</v-icon>
+        Copied to clipboard!
+      </div>
+    </v-snackbar>
   </v-container>
 </template>
   
 <script setup>
 import { ref, computed, onMounted, watch, onUnmounted } from 'vue';
+
+// Create a global object to track animated summaries (persists between component remounts)
+if (!window._animatedSummaries) {
+  window._animatedSummaries = new Set();
+}
 
 const props = defineProps({
   summaryData: {
@@ -141,39 +234,79 @@ const formattedContent = computed(() => {
   return content;
 });
 
-const displayText = ref('');
-  
-const wordCount = computed(() => {
-  return displayText.value.trim() ? displayText.value.trim().split(/\s+/).length : 0;
+// Create a unique identifier for this summary
+const summaryId = computed(() => {
+  if (!props.summaryData) return '';
+  // Create a hash from the content or title to uniquely identify this summary
+  const content = props.summaryData.content || '';
+  const title = props.summaryData.title || '';
+  return `summary_${content.length}_${title.length}_${content.substring(0, 50)}`;
 });
 
+// Check if this summary has already been animated
+const hasBeenAnimated = computed(() => {
+  return window._animatedSummaries.has(summaryId.value);
+});
+
+const displayText = ref('');
+const isTyping = ref(false);
+const isMobile = ref(false);
+const showCopyToast = ref(false); // Add ref for copy toast
+
+// Computed property to count words in the text
+const wordCount = computed(() => {
+  if (!displayText.value) return 0;
+  return displayText.value.trim().split(/\s+/).filter(Boolean).length;
+});
+
+// Function to clear the text
 const clearText = () => {
   displayText.value = '';
 };
 
+// Function to copy text to clipboard
 const copyText = async () => {
+  if (!displayText.value) return;
+  
   try {
     await navigator.clipboard.writeText(displayText.value);
-    alert('Text copied to clipboard!');
-  } catch (err) {
-    console.error('Failed to copy text:', err);
+    showCopyToast.value = true;
+  } catch (error) {
+    console.error('Failed to copy text:', error);
   }
 };
 
+// Function to download text as a file
 const downloadText = () => {
-  const element = document.createElement('a');
-  const file = new Blob([displayText.value], {type: 'text/plain'});
-  element.href = URL.createObjectURL(file);
-  element.download = `${formattedTitle.value.replace(/\s+/g, '_')}_summary.txt`;
-  document.body.appendChild(element);
-  element.click();
-  document.body.removeChild(element);
+  if (!displayText.value) return;
+  
+  const filename = `${formattedTitle.value.replace(/[^a-z0-9]/gi, '_').toLowerCase()}_summary.txt`;
+  const blob = new Blob([displayText.value], { type: 'text/plain' });
+  const url = URL.createObjectURL(blob);
+  
+  const link = document.createElement('a');
+  link.href = url;
+  link.download = filename;
+  document.body.appendChild(link);
+  link.click();
+  document.body.removeChild(link);
+  
+  // Clean up the URL object
+  URL.revokeObjectURL(url);
 };
 
-// Animate the text display character by character
+// Enhanced character-by-character typing animation with adaptive speed
 const animateText = () => {
   if (!formattedContent.value) {
     console.log('No content to animate');
+    return;
+  }
+  
+  // Skip animation if this summary has already been animated
+  if (hasBeenAnimated.value) {
+    console.log('Skipping animation - already animated this summary');
+    displayText.value = formattedContent.value;
+    isTyping.value = false;
     return;
   }
   
@@ -182,29 +315,96 @@ const animateText = () => {
   // Clear any previous animation to avoid doubling
   displayText.value = '';
   clearTimeout(window._textAnimationTimer);
+  isTyping.value = true;
   
-  // Use direct assignment instead of character-by-character animation
-  // This avoids the doubling issue while still showing the content
-  displayText.value = formattedContent.value;
-  
-  /* 
-  // Removed problematic character-by-character animation
-  let index = 0;
   const text = formattedContent.value;
+  let currentIndex = 0;
   
-  const interval = setInterval(() => {
-    if (index < text.length) {
-      displayText.value += text[index++];
-      // Avoid excessive logging by only logging at intervals
-      if (index % 500 === 0) {
-        console.log(`Animation progress: ${index}/${text.length} characters`);
+  // Determine if text is "long" or "short"
+  const textLength = text.length;
+  const isLongText = textLength > 1000; // Threshold for "long" text
+  
+  console.log(`Text length: ${textLength}, treating as: ${isLongText ? 'long' : 'short'} text`);
+  
+  // For very long texts, show content in batch mode instead of character by character
+  if (textLength > 5000) {
+    // Quick batch animation for extremely long content
+    const batchSize = Math.floor(textLength / 20); // Show in ~20 steps
+    let position = 0;
+    
+    const animateBatch = () => {
+      if (position < textLength) {
+        const nextBatch = Math.min(position + batchSize, textLength);
+        displayText.value = text.substring(0, nextBatch);
+        position = nextBatch;
+        
+        const delay = 50; // Fast but visible steps
+        window._textAnimationTimer = setTimeout(animateBatch, delay);
+      } else {
+        isTyping.value = false;
+        // Mark as animated once complete
+        window._animatedSummaries.add(summaryId.value);
       }
+    };
+    
+    animateBatch();
+    return;
+  }
+  
+  const animateNextChar = () => {
+    if (currentIndex < text.length) {
+      const char = text[currentIndex];
+      displayText.value += char;
+      currentIndex++;
+      
+      // Calculate delay based on character context and text length
+      const delay = calculateCharDelay(text, currentIndex, isLongText);
+      
+      window._textAnimationTimer = setTimeout(animateNextChar, delay);
     } else {
-      clearInterval(interval);
-      console.log('Text animation completed');
+      isTyping.value = false;
+      // Mark as animated once complete
+      window._animatedSummaries.add(summaryId.value);
     }
-  }, 10); // Fast animation
-  */
+  };
+  
+  // Start the animation
+  animateNextChar();
+};
+
+// Calculate delay based on character context and text length
+const calculateCharDelay = (text, position, isLongText) => {
+  const currentChar = text[position - 1];
+  const nextChar = text[position];
+  
+  // Speed multiplier based on text length
+  const speedFactor = isLongText ? 0.3 : 1.0; // Long text is 3-4x faster
+  
+  // Long pause after sentence endings
+  if (/[.!?]/.test(currentChar) && (!nextChar || /\s/.test(nextChar))) {
+    return (Math.random() * 300 + 400) * speedFactor; // 400-700ms for normal, ~120-210ms for long
+  } 
+  // Medium pause after commas and semicolons
+  else if (/[,;:]/.test(currentChar)) {
+    return (Math.random() * 100 + 200) * speedFactor; // 200-300ms for normal, ~60-90ms for long
+  }
+  // Pause at line breaks
+  else if (currentChar === '\n') {
+    return (Math.random() * 100 + 150) * speedFactor; // 150-250ms for normal, ~45-75ms for long
+  }
+  // Brief pause after spaces (end of words)
+  else if (currentChar === ' ') {
+    return (Math.random() * 40 + 60) * speedFactor; // 60-100ms for normal, ~18-30ms for long
+  }
+  // Very short delay for normal characters
+  else {
+    return (Math.random() * 15 + 20) * speedFactor; // 20-35ms for normal, ~6-10ms for long
+  }
+};
+
+// Check if device is mobile
+const checkMobile = () => {
+  isMobile.value = window.innerWidth <= 768;
 };
 
 // Remove immediate:true from the watch to prevent double animation
@@ -219,15 +419,25 @@ watch(() => props.summaryData, () => {
 
 // Also ensure we only animate once on mount
 onMounted(() => {
+  // Check mobile state
+  checkMobile();
+  window.addEventListener('resize', checkMobile);
+  
   // Only animate if not already done by watch
   if (props.summaryData && !displayText.value) {
-    animateText();
+    // Set the text immediately if already animated
+    if (hasBeenAnimated.value) {
+      displayText.value = formattedContent.value;
+    } else {
+      animateText();
+    }
   }
 });
 
 // Clean up any pending animations when component is unmounted
 onUnmounted(() => {
   clearTimeout(window._textAnimationTimer);
+  window.removeEventListener('resize', checkMobile);
 });
 </script>
 
@@ -244,37 +454,212 @@ onUnmounted(() => {
   font-weight: 400;
 }
 
+.outfit-medium {
+  font-weight: 500;
+}
+
 .outfit-bold {
   font-weight: 700;
 }
 
-.border-radius {
-  border-radius: 12px;
-  border: 2px solid #e5e7eb;
+/* Container styling */
+.summary-container {
+  max-width: 1500px; /* Increased from 900px */
+  margin: 0 auto;
+  padding-top: 20px;
+  width: 100%;
 }
 
-.border-radius:hover {
-  border: 2px solid #6d54f9;
+/* Header section */
+.header-section {
+  text-align: center;
+  margin-bottom: 2rem;
 }
 
-.animation {
+/* Gradient text for title - aligned with other components */
+.gradient-text {
+  background: linear-gradient(90deg, #7b83e0, #9D7BFC);
+  -webkit-background-clip: text;
+  background-clip: text;
+  color: transparent;
   display: inline-block;
-  animation: snakeVerticalMovement 3s linear infinite;
+  text-shadow: 1px 1px 2px rgba(0, 0, 0, 0.05);
 }
 
-.cursor-pointer {
-  cursor: pointer;
+/* Summary chip */
+.summary-chip {
+  display: inline-flex;
+  align-items: center;
+  background: linear-gradient(90deg, #7b83e0 0%, #9D7BFC 100%);
+  color: white;
+  padding: 6px 16px;
+  border-radius: 20px;
+  font-size: 0.9rem;
+  font-weight: 500;
+  box-shadow: 0 2px 12px rgba(157, 123, 252, 0.3);
 }
 
-@keyframes snakeVerticalMovement {
+/* Text section */
+.text-section {
+  max-width: 700px;
+  margin: 0 auto;
+}
+
+/* Summary card styling */
+.summary-card {
+  border-radius: 16px;
+  overflow: hidden;
+  border: none;
+  background-color: white;
+  transition: all 0.3s ease;
+  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.08) !important;
+}
+
+.summary-card:hover {
+  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.12) !important;
+  transform: translateY(-3px);
+}
+
+.summary-header {
+  background-color: #f8f9ff;
+}
+
+/* Back button animation */
+.back-btn {
+  transition: transform 0.3s ease;
+}
+
+.back-btn:hover {
+  transform: translateX(-3px);
+}
+
+/* Textarea container for cursor effect */
+.textarea-container {
+  position: relative;
+}
+
+/* Textarea styling */
+.summary-textarea {
+  font-family: 'Outfit', sans-serif !important;
+  font-size: 1rem !important;
+  line-height: 1.6 !important;
+  transition: all 0.3s ease;
+  border: none !important;
+}
+
+.summary-textarea >>> textarea {
+  padding: 24px !important; /* Increased padding */
+  letter-spacing: 0.2px;
+}
+
+.content-loaded {
+  background-color: white;
+}
+
+/* Removing cursor blink effect styles */
+
+/* Typing indicator */
+.typing-indicator {
+  display: inline-flex;
+  align-items: center;
+}
+
+.typing-indicator span {
+  height: 6px;
+  width: 6px;
+  margin: 0 1px;
+  background-color: #9D7BFC;
+  display: block;
+  border-radius: 50%;
+  opacity: 0.4;
+}
+
+.typing-indicator span:nth-of-type(1) {
+  animation: bounce 1s infinite 0.1s;
+}
+.typing-indicator span:nth-of-type(2) {
+  animation: bounce 1s infinite 0.2s;
+}
+.typing-indicator span:nth-of-type(3) {
+  animation: bounce 1s infinite 0.3s;
+}
+
+@keyframes bounce {
+  0%, 100% { transform: translateY(0); }
+  50% { transform: translateY(-5px); }
+}
+
+/* Word count styling */
+.word-count {
+  display: flex;
+  align-items: center;
+  padding: 5px 12px;
+  background-color: rgba(123, 131, 224, 0.1);
+  border-radius: 20px;
+  display: inline-flex;
+}
+
+/* Action buttons - made consistent with other components */
+.action-btn {
+  font-weight: 500;
+  transition: all 0.3s ease;
+  letter-spacing: 0.5px;
+  position: relative;
+  overflow: hidden;
+}
+
+.action-btn::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: -100%;
+  width: 100%;
+  height: 100%;
+  background: linear-gradient(90deg, transparent, rgba(255,255,255,0.2), transparent);
+  transition: all 0.6s ease;
+}
+
+.action-btn:hover::before {
+  left: 100%;
+}
+
+.action-btn:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+}
+
+/* Copy toast */
+.copy-toast {
+  font-family: 'Outfit', sans-serif !important;
+}
+
+/* Animation for pulse */
+.pulse-animation {
+  display: inline-block;
+  animation: pulse 2s infinite;
+  color: #9D7BFC;
+  font-weight: 600;
+}
+
+@keyframes pulse {
   0% {
-    transform: translateY(0);
+    transform: scale(1);
+    opacity: 1;
   }
   50% {
-    transform: translateY(2px); /* Move down */
+    transform: scale(1.05);
+    opacity: 0.8;
   }
   100% {
-    transform: translateY(0);
+    transform: scale(1);
+    opacity: 1;
+  }
+}
+
+/* Add responsive styling for smaller screens */
+@media (max-width: 960px) {
+  .summary-container {
+    max-width: 95%;
   }
 }
 </style>
