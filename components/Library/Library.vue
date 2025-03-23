@@ -34,11 +34,13 @@
 
     <SummariesSection 
       :summaries="summaries"
+      :loading="isLoadingSummaries"
       @edit-summary="editSummary"
       @view-summary="viewSummary"
       @open-summary-dialog="summaryDialog = true"
       @open-tags-dialog="openTagsDialog"
       @remove-tag-from-item="removeTagFromItem"
+      @delete-summary="confirmDeleteSummary"
     />
 
     <!-- Dialogs -->
@@ -311,6 +313,22 @@
         </v-card-actions>
       </v-card>
     </v-dialog>
+
+    <!-- Delete Summary Confirmation Dialog -->
+    <v-dialog v-model="deleteSummaryDialog" max-width="400" class="rounded-lg">
+      <v-card>
+        <v-card-title class="text-h6 outfit pa-4">Delete Summary</v-card-title>
+        <v-divider></v-divider>
+        <v-card-text class="outfit pa-4">
+          Are you sure you want to delete this summary? This action cannot be undone.
+        </v-card-text>
+        <v-card-actions class="pa-4 pt-2">
+          <v-spacer></v-spacer>
+          <v-btn variant="text" @click="deleteSummaryDialog = false" class="outfit">Cancel</v-btn>
+          <v-btn color="error" variant="flat" class="outfit" @click="deleteSummary" :loading="isDeleteLoading">Delete</v-btn>
+        </v-card-actions>
+      </v-card>
+    </v-dialog>
   </div>
 </template>
   
@@ -320,6 +338,8 @@ import TagsSection from './TagsSection.vue';
 import FlashcardsSection from './FlashcardsSection.vue';
 import QuizzesSection from './QuizzesSection.vue';
 import SummariesSection from './SummariesSection.vue';
+import { useSummaryStore } from '~/store/summaryStore';
+import { useRouter } from 'vue-router';
 
 // Tags management
 const tags = ref([]);
@@ -385,37 +405,33 @@ const quizzes = ref([
   }
 ]);
 
-const summaries = ref([
-  {
-    id: 1,
-    title: "Biology Textbook Ch. 5",
-    subtitle: "Science",
-    description: "Concise summary of cellular respiration and photosynthesis processes",
-    wordCount: 850,
-    lastUpdated: "1 day ago",
-    tags: [{ name: "Biology", color: "#4CAF50" }]
-  },
-  {
-    id: 2,
-    title: "World History Notes",
-    subtitle: "History",
-    description: "Key events and figures of the Industrial Revolution summarized",
-    wordCount: 1200,
-    lastUpdated: "3 days ago",
-    tags: [{ name: "History", color: "#9C27B0" }]
-  }
-]);
+const summaryStore = useSummaryStore();
+const router = useRouter();
+const isLoadingSummaries = ref(false);
 
-// For demo purposes, you can set these to empty arrays to test the empty state
-// flashcards.value = [];
-// quizzes.value = [];
-// tags.value = [];
-// summaries.value = [];
+// Replace your hardcoded summaries with an empty array initially
+const summaries = ref([]);
 
-onMounted(() => {
+onMounted(async () => {
   const savedTags = localStorage.getItem('tags');
   if (savedTags) {
     tags.value = JSON.parse(savedTags);
+  }
+  
+  // Fetch summaries from API
+  isLoadingSummaries.value = true;
+  try {
+    const result = await summaryStore.fetchSummaries();
+    if (result.success) {
+      summaries.value = result.data;
+    } else if (!result.authenticated) {
+      // Handle authentication error if needed
+      console.log('Authentication required to fetch summaries');
+    }
+  } catch (error) {
+    console.error('Error loading summaries:', error);
+  } finally {
+    isLoadingSummaries.value = false;
   }
 });
 
@@ -495,12 +511,20 @@ const startQuiz = (id) => {
 // Summary action handlers
 const editSummary = (id) => {
   console.log(`Editing summary with ID: ${id}`);
-  // Implement navigation to edit summary page
+  router.push(`/summary/edit/${id}`);
 };
 
-const viewSummary = (id) => {
+const viewSummary = async (id) => {
   console.log(`Viewing summary with ID: ${id}`);
-  // Implement navigation to view summary page
+  try {
+    const result = await summaryStore.fetchSummaryById(id);
+    if (result.success) {
+      // Navigate to summary view page
+      router.push(`/summary/view/${id}`);
+    }
+  } catch (error) {
+    console.error(`Error loading summary ${id}:`, error);
+  }
 };
 
 // Tags dialog
@@ -615,6 +639,47 @@ const removeTagFromItem = ({ id, tagIndex }) => {
   findAndRemoveTag(flashcards.value);
   findAndRemoveTag(quizzes.value);
   findAndRemoveTag(summaries.value);
+};
+
+// Delete Summary functionality
+const deleteSummaryDialog = ref(false);
+const deletingSummaryId = ref(null);
+const isDeleteLoading = ref(false);
+
+// Delete summary handlers
+const confirmDeleteSummary = (id) => {
+  deletingSummaryId.value = id;
+  deleteSummaryDialog.value = true;
+};
+
+const deleteSummary = async () => {
+  if (!deletingSummaryId.value) return;
+  
+  isDeleteLoading.value = true;
+  try {
+    // Make sure summaryStore is defined and has the deleteSummary method
+    if (!summaryStore || typeof summaryStore.deleteSummary !== 'function') {
+      console.error('summaryStore.deleteSummary is not available', summaryStore);
+      throw new Error('Delete functionality is not available');
+    }
+    
+    // Using `id` parameter consistently
+    const result = await summaryStore.deleteSummary(deletingSummaryId.value);
+    
+    if (result.success) {
+      // Remove from the local list if not already done by the store
+      summaries.value = summaries.value.filter(summary => summary.id !== deletingSummaryId.value);
+      deleteSummaryDialog.value = false;
+    } else {
+      alert(result.error || 'Failed to delete summary');
+    }
+  } catch (error) {
+    console.error('Error deleting summary:', error);
+    alert('An error occurred while deleting the summary');
+  } finally {
+    isDeleteLoading.value = false;
+    deletingSummaryId.value = null;
+  }
 };
 </script>
 

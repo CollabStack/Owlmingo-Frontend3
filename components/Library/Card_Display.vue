@@ -80,6 +80,17 @@
     <!-- Card Actions -->
     <v-divider></v-divider>
     <v-card-actions class="pa-3">
+      <!-- Delete Button -->
+      <v-btn 
+        color="error" 
+        variant="text" 
+        size="small"
+        class="action-btn outfit"
+        @click.stop="$emit('delete')"
+      >
+        <v-icon size="16">mdi-delete</v-icon>
+      </v-btn>
+      
       <v-spacer></v-spacer>
       
       <!-- Edit Button -->
@@ -155,7 +166,7 @@ const props = defineProps({
   }
 });
 
-defineEmits(['edit', 'action', 'editTags', 'removeTag']);
+defineEmits(['edit', 'action', 'editTags', 'removeTag', 'delete']);
 
 // Dynamic computed properties based on type
 const getTypeClass = computed(() => {
