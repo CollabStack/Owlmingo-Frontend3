@@ -34,7 +34,7 @@
       <div class="d-flex justify-space-between align-center mb-2">
         <span class="text-caption outfit outfit-medium text-medium-emphasis">
           <v-icon size="16" class="me-1">{{ getCountIcon }}</v-icon>
-          {{ itemCount }} {{ type === 'quiz' ? 'Questions' : 'Cards' }}
+          {{ itemCount }} {{ type === 'quiz' ? 'Questions' : (type === 'summary' ? 'Words' : 'Cards') }}
         </span>
         <span class="text-caption text-medium-emphasis outfit">
           <v-icon size="16" class="me-1">mdi-clock-outline</v-icon>
