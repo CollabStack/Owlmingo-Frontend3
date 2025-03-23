@@ -3,17 +3,7 @@
     <div class="d-flex align-center justify-space-between mb-4">
       <h2 class="text-h5 outfit outfit-semibold">My Summaries</h2>
       <div class="d-flex align-center">
-        <v-btn 
-          icon
-          variant="text"
-          class="mr-2"
-          size="small"
-          @click="$emit('refresh-summaries')"
-          :disabled="loading"
-        >
-          <v-icon>mdi-refresh</v-icon>
-        </v-btn>
-        <v-btn 
+          <v-btn 
           color="teal" 
           class="rounded-lg action-btn outfit outfit-medium"
           prepend-icon="mdi-plus"
@@ -113,6 +103,5 @@ defineEmits([
   'open-tags-dialog',
   'remove-tag-from-item',
   'delete-summary',
-  'refresh-summaries'  // Add this new emit
 ]);
 </script>
