@@ -7,7 +7,8 @@ export const useSummaryStore = defineStore('summaryStore', {
     isGenerating: false,
     currentSummary: null,
     summaries: [],
-    error: null
+    error: null,
+    isLoading: false
   }),
   
   actions: {
@@ -77,6 +78,120 @@ export const useSummaryStore = defineStore('summaryStore', {
         return { authenticated: true, success: false, error: this.error };
       } finally {
         this.isGenerating = false;
+      }
+    },
+    
+    /**
+     * Fetch all summaries for the current user
+     * @returns {Promise<Array>} - List of user summaries
+     */
+    async fetchSummaries() {
+      const authStore = userAuth();
+      const { $UserPrivateAxios } = useNuxtApp();
+      
+      // Check authentication first
+      if (!authStore.isLoggedIn) {
+        return { authenticated: false };
+      }
+      
+      this.isLoading = true;
+      this.error = null;
+      
+      try {
+        const response = await $UserPrivateAxios.get('/summaries');
+        
+        if (response.data && response.data.status === 'success') {
+          this.summaries = response.data.data.map(summary => ({
+            id: summary.id,
+            title: summary.title,
+            subtitle: summary.fileInfo?.fileName || 'Text Summary',
+            description: summary.content.substring(0, 100) + (summary.content.length > 100 ? '...' : ''),
+            wordCount: summary.content.split(/\s+/).filter(Boolean).length,
+            lastUpdated: new Date(summary.updatedAt).toLocaleDateString(),
+            tags: [], // Tags would need to be associated in your backend or handled separately
+            content: summary.content,
+            originalText: summary.originalText
+          }));
+          
+          return { success: true, data: this.summaries };
+        } else {
+          throw new Error(response.data?.message || 'Failed to fetch summaries');
+        }
+      } catch (error) {
+        console.error('Error fetching summaries:', error);
+        this.error = error.message || 'Failed to fetch summaries';
+        return { success: false, error: this.error };
+      } finally {
+        this.isLoading = false;
+      }
+    },
+    
+    /**
+     * Fetch a single summary by ID
+     * @param {string} id - The ID of the summary to fetch
+     */
+    async fetchSummaryById(id) {
+      const authStore = userAuth();
+      const { $UserPrivateAxios } = useNuxtApp();
+      
+      if (!authStore.isLoggedIn) {
+        return { authenticated: false };
+      }
+      
+      this.isLoading = true;
+      
+      try {
+        const response = await $UserPrivateAxios.get(`/summaries/${id}`);
+        
+        if (response.data && response.data.status === 'success') {
+          this.currentSummary = response.data.data;
+          return { success: true, data: this.currentSummary };
+        } else {
+          throw new Error(response.data?.message || 'Failed to fetch summary');
+        }
+      } catch (error) {
+        console.error(`Error fetching summary ${id}:`, error);
+        return { success: false, error: error.message };
+      } finally {
+        this.isLoading = false;
+      }
+    },
+
+    /**
+     * Delete a summary by ID
+     * @param {string} id - The ID of the summary to delete
+     * @returns {Promise<Object>} - Result of the deletion
+     */
+    async deleteSummary(id) {
+      const authStore = userAuth();
+      const { $UserPrivateAxios } = useNuxtApp();
+      
+      if (!authStore.isLoggedIn) {
+        return { authenticated: false };
+      }
+      
+      this.isLoading = true;
+      
+      try {
+        // Using 'id' parameter instead of 'globalId'
+        const response = await $UserPrivateAxios.delete(`/summaries/${id}`);
+        
+        if (response.data && response.data.status === 'success') {
+          // Remove the deleted summary from the local state
+          this.summaries = this.summaries.filter(summary => summary.id !== id);
+          
+          return { success: true };
+        } else {
+          throw new Error(response.data?.message || 'Failed to delete summary');
+        }
+      } catch (error) {
+        console.error(`Error deleting summary ${id}:`, error);
+        return { 
+          success: false, 
+          error: error.response?.data?.message || error.message || 'Failed to delete summary' 
+        };
+      } finally {
+        this.isLoading = false;
       }
     }
   }

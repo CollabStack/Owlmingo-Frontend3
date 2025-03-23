@@ -79,6 +79,7 @@ const route = useRoute();
 const router = useRouter();
 const tabs = [
     { label: 'Home', route: '/' },
+    { label: 'Library', route: '/library' },
     { label: 'Flashcard', route: '/flashcard' },
     { label: 'Quiz', route: '/quiz' },
     { label: 'Summary', route: '/summary' }, // Add this line
