@@ -41,6 +41,7 @@
       @open-tags-dialog="openTagsDialog"
       @remove-tag-from-item="removeTagFromItem"
       @delete-summary="confirmDeleteSummary"
+      @refresh-summaries="refreshSummaries"
     />
 
     <!-- Dialogs -->
@@ -418,15 +419,16 @@ onMounted(async () => {
     tags.value = JSON.parse(savedTags);
   }
   
-  // Load sample data
-  // For flashcards and quizzes, apply saved tags
+  // Load sample data and apply saved tags
   applySavedTags(flashcards.value, 'flashcard_tags');
   applySavedTags(quizzes.value, 'quiz_tags');
   
-  // Fetch summaries from API
+  // Always show loading state initially
   isLoadingSummaries.value = true;
+  
   try {
-    const result = await summaryStore.fetchSummaries();
+    // Pass false to use cache if available
+    const result = await summaryStore.fetchSummaries(false);
     if (result.success) {
       summaries.value = result.data;
       
@@ -753,6 +755,21 @@ const deleteSummary = async () => {
   } finally {
     isDeleteLoading.value = false;
     deletingSummaryId.value = null;
+  }
+};
+
+const refreshSummaries = async () => {
+  isLoadingSummaries.value = true;
+  try {
+    const result = await summaryStore.fetchSummaries(true);
+    if (result.success) {
+      summaries.value = result.data;
+      applySavedTags(summaries.value, 'summary_tags');
+    }
+  } catch (error) {
+    console.error('Error refreshing summaries:', error);
+  } finally {
+    isLoadingSummaries.value = false;
   }
 };
 </script>

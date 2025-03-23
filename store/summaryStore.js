@@ -8,8 +8,23 @@ export const useSummaryStore = defineStore('summaryStore', {
     currentSummary: null,
     summaries: [],
     error: null,
-    isLoading: false
+    isLoading: false,
+    lastFetched: null // Add timestamp to track when data was last fetched
   }),
+  
+  getters: {
+    // Check if data needs refresh (older than 2 minutes or never fetched)
+    needsRefresh() {
+      if (!this.lastFetched) return true;
+      const twoMinutesAgo = Date.now() - 2 * 60 * 1000;
+      return this.lastFetched < twoMinutesAgo;
+    },
+    
+    // Check if we have summaries data already
+    hasSummaries() {
+      return this.summaries.length > 0;
+    }
+  },
   
   actions: {
     /**
@@ -83,9 +98,10 @@ export const useSummaryStore = defineStore('summaryStore', {
     
     /**
      * Fetch all summaries for the current user
+     * @param {boolean} force - Force refresh even if cache exists
      * @returns {Promise<Array>} - List of user summaries
      */
-    async fetchSummaries() {
+    async fetchSummaries(force = false) {
       const authStore = userAuth();
       const { $UserPrivateAxios } = useNuxtApp();
       
@@ -94,6 +110,13 @@ export const useSummaryStore = defineStore('summaryStore', {
         return { authenticated: false };
       }
       
+      // If we have cached data and don't need to refresh, return it immediately
+      if (!force && this.hasSummaries && !this.needsRefresh) {
+        console.log('Using cached summaries data');
+        return { success: true, data: this.summaries };
+      }
+      
+      // Set loading state regardless of cache status
       this.isLoading = true;
       this.error = null;
       
@@ -113,6 +136,9 @@ export const useSummaryStore = defineStore('summaryStore', {
             originalText: summary.originalText
           }));
           
+          // Update the lastFetched timestamp
+          this.lastFetched = Date.now();
+          
           return { success: true, data: this.summaries };
         } else {
           throw new Error(response.data?.message || 'Failed to fetch summaries');
@@ -125,7 +151,14 @@ export const useSummaryStore = defineStore('summaryStore', {
         this.isLoading = false;
       }
     },
-    
+
+    /**
+     * Mark store data as needing refresh
+     */
+    markForRefresh() {
+      this.lastFetched = null;
+    },
+
     /**
      * Fetch a single summary by ID
      * @param {string} id - The ID of the summary to fetch
@@ -182,9 +215,11 @@ export const useSummaryStore = defineStore('summaryStore', {
           
           return { success: true };
         } else {
+          this.markForRefresh();
           throw new Error(response.data?.message || 'Failed to delete summary');
         }
       } catch (error) {
+        this.markForRefresh();
         console.error(`Error deleting summary ${id}:`, error);
         return { 
           success: false, 

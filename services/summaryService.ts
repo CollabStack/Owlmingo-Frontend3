@@ -3,6 +3,7 @@ import { ref } from 'vue';
 import { userAuth } from '~/store/userAuth';
 import Swal from 'sweetalert2';
 import { useRuntimeConfig } from 'nuxt/app';
+import { useSummaryStore } from '~/store/summaryStore';
 
 // Reactive state
 const isLoading = ref(false);
@@ -148,6 +149,7 @@ export const generateSummary = async ({
   isLink = false
 }) => {
   const authStore = userAuth();
+  const summaryStore = useSummaryStore();
 
   if (!checkAuth()) return { success: false, reason: 'auth' };
 
@@ -206,6 +208,9 @@ export const generateSummary = async ({
       summaryData.value = summaryResponse.data;
       console.log('Summary Data to display:', JSON.stringify(summaryData.value, null, 2));
       showSummaryDisplay.value = true;
+      
+      // Mark the store for refresh to ensure the library shows the new summary
+      summaryStore.markForRefresh();
       
       // Show success notification
       Swal.fire({
