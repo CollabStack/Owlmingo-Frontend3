@@ -418,14 +418,21 @@ onMounted(async () => {
     tags.value = JSON.parse(savedTags);
   }
   
+  // Load sample data
+  // For flashcards and quizzes, apply saved tags
+  applySavedTags(flashcards.value, 'flashcard_tags');
+  applySavedTags(quizzes.value, 'quiz_tags');
+  
   // Fetch summaries from API
   isLoadingSummaries.value = true;
   try {
     const result = await summaryStore.fetchSummaries();
     if (result.success) {
       summaries.value = result.data;
+      
+      // Apply saved tags to API-fetched summaries
+      applySavedTags(summaries.value, 'summary_tags');
     } else if (!result.authenticated) {
-      // Handle authentication error if needed
       console.log('Authentication required to fetch summaries');
     }
   } catch (error) {
@@ -582,6 +589,15 @@ const closeTagsDialog = () => {
     
     if (itemIndex !== -1) {
       items[itemIndex].tags = [...currentItemTags.value];
+      
+      // Save the tag assignments to localStorage based on item type
+      if (currentItemType.value === 'flashcard') {
+        saveFlashcardTags();
+      } else if (currentItemType.value === 'quiz') {
+        saveQuizTags();
+      } else if (currentItemType.value === 'summary') {
+        saveSummaryTags();
+      }
     }
   }
   
@@ -629,16 +645,74 @@ const createAndAddTag = () => {
 // Function to remove a tag from an item directly from the card
 const removeTagFromItem = ({ id, tagIndex }) => {
   // Find the item type and remove the tag
-  const findAndRemoveTag = (items) => {
+  const findAndRemoveTag = (items, type) => {
     const itemIndex = items.findIndex(item => item.id === id);
     if (itemIndex !== -1 && items[itemIndex].tags && items[itemIndex].tags[tagIndex]) {
       items[itemIndex].tags.splice(tagIndex, 1);
+      
+      // Save changes to localStorage
+      if (type === 'flashcard') {
+        saveFlashcardTags();
+      } else if (type === 'quiz') {
+        saveQuizTags();
+      } else if (type === 'summary') {
+        saveSummaryTags();
+      }
+      return true;
     }
+    return false;
   };
   
-  findAndRemoveTag(flashcards.value);
-  findAndRemoveTag(quizzes.value);
-  findAndRemoveTag(summaries.value);
+  // Try each item type
+  if (findAndRemoveTag(flashcards.value, 'flashcard')) return;
+  if (findAndRemoveTag(quizzes.value, 'quiz')) return;
+  if (findAndRemoveTag(summaries.value, 'summary')) return;
+};
+
+const saveFlashcardTags = () => {
+  const tagMap = {};
+  flashcards.value.forEach(card => {
+    if (card.tags && card.tags.length > 0) {
+      tagMap[card.id] = card.tags;
+    }
+  });
+  localStorage.setItem('flashcard_tags', JSON.stringify(tagMap));
+};
+
+const saveQuizTags = () => {
+  const tagMap = {};
+  quizzes.value.forEach(quiz => {
+    if (quiz.tags && quiz.tags.length > 0) {
+      tagMap[quiz.id] = quiz.tags;
+    }
+  });
+  localStorage.setItem('quiz_tags', JSON.stringify(tagMap));
+};
+
+const saveSummaryTags = () => {
+  const tagMap = {};
+  summaries.value.forEach(summary => {
+    if (summary.tags && summary.tags.length > 0) {
+      tagMap[summary.id] = summary.tags;
+    }
+  });
+  localStorage.setItem('summary_tags', JSON.stringify(tagMap));
+};
+
+const applySavedTags = (items, storageKey) => {
+  try {
+    const savedTags = localStorage.getItem(storageKey);
+    if (savedTags) {
+      const tagMap = JSON.parse(savedTags);
+      items.forEach(item => {
+        if (tagMap[item.id]) {
+          item.tags = tagMap[item.id];
+        }
+      });
+    }
+  } catch (error) {
+    console.error(`Error applying saved tags from ${storageKey}:`, error);
+  }
 };
 
 // Delete Summary functionality
@@ -687,7 +761,7 @@ const deleteSummary = async () => {
 @import url('https://fonts.googleapis.com/css2?family=Outfit:wght@400;500;600;700&display=swap');
 
 .library-container {
-  max-width: 1500px;
+  max-width: 1600px;
   margin: 0 auto;
   padding: 1rem;
 }
