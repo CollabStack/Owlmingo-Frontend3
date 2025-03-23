@@ -69,7 +69,7 @@
 
           @file-selected="handleFileSelected('document', $event)" @file-removed="handleFileRemoved('document')"
           @error="showSnackbar" />
-        <p class="mt-2 animated-link">Looking for flashcards instead? Try the <nuxt-link to="/"
+        <p class="mt-2 animated-link">Looking for flashcards instead? Try the <nuxt-link to="/flashcard/flashcards"
             style="text-decoration: none;"> AI Flashcard Generator</nuxt-link></p>
 
         <v-row> <!-- Add the missing opening <v-row> tag -->
@@ -101,7 +101,7 @@
               </span>
             </v-btn>
           </div>
-          <p class="animated-link mt-4">Looking for flashcards instead? Try the <nuxt-link to="/"
+          <p class="animated-link mt-4">Looking for flashcards instead? Try the <nuxt-link to="/SelectPage"
               style="text-decoration: none;"> AI Flashcard Generator</nuxt-link></p>
         </div>
       </v-window-item>
@@ -114,7 +114,7 @@
 
           @file-selected="handleFileSelected('image', $event)" @file-removed="handleFileRemoved('image')"
           @error="showSnackbar" />
-        <p class="mt-2 animated-link">Looking for flashcards instead? Try the <nuxt-link to="/"
+        <p class="mt-2 animated-link">Looking for flashcards instead? Try the <nuxt-link to="/SelectPage"
             style="text-decoration: none;"> AI Flashcard Generator</nuxt-link></p>
       </v-window-item>
 
@@ -136,19 +136,20 @@
               </span>
             </v-btn>
           </div>
-          <p class="animated-link mt-4">Looking for flashcards instead? Try the <nuxt-link to="/"
-              style="text-decoration: none;"> AI Flashcard Generator</nuxt-link></p>
+          <!-- <p class="animated-link mt-4">Looking for flashcards instead? Try the <nuxt-link to="/SelectPage"
+              style="text-decoration: none;"> AI Flashcard Generator</nuxt-link></p> -->
         </div>
 
         
         <v-row class="mt-2" align="center">
           <v-col class="d-flex">
             <p class="animated-link">Looking for flashcards instead? Try the 
-              <nuxt-link to="/" style="text-decoration: none;"> AI Flashcard Generator</nuxt-link>
+              <nuxt-link to="/SelectPage" style="text-decoration: none;"> AI Flashcard Generator</nuxt-link>
             </p>
           </v-col>
           <!-- Conditionally render the 'Next' button -->
           <v-col class="d-flex justify-end">
+
             <v-btn class="text-blue rounded-xl" variant = "outlined" @click = "generateQuiz">
               Next
             </v-btn>
@@ -173,7 +174,7 @@
         <v-row class="mt-2" align="center">
           <v-col class="d-flex">
             <p class="animated-link">Looking for flashcards instead? Try the 
-              <nuxt-link to="/" style="text-decoration: none;"> AI Flashcard Generator</nuxt-link>
+              <nuxt-link to="/SelectPage" style="text-decoration: none;"> AI Flashcard Generator</nuxt-link>
             </p>
           </v-col>
           <!-- Conditionally render the 'Next' button -->

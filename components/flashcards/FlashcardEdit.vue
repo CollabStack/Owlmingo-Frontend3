@@ -4,9 +4,11 @@
     <!-- Header Section -->
     <v-container class="text-center py-6 d-flex align-center justify-space-between">
       <p class="text-h4 font-weight-bold text-onyx">New Flashcard Deck</p>
+      <nuxt-link to="/flashcard/flashcardview">
       <v-btn color="info" variant="outlined" rounded="xl" @click="saveFlashcard">
         Create
       </v-btn>
+    </nuxt-link>
     </v-container>
 
     <!-- Deck Name Input -->
