@@ -50,9 +50,11 @@
             :key="i"
             :color="tag.color"
             size="x-small"
-            class="mr-2 mb-1 text-white outfit outfit-medium"
+            class="mr-2 mb-1 text-white outfit outfit-medium tag-chip"
             variant="flat"
             closable
+            close-icon="mdi-close-circle"
+            :close-label="`Remove ${tag.name} tag`"
             @click:close="$emit('removeTag', { id, tagIndex: i })"
           >
             {{ tag.name }}
@@ -117,7 +119,7 @@ const props = defineProps({
   type: {
     type: String,
     required: true,
-    validator: (value) => ['flashcard', 'quiz'].includes(value)
+    validator: (value) => ['flashcard', 'quiz', 'summary'].includes(value)
   },
   title: {
     type: String,
@@ -157,15 +159,21 @@ defineEmits(['edit', 'action', 'editTags', 'removeTag']);
 
 // Dynamic computed properties based on type
 const getTypeClass = computed(() => {
-  return props.type === 'quiz' ? 'purple' : 'primary';
+  if (props.type === 'quiz') return 'purple';
+  if (props.type === 'summary') return 'teal';
+  return 'primary';
 });
 
 const getTypeIcon = computed(() => {
-  return props.type === 'quiz' ? 'mdi-help-circle-outline' : 'mdi-cards-outline';
+  if (props.type === 'quiz') return 'mdi-help-circle-outline';
+  if (props.type === 'summary') return 'mdi-file-document-outline';
+  return 'mdi-cards-outline';
 });
 
 const getCountIcon = computed(() => {
-  return props.type === 'quiz' ? 'mdi-format-list-numbered' : 'mdi-card-text-outline';
+  if (props.type === 'quiz') return 'mdi-format-list-numbered';
+  if (props.type === 'summary') return 'mdi-text';
+  return 'mdi-card-text-outline';
 });
 </script>
 
@@ -228,15 +236,42 @@ const getCountIcon = computed(() => {
   position: relative;
   border-radius: 50%;
   overflow: visible;
+  padding: 2px;
+  margin-left: 2px; /* Add some margin to prevent cutoff */
 }
 
 .card-icon {
   transition: transform 0.4s ease;
   z-index: 2;
+  transform-origin: center center; /* Ensure rotation happens from the center */
+  overflow: visible;
 }
 
 .library-card:hover .card-icon {
   transform: scale(1.1) rotate(5deg);
+}
+
+/* For the v-avatar to ensure the background isn't cut */
+.card-icon-wrapper :deep(.v-avatar) {
+  overflow: visible !important; /* Override Vuetify's overflow hidden */
+}
+
+/* Add a pseudo-element that expands with the icon */
+.card-icon-wrapper::after {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  border-radius: 50%;
+  z-index: 1;
+  transition: transform 0.4s ease;
+  transform: scale(1);
+}
+
+.library-card:hover .card-icon-wrapper::after {
+  transform: scale(1.1);
 }
 
 /* Tags container with proper wrapping */
@@ -246,6 +281,39 @@ const getCountIcon = computed(() => {
   align-items: center;
   min-height: 24px;
   position: relative;
+}
+
+/* Tag chip styling with hover effect for close button */
+.tag-chip {
+  position: relative;
+  transition: all 0.3s ease;
+  padding-right: 6px !important; /* Default compact padding */
+}
+
+/* Hide the close icon completely by default */
+.tag-chip :deep(.v-chip__close) {
+  opacity: 0;
+  width: 0;
+  margin-right: 0;
+  margin-left: 0;
+  transition: all 0.3s ease;
+  transform: scale(0);
+  position: absolute;
+  right: 4px;
+}
+
+/* Show the close icon on hover and expand chip to make space */
+.tag-chip:hover {
+  padding-right: 24px !important; /* Expanded padding to make space for icon */
+}
+
+.tag-chip:hover :deep(.v-chip__close) {
+  opacity: 1;
+  width: auto;
+  margin-right: 0;
+  margin-left: 4px;
+  transform: scale(1);
+  position: absolute;
 }
 
 .tag-edit-btn {
@@ -287,5 +355,18 @@ const getCountIcon = computed(() => {
 
 .action-btn:active {
   transform: translateY(1px);
+}
+
+/* Soft background colors for card icons */
+.bg-primary-soft {
+  background-color: rgba(33, 150, 243, 0.8) !important; /* Softer primary color */
+}
+
+.bg-purple-soft {
+  background-color: rgba(156, 39, 176, 0.75) !important; /* Softer purple color */
+}
+
+.bg-teal-soft {
+  background-color: rgba(0, 150, 136, 0.75) !important; /* Softer teal color */
 }
 </style>
