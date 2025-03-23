@@ -15,7 +15,15 @@
 
     <!-- Summary Content -->
     <div>
-      <v-row v-if="summaries.length > 0">
+      <!-- Loading state -->
+      <v-skeleton-loader
+        v-if="loading"
+        type="card, card, card"
+        class="mb-4"
+      ></v-skeleton-loader>
+
+      <!-- Content when data is available -->
+      <v-row v-else-if="summaries.length > 0">
         <v-col cols="12" sm="6" md="4" v-for="(summary, index) in summaries" :key="index">
           <Card_Display
             type="summary"
@@ -31,6 +39,7 @@
             @action="$emit('view-summary', summary.id)"
             @editTags="$emit('open-tags-dialog', 'summary', summary.id)"
             @removeTag="$emit('remove-tag-from-item', $event)"
+            @delete="$emit('delete-summary', summary.id)"
           />
         </v-col>
       </v-row>
@@ -75,6 +84,10 @@ defineProps({
   summaries: {
     type: Array,
     required: true
+  },
+  loading: {
+    type: Boolean,
+    default: false
   }
 });
 
@@ -83,6 +96,7 @@ defineEmits([
   'view-summary',
   'open-summary-dialog',
   'open-tags-dialog',
-  'remove-tag-from-item'
+  'remove-tag-from-item',
+  'delete-summary'  // Add this new emit
 ]);
 </script>
