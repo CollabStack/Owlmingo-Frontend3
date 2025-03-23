@@ -1,204 +1,47 @@
 <template>
   <div class="library-container">
-    <!-- ===== TAGS SECTION ===== -->
-    <section class="mb-8">
-      <div class="d-flex align-center justify-space-between mb-4">
-        <h2 class="text-h5 outfit outfit-semibold">My Tags</h2>
-        <v-btn 
-          color="secondary" 
-          class="rounded-lg action-btn outfit outfit-medium"
-          prepend-icon="mdi-plus"
-          @click="dialog = true"
-          size="small"
-        >
-          Create Tag
-        </v-btn>
-      </div>
-
-      <!-- Tag List -->
-      <div class="tags-container">
-        <v-row v-if="tags.length > 0">
-          <v-col cols="12" sm="6" md="4" v-for="(tag, index) in tags" :key="index">
-            <v-card class="tag-card d-flex align-center px-4 py-3 mx-2 mb-3" elevation="1">
-              <!-- Color Indicator -->
-              <div 
-                :style="{ backgroundColor: tag.color }" 
-                class="tag-color"
-              ></div>
-
-              <!-- Tag Name -->
-              <p class="mx-3 mb-0 outfit text-truncate">{{ tag.name }}</p>
-
-              <!-- Spacer -->
-              <v-spacer></v-spacer>
-
-              <!-- Action Buttons -->
-              <v-btn icon="mdi-pencil" size="small" variant="text" color="grey-darken-1" @click="editTag(index)" class="mr-1"></v-btn>
-              <v-btn icon="mdi-delete" size="small" variant="text" color="error" @click="confirmDelete(index)"></v-btn>
-            </v-card>
-          </v-col>
-        </v-row>
-
-        <!-- Empty State for Tags -->
-        <v-card v-else class="pa-8 text-center rounded-lg empty-state">
-          <v-icon size="64" color="secondary" class="mb-4">mdi-tag-multiple</v-icon>
-          <h3 class="text-h5 outfit outfit-semibold mb-3">No tags yet</h3>
-          <p class="text-body-1 text-medium-emphasis mb-6 outfit">Create tags to organize your flashcards and quizzes</p>
-          
-          <v-btn 
-            color="secondary" 
-            class="action-btn outfit"
-            prepend-icon="mdi-plus"
-            @click="dialog = true"
-          >
-            Create First Tag
-          </v-btn>
-        </v-card>
-      </div>
-    </section>
+    <!-- Section Components -->
+    <TagsSection 
+      :tags="tags"
+      @open-tag-dialog="dialog = true"
+      @edit-tag="editTag"
+      @confirm-delete="confirmDelete"
+    />
 
     <v-divider class="mb-8"></v-divider>
 
-    <!-- ===== FLASHCARDS SECTION ===== -->
-    <section class="mb-8">
-      <div class="d-flex align-center justify-space-between mb-4">
-        <h2 class="text-h5 outfit outfit-semibold">My Flashcards</h2>
-        <v-btn 
-          color="primary" 
-          class="rounded-lg action-btn outfit outfit-medium"
-          prepend-icon="mdi-plus"
-          @click="flashcardDialog = true"
-          size="small"
-        >
-          Create
-        </v-btn>
-      </div>
-
-      <!-- Flashcard Content -->
-      <div>
-        <v-row v-if="flashcards.length > 0">
-          <v-col cols="12" sm="6" md="4" v-for="(card, index) in flashcards" :key="index">
-            <Card_Display
-              type="flashcard"
-              :title="card.title"
-              :description="card.description"
-              :subtitle="card.subtitle"
-              :item-count="card.cardCount"
-              :last-updated="card.lastUpdated"
-              :tags="card.tags"
-              :index="index"
-              :id="card.id"
-              @edit="editFlashcard(card.id)"
-              @action="viewFlashcard(card.id)"
-              @editTags="openTagsDialog('flashcard', $event)"
-              @removeTag="removeTagFromItem($event)"
-            />
-          </v-col>
-        </v-row>
-
-        <!-- Empty State -->
-        <v-card v-else class="pa-8 text-center rounded-lg empty-state">
-          <v-icon size="64" color="primary" class="mb-4">mdi-cards-outline</v-icon>
-          <h3 class="text-h5 outfit outfit-semibold mb-3">No flashcards yet</h3>
-          <p class="text-body-1 text-medium-emphasis mb-6 outfit">Create your first flashcard deck to start studying effectively</p>
-          
-          <div class="d-flex justify-center" style="gap: 16px;">
-            <nuxt-link to="/flashcard" style="text-decoration: none;">
-              <v-btn 
-                color="primary" 
-                class="action-btn outfit"
-                variant="flat"
-                prepend-icon="mdi-robot"
-              >
-                Generate with AI
-              </v-btn>
-            </nuxt-link>
-            <nuxt-link to="/flashcard/flashcards" style="text-decoration: none;">
-              <v-btn 
-                color="grey-darken-1" 
-                variant="outlined"
-                class="action-btn outfit"
-                prepend-icon="mdi-pencil"
-              >
-                Create Manually
-              </v-btn>
-            </nuxt-link>
-          </div>
-        </v-card>
-      </div>
-    </section>
+    <FlashcardsSection 
+      :flashcards="flashcards"
+      @edit-flashcard="editFlashcard"
+      @view-flashcard="viewFlashcard"
+      @open-flashcard-dialog="flashcardDialog = true"
+      @open-tags-dialog="openTagsDialog"
+      @remove-tag-from-item="removeTagFromItem"
+    />
 
     <v-divider class="mb-8"></v-divider>
 
-    <!-- ===== QUIZZES SECTION ===== -->
-    <section class="mb-8">
-      <div class="d-flex align-center justify-space-between mb-4">
-        <h2 class="text-h5 outfit outfit-semibold">My Quizzes</h2>
-        <v-btn 
-          color="purple" 
-          class="rounded-lg action-btn outfit outfit-medium"
-          prepend-icon="mdi-plus"
-          @click="quizDialog = true"
-          size="small"
-        >
-          Create
-        </v-btn>
-      </div>
+    <QuizzesSection 
+      :quizzes="quizzes"
+      @edit-quiz="editQuiz"
+      @start-quiz="startQuiz"
+      @open-quiz-dialog="quizDialog = true"
+      @open-tags-dialog="openTagsDialog"
+      @remove-tag-from-item="removeTagFromItem"
+    />
 
-      <!-- Quiz Content -->
-      <div>
-        <v-row v-if="quizzes.length > 0">
-          <v-col cols="12" sm="6" md="4" v-for="(quiz, index) in quizzes" :key="index">
-            <Card_Display
-              type="quiz"
-              :title="quiz.title"
-              :description="quiz.description"
-              :subtitle="quiz.subtitle"
-              :item-count="quiz.questionCount"
-              :last-updated="quiz.lastUpdated"
-              :tags="quiz.tags"
-              :index="index"
-              :id="quiz.id"
-              @edit="editQuiz(quiz.id)"
-              @action="startQuiz(quiz.id)"
-              @editTags="openTagsDialog('quiz', $event)"
-              @removeTag="removeTagFromItem($event)"
-            />
-          </v-col>
-        </v-row>
+    <v-divider class="mb-8"></v-divider>
 
-        <!-- Empty State -->
-        <v-card v-else class="pa-8 text-center rounded-lg empty-state">
-          <v-icon size="64" color="purple" class="mb-4">mdi-help-circle-outline</v-icon>
-          <h3 class="text-h5 outfit outfit-semibold mb-3">No quizzes yet</h3>
-          <p class="text-body-1 text-medium-emphasis mb-6 outfit">Create your first quiz to test your knowledge</p>
-          
-          <div class="d-flex justify-center" style="gap: 16px;">
-            <nuxt-link to="/quiz" style="text-decoration: none;">
-              <v-btn 
-                color="purple" 
-                class="action-btn outfit"
-                variant="flat"
-                prepend-icon="mdi-robot"
-              >
-                Generate with AI
-              </v-btn>
-            </nuxt-link>
-            <nuxt-link to="/quiz/review-quiz" style="text-decoration: none;">
-              <v-btn 
-                color="grey-darken-1" 
-                variant="outlined"
-                class="action-btn outfit"
-                prepend-icon="mdi-pencil"
-              >
-                Create Manually
-              </v-btn>
-            </nuxt-link>
-          </div>
-        </v-card>
-      </div>
-    </section>
+    <SummariesSection 
+      :summaries="summaries"
+      @edit-summary="editSummary"
+      @view-summary="viewSummary"
+      @open-summary-dialog="summaryDialog = true"
+      @open-tags-dialog="openTagsDialog"
+      @remove-tag-from-item="removeTagFromItem"
+    />
 
+    <!-- Dialogs -->
     <!-- Add/Edit Tag Dialog -->
     <v-dialog v-model="dialog" max-width="400" class="rounded-lg">
       <v-card>
@@ -342,6 +185,48 @@
       </v-card>
     </v-dialog>
 
+    <!-- Create Summary Dialog -->
+    <v-dialog v-model="summaryDialog" max-width="400" class="rounded-lg">
+      <v-card>
+        <v-card-title class="text-h6 outfit pa-4">Create Summary</v-card-title>
+        <v-divider></v-divider>
+        <v-card-text class="pt-4">
+          <p class="text-body-2 text-medium-emphasis mb-4">Choose a method to create your summary:</p>
+          
+          <div class="d-flex flex-column" style="gap: 12px;">
+            <nuxt-link to="/summary" style="text-decoration: none;">
+              <v-btn 
+                color="teal" 
+                class="action-btn outfit" 
+                variant="flat"
+                block
+                height="44"
+              >
+                <v-icon start>mdi-robot</v-icon>
+                Generate with AI
+              </v-btn>
+            </nuxt-link>
+            <nuxt-link to="/summary/create" style="text-decoration: none;">
+              <v-btn 
+                color="grey-darken-1" 
+                variant="outlined" 
+                class="action-btn outfit" 
+                block
+                height="44"
+              >
+                <v-icon start>mdi-pencil</v-icon>
+                Create Manually
+              </v-btn>
+            </nuxt-link>
+          </div>
+        </v-card-text>
+        <v-card-actions class="pa-4 pt-0">
+          <v-spacer></v-spacer>
+          <v-btn variant="text" @click="summaryDialog = false" class="outfit">Cancel</v-btn>
+        </v-card-actions>
+      </v-card>
+    </v-dialog>
+
     <!-- Edit Item Tags Dialog -->
     <v-dialog v-model="tagsDialog" max-width="400" class="rounded-lg">
       <v-card>
@@ -431,7 +316,10 @@
   
 <script setup>
 import { ref, onMounted, computed } from 'vue';
-import Card_Display from './Card_Display.vue';
+import TagsSection from './TagsSection.vue';
+import FlashcardsSection from './FlashcardsSection.vue';
+import QuizzesSection from './QuizzesSection.vue';
+import SummariesSection from './SummariesSection.vue';
 
 // Tags management
 const tags = ref([]);
@@ -452,6 +340,7 @@ const swatchColors = [
 // Dialogs
 const flashcardDialog = ref(false);
 const quizDialog = ref(false);
+const summaryDialog = ref(false);
 
 // Sample data (Replace this with your actual data from API or store)
 const flashcards = ref([
@@ -496,10 +385,32 @@ const quizzes = ref([
   }
 ]);
 
+const summaries = ref([
+  {
+    id: 1,
+    title: "Biology Textbook Ch. 5",
+    subtitle: "Science",
+    description: "Concise summary of cellular respiration and photosynthesis processes",
+    wordCount: 850,
+    lastUpdated: "1 day ago",
+    tags: [{ name: "Biology", color: "#4CAF50" }]
+  },
+  {
+    id: 2,
+    title: "World History Notes",
+    subtitle: "History",
+    description: "Key events and figures of the Industrial Revolution summarized",
+    wordCount: 1200,
+    lastUpdated: "3 days ago",
+    tags: [{ name: "History", color: "#9C27B0" }]
+  }
+]);
+
 // For demo purposes, you can set these to empty arrays to test the empty state
 // flashcards.value = [];
 // quizzes.value = [];
 // tags.value = [];
+// summaries.value = [];
 
 onMounted(() => {
   const savedTags = localStorage.getItem('tags');
@@ -581,6 +492,17 @@ const startQuiz = (id) => {
   // Implement navigation to quiz start page
 };
 
+// Summary action handlers
+const editSummary = (id) => {
+  console.log(`Editing summary with ID: ${id}`);
+  // Implement navigation to edit summary page
+};
+
+const viewSummary = (id) => {
+  console.log(`Viewing summary with ID: ${id}`);
+  // Implement navigation to view summary page
+};
+
 // Tags dialog
 const tagsDialog = ref(false);
 const currentItemType = ref(null);
@@ -604,8 +526,10 @@ const openTagsDialog = (type, id) => {
   let item;
   if (type === 'flashcard') {
     item = flashcards.value.find(card => card.id === id);
-  } else {
+  } else if (type === 'quiz') {
     item = quizzes.value.find(quiz => quiz.id === id);
+  } else if (type === 'summary') {
+    item = summaries.value.find(summary => summary.id === id);
   }
   
   if (item) {
@@ -621,7 +545,15 @@ const openTagsDialog = (type, id) => {
 const closeTagsDialog = () => {
   // Update the item's tags
   if (currentItemType.value && currentItemId.value) {
-    const items = currentItemType.value === 'flashcard' ? flashcards.value : quizzes.value;
+    let items;
+    if (currentItemType.value === 'flashcard') {
+      items = flashcards.value;
+    } else if (currentItemType.value === 'quiz') {
+      items = quizzes.value;
+    } else if (currentItemType.value === 'summary') {
+      items = summaries.value;
+    }
+    
     const itemIndex = items.findIndex(item => item.id === currentItemId.value);
     
     if (itemIndex !== -1) {
@@ -682,6 +614,7 @@ const removeTagFromItem = ({ id, tagIndex }) => {
   
   findAndRemoveTag(flashcards.value);
   findAndRemoveTag(quizzes.value);
+  findAndRemoveTag(summaries.value);
 };
 </script>
 
@@ -689,7 +622,7 @@ const removeTagFromItem = ({ id, tagIndex }) => {
 @import url('https://fonts.googleapis.com/css2?family=Outfit:wght@400;500;600;700&display=swap');
 
 .library-container {
-  max-width: 1200px;
+  max-width: 1500px;
   margin: 0 auto;
   padding: 1rem;
 }
@@ -708,33 +641,6 @@ const removeTagFromItem = ({ id, tagIndex }) => {
 
 .outfit-bold {
   font-weight: 700;
-}
-
-/* Tag styling */
-.tag-color {
-  min-width: 24px; 
-  width: 24px;
-  height: 24px; 
-  border-radius: 4px;
-  transition: transform 0.3s ease;
-  flex-shrink: 0;
-}
-
-.tag-card {
-  transition: all 0.3s ease;
-  border-radius: 8px;
-  border: 1px solid rgba(0,0,0,0.05);
-  overflow: hidden;
-}
-
-.tag-card:hover {
-  transform: translateY(-3px);
-  box-shadow: 0 4px 10px rgba(0, 0, 0, 0.06) !important;
-  border-color: rgba(0,0,0,0);
-}
-
-.tag-card:hover .tag-color {
-  transform: scale(1.1);
 }
 
 /* Action button styling */
@@ -768,11 +674,6 @@ const removeTagFromItem = ({ id, tagIndex }) => {
   transform: translateY(-5px);
   box-shadow: 0 8px 16px rgba(0, 0, 0, 0.06);
   border-color: rgba(0,0,0,0);
-}
-
-/* Badge styling */
-.v-badge__badge {
-  font-family: 'Outfit', sans-serif !important;
 }
 
 /* Dialog styling */
