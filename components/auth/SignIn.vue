@@ -68,13 +68,6 @@
                             src="/icons/icons8-github-logo.png"
                         ></v-img>
                     </v-btn>
-                    <!-- <v-btn icon="" class="icon-button" @click="telegramOAuth">
-                        <v-img
-                            width="50px"
-                            height="50px"
-                            src="/icons/icons8-telegram-app-100.png"
-                        ></v-img>
-                    </v-btn> -->
                     <TelegramLogin/>
                 </div>
                 <div class="sign-up-option d-flex flex-row justify-center align-center mt-10">
@@ -95,13 +88,14 @@
     import { ref, onMounted } from 'vue';
     import { userAuth } from '~/store/userAuth';
     import TelegramLogin from './TelegramLogin.vue';
+    import { useNuxtApp } from '#app';
 
     const authStore = userAuth();
     const email = ref('');
     const password = ref('');
     const showPassword = ref(false);
     const isLoading = ref(false);
-    const runtimeConfig = useRuntimeConfig();
+    const runtimeConfig = useRuntimeConfig(); 
 
     onMounted(() => {
         console.log('Sign In mounted');
@@ -140,6 +134,14 @@
         } finally {
             isLoading.value = false;
         }
+    };
+
+    const googleOAuth = async () => {
+        window.location.href = `${runtimeConfig.public.USER_PUBLIC_API}google`;
+    };
+
+    const githubOAuth = async () => {
+        window.location.href = `${runtimeConfig.public.USER_PUBLIC_API}github`;
     };
 
     const gotoForgotPassword = () => {

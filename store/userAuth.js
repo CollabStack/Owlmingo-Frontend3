@@ -6,7 +6,8 @@ export const userAuth = defineStore('userAuth', {
     state: () => ({
         token: Cookies.get('token') || null,
         user: null, 
-        isLoggedIn: false,
+        isLoggedIn: !!Cookies.get('token'),
+        tokenInitialized: false // Add a flag to track initialization
     }),
     actions: {
         // User management methods
@@ -14,13 +15,56 @@ export const userAuth = defineStore('userAuth', {
             this.user = user;
         },
         
+        // Add initialization method
+        init() {
+            if (this.tokenInitialized) return; // Prevent multiple initializations
+            
+            const token = this.getToken();
+            if (token) {
+                this.token = token;
+                this.isLoggedIn = true;
+                this.tokenInitialized = true;
+                
+                // Add a timeout to allow component mount before refresh
+                setTimeout(() => {
+                    this.refreshToken();
+                }, 300);
+            }
+        },
+
         setToken(token) {
             this.token = token;
-            Cookies.set('token', token);
+            this.isLoggedIn = true;
+            this.tokenInitialized = true;
+            
+            // Use more complete cookie options
+            Cookies.set('token', token, { 
+                expires: 7, // 7 days
+                path: '/',
+                secure: process.env.NODE_ENV === 'production',
+                // sameSite: 'Lax' // Important for cross-site requests
+            });
+            
+            // Also store in localStorage as backup
+            localStorage.setItem('auth_token_backup', token);
         },
         
         getToken() {
-            return Cookies.get('token');
+            // Try to get token from cookie first, then from localStorage as backup
+            let token = Cookies.get('token');
+            if (!token) {
+                token = localStorage.getItem('auth_token_backup');
+                // If found in localStorage but not in cookies, restore the cookie
+                if (token) {
+                    Cookies.set('token', token, { 
+                        expires: 7,
+                        path: '/',
+                        secure: process.env.NODE_ENV === 'production',
+                        sameSite: 'Lax'
+                    });
+                }
+            }
+            return token;
         },
         
         getUser() {
@@ -43,7 +87,7 @@ export const userAuth = defineStore('userAuth', {
             console.log("password", password);
             const {$UserPublicAxios} = useNuxtApp();
             try {
-                const response = await $UserPublicAxios.post('/login', {
+                const response = await $UserPublicAxios.post('login', {
                     email: email,
                     password: password
                 });
@@ -274,70 +318,106 @@ export const userAuth = defineStore('userAuth', {
             this.user = null;
             this.token = null;
             this.isLoggedIn = false;
-            Cookies.remove('token');
+            this.tokenInitialized = false;
+            Cookies.remove('token', { path: '/' });
+            localStorage.removeItem('auth_token_backup');
         },
-        // Telegram OAuth method
+
         async telegramOAuth(data) {
-            const {$UserPublicAxios} = useNuxtApp();
+            const {$UserPublicAxios} = useNuxtApp(); // Use full Nuxt app instance
             try {
-                const response = await $UserPublicAxios.post('/telegram/auth', data);
-                this.setUser(response.data.data.user);
-                this.setToken(response.data.data.token);
-                this.isLoggedIn = true;
-                return response.data;
+            const {first_name, last_name, username} = data;
+            const telegram_id = data.id;
+            const response = await $UserPublicAxios.post('/telegram-oauth', {first_name, last_name, username, telegram_id});
+            if (response.status !== 200) {
+                throw new Error(`Error: Received status code ${response.status}`);
+            }
+            console.log("response OAuth", response);
+            const token = response.data.data['token'];
+            this.setUser(response.data.data['user']);
+            this.setToken(token);
+            this.refreshToken();
+            this.isLoggedIn = true;
+            return response;
             } catch (error) {
-                console.error('Telegram OAuth error:', error);
-                throw error;
+            throw error;
             }
         },
-        // Google OAuth method
+
         async googleOAuth(data) {
-            const {$UserPublicAxios} = useNuxtApp();
-            try {
-                const response = await $UserPublicAxios.post('/google/auth', data);
-                this.setUser(response.data.data.user);
-                this.setToken(response.data.data.token);
-                this.isLoggedIn = true;
-                return response.data;
-            } catch (error) {
-                console.error('Google OAuth error:', error);
-                throw error;
-            }
+            
         },
         
-        // GitHub OAuth method
-        async githubOAuth(data) {
-            const {$UserPublicAxios} = useNuxtApp();
-            try {
-                const response = await $UserPublicAxios.post('/github/auth', data);
-                this.setUser(response.data.data.user);
-                this.setToken(response.data.data.token);
-                this.isLoggedIn = true;
-                return response.data;
-            } catch (error) {
-                console.error('GitHub OAuth error:', error);
-                throw error;
-            }
-        },
         async refreshToken() {
-            // Implementation for refreshing token
-            console.log("Refreshing token");
-            // Your token refresh implementation here
+            try {
+                const {$UserPrivateAxios} = useNuxtApp();
+                const response = await $UserPrivateAxios.post('/refresh-token');
+                
+                if (!response.data || !response.data.data || !response.data.data.token) {
+                    console.error('Invalid refresh token response', response);
+                    return;
+                }
+                
+                const token = response.data.data.token;
+                this.setToken(token);
+                
+                // Schedule next token refresh (every 15 minutes)
+                setTimeout(() => {
+                    this.refreshToken();
+                }, 15 * 60 * 1000);
+                
+                return token;
+            } catch (error) {
+                console.error("Refresh Token Error:", error);
+                // Don't logout on refresh failures - just try again later
+                setTimeout(() => {
+                    this.refreshToken();
+                }, 60 * 1000);
+            }
         },
         
         async checkTokenExpired() {
-            // Implementation for checking if token is expired
-            console.log("Checking if token is expired");
-            // Your token expiration check implementation here
+            let token = this.getToken();
+            if (!token) {
+                return false;
+            }
+            
+            try {
+                const parts = token.split('.');
+                if (parts.length !== 3) {
+                    throw new Error('Invalid token format');
+                }
+                
+                const payload = JSON.parse(atob(parts[1]));
+                const currentTime = Math.floor(Date.now() / 1000);
+                
+                // If token is expired or close to expiry, refresh it
+                if (!payload.exp || payload.exp < currentTime) {
+                    console.log('Token expired, getting new one');
+                    token = await this.refreshToken();
+                    return !!token;
+                } else if (payload.exp - currentTime < 900) { // 15 minutes
+                    console.log('Token expiring soon, refreshing');
+                    this.refreshToken(); // Don't await, let it refresh in background
+                }
+                
+                return true;
+            } catch (error) {
+                console.error('Token validation error:', error);
+                return false;
+            }
         },
         
         initializeSession() {
-            const token = this.getToken();
-            if (token) {
-                this.isLoggedIn = true;
-                // Optionally fetch user data here
-                // this.fetchUserData();
+            if (!this.token) {
+                this.logout();
+                return;
             }
+            this.checkTokenExpired().then(isValid => {
+                if (isValid) {
+                    this.refreshToken();
+                }
+            });
         }
     }
 });

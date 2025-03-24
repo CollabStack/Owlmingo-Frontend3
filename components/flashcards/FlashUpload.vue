@@ -3,11 +3,11 @@
     <!-- Header -->
     <h1 class="text-h4 font-weight-bold text-primary mb-3 outfit outfit-bold" v-motion :initial="{ opacity: 0, y: 20 }"
       :enter="{ opacity: 1, y: 0, transition: { duration: 600 } }">
-      AI Quiz Generator
+      AI Flashcard Generator
     </h1>
     <p class="text-subtitle-1 text-grey-darken-1 mb-6 outfit outfit-regular" v-motion :initial="{ opacity: 0, y: 20 }"
       :enter="{ opacity: 1, y: 0, transition: { duration: 600, delay: 200 } }">
-      Upload a document, paste your notes, or select a video to automatically generate quizzes with AI.
+      Upload a document, paste your notes, or select a video to automatically generate flashcards with AI.
     </p>
 
     <!-- Tabs and Options -->
@@ -48,12 +48,13 @@
 
         <!-- Select Option -->
         <v-container>
-          <p class="text-primary text-h6 text-left">Question Type</p>
-          <v-select clearable chips label="Multiple Choice" :items="['Multiple Choice', 'True/False', 'Open Ended']"
+          <p class="text-primary text-h6 text-left">Flashcard Format</p>
+          <v-select clearable chips label="Term - Definition" 
+            :items="['Term - Definition', 'Question - Answer', 'Concept - Example']"
             class="my-3 animated-input"></v-select>
 
-          <p class="text-primary text-h6 text-left">Max Questions</p>
-          <v-select clearable chips label="Auto" :items="['Auto', '5', '10']" class="my-3 animated-input"></v-select>
+          <p class="text-primary text-h6 text-left">Number of Flashcards</p>
+          <v-select clearable chips label="Auto" :items="['Auto', '10', '20', '30']" class="my-3 animated-input"></v-select>
         </v-container>
       </v-card>
     </v-bottom-sheet>
@@ -66,21 +67,35 @@
           acceptedFileTypes="application/pdf,application/msword,application/vnd.openxmlformats-officedocument.wordprocessingml.document"
           buttonText="Browse Files" buttonIcon="mdi-upload" :maxFileSize="20"
           fileTypeErrorMessage="Invalid file type! Only PDF and DOC files are allowed."
-
           @file-selected="handleFileSelected('document', $event)" @file-removed="handleFileRemoved('document')"
           @error="showSnackbar" />
-        <p class="mt-2 animated-link">Looking for flashcards instead? Try the <nuxt-link to="/"
-            style="text-decoration: none;"> AI Flashcard Generator</nuxt-link></p>
-
-        <v-row> <!-- Add the missing opening <v-row> tag -->
-          <!-- Conditionally render the 'Next' button -->
-          <v-col class="d-flex justify-end">
-            <v-btn class="text-blue rounded-xl" variant = "outlined" @click = "generateQuiz">
-              Next
-            </v-btn>
-          </v-col>
-        </v-row>
-
+        
+        <!-- PDF page selector component with ref -->
+        <PdfPageSelector
+          ref="pdfSelector"
+          v-if="documentFile && isPdfFile"
+          :file="documentFile"
+          :total-pages="totalPages"
+          :file-name="documentFile.name"
+          v-model:selection-mode="selectionMode"
+          v-model:page-selection="pageSelection"
+          v-model:selected-pages="selectedPages"
+        />
+        
+        <div class="button-container" style="margin: 12px 0;">
+          <v-btn color="royal_blue" min-width="92" variant="outlined"
+            class="custom-btn text-none animated-btn outfit outfit-medium" 
+            @click="generateFlashcard"
+            :disabled="!documentFile || (isPdfFile && selectedPages.size === 0)" 
+            rounded="xl">
+            <span class="d-flex align-center">
+              Generate
+              <v-icon class="ms-2 btn-icon">mdi-lightning-bolt</v-icon>
+            </span>
+          </v-btn>
+        </div>
+        <p class="mt-2 animated-link">Looking for summaries instead? Try the <nuxt-link to="/summary"
+            style="text-decoration: none;"> AI Summary Generator</nuxt-link></p>
       </v-window-item>
 
       <!-- Text Upload -->
@@ -93,7 +108,7 @@
           </v-textarea>
           <div class="button-container">
             <v-btn color="royal_blue" min-width="92" variant="outlined"
-              class="custom-btn text-none animated-btn outfit outfit-medium" @click="generateQuiz"
+              class="custom-btn text-none animated-btn outfit outfit-medium" @click="generateFlashcard"
               :disabled="!textContent" rounded="xl">
               <span class="d-flex align-center">
                 Generate
@@ -101,8 +116,8 @@
               </span>
             </v-btn>
           </div>
-          <p class="animated-link mt-4">Looking for flashcards instead? Try the <nuxt-link to="/"
-              style="text-decoration: none;"> AI Flashcard Generator</nuxt-link></p>
+          <p class="animated-link mt-4">Looking for summaries instead? Try the <nuxt-link to="/summary"
+              style="text-decoration: none;"> AI Summary Generator</nuxt-link></p>
         </div>
       </v-window-item>
 
@@ -111,14 +126,25 @@
         <FileUploader icon="mdi-image" placeholder="Drag an image here to upload" acceptedFileTypes="image/*"
           buttonText="Browse Images" buttonIcon="mdi-image-search" :maxFileSize="10"
           fileTypeErrorMessage="Invalid file type! Only image files are allowed."
-
           @file-selected="handleFileSelected('image', $event)" @file-removed="handleFileRemoved('image')"
           @error="showSnackbar" />
-        <p class="mt-2 animated-link">Looking for flashcards instead? Try the <nuxt-link to="/"
-            style="text-decoration: none;"> AI Flashcard Generator</nuxt-link></p>
+        <div class="button-container" style="margin: 12px 0;">
+          <v-btn color="royal_blue" min-width="92" variant="outlined"
+            class="custom-btn text-none animated-btn outfit outfit-medium" 
+            @click="generateFlashcard"
+            :disabled="!imageFile" 
+            rounded="xl">
+            <span class="d-flex align-center">
+              Generate
+              <v-icon class="ms-2 btn-icon">mdi-lightning-bolt</v-icon>
+            </span>
+          </v-btn>
+        </div>
+        <p class="mt-2 animated-link">Looking for summaries instead? Try the <nuxt-link to="/summary"
+            style="text-decoration: none;"> AI Summary Generator</nuxt-link></p>
       </v-window-item>
 
-      <!-- Video Upload -->
+      <!-- Link Upload -->
       <v-window-item value="link">
         <div class="ma-4 pa-4" outlined v-motion :initial="{ opacity: 0, y: 20 }"
           :enter="{ opacity: 1, y: 0, transition: { duration: 600 } }">
@@ -128,7 +154,7 @@
           </v-textarea>
           <div class="button-container">
             <v-btn color="royal_blue" min-width="92" variant="outlined"
-              class="custom-btn text-none animated-btn outfit outfit-medium" @click="generateQuiz"
+              class="custom-btn text-none animated-btn outfit outfit-medium" @click="generateFlashcard"
               :disabled="!textContent" rounded="xl">
               <span class="d-flex align-center">
                 Generate
@@ -136,24 +162,9 @@
               </span>
             </v-btn>
           </div>
-          <p class="animated-link mt-4">Looking for flashcards instead? Try the <nuxt-link to="/"
-              style="text-decoration: none;"> AI Flashcard Generator</nuxt-link></p>
+          <p class="animated-link mt-4">Looking for summaries instead? Try the <nuxt-link to="/summary"
+              style="text-decoration: none;"> AI Summary Generator</nuxt-link></p>
         </div>
-
-        
-        <v-row class="mt-2" align="center">
-          <v-col class="d-flex">
-            <p class="animated-link">Looking for flashcards instead? Try the 
-              <nuxt-link to="/" style="text-decoration: none;"> AI Flashcard Generator</nuxt-link>
-            </p>
-          </v-col>
-          <!-- Conditionally render the 'Next' button -->
-          <v-col class="d-flex justify-end">
-            <v-btn class="text-blue rounded-xl" variant = "outlined" @click = "generateQuiz">
-              Next
-            </v-btn>
-          </v-col>
-        </v-row>
       </v-window-item>
 
       <!-- Video Upload -->
@@ -170,20 +181,20 @@
           @file-removed="handleFileRemoved('video')"
           @error="showSnackbar"
         />
-        <v-row class="mt-2" align="center">
-          <v-col class="d-flex">
-            <p class="animated-link">Looking for flashcards instead? Try the 
-              <nuxt-link to="/" style="text-decoration: none;"> AI Flashcard Generator</nuxt-link>
-            </p>
-          </v-col>
-          <!-- Conditionally render the 'Next' button -->
-          <v-col class="d-flex justify-end">
-            <v-btn class="text-blue rounded-xl" variant = "outlined" @click = "generateQuiz">
-              Next
-            </v-btn>
-          </v-col>
-        </v-row>
-
+        <div class="button-container">
+          <v-btn color="royal_blue" min-width="92" variant="outlined"
+            class="custom-btn text-none animated-btn outfit outfit-medium" 
+            @click="generateFlashcard"
+            :disabled="!videoFile" 
+            rounded="xl">
+            <span class="d-flex align-center">
+              Generate
+              <v-icon class="ms-2 btn-icon">mdi-lightning-bolt</v-icon>
+            </span>
+          </v-btn>
+        </div>
+        <p class="mt-2 animated-link">Looking for summaries instead? Try the <nuxt-link to="/summary"
+            style="text-decoration: none;"> AI Summary Generator</nuxt-link></p>
       </v-window-item>
     </v-window>
 
@@ -191,7 +202,7 @@
     <v-overlay :model-value="loading" class="align-center justify-center">
       <v-card color="white" width="300" class="pa-4 rounded-xl text-center">
         <v-progress-circular indeterminate color="primary" size="64"></v-progress-circular>
-        <p class="mt-4">Generating your quiz...</p>
+        <p class="mt-4">Generating your flashcards...</p>
       </v-card>
     </v-overlay>
 
@@ -206,13 +217,48 @@
 </template>
 
 <script setup>
-import { ref } from 'vue';
+import { ref, computed, watch, onMounted } from 'vue';
 import FileUploader from '../common/FileUploader.vue';
-import { useRouter } from 'vue-router'; // Import useRouter
-  
-const router = useRouter(); // Initialize router
+import PdfPageSelector from '../summary/PdfPageSelector.vue';
+import { useRouter } from 'vue-router';
+import { PDFDocument } from 'pdf-lib';
+import * as pdfjs from 'pdfjs-dist';
+import { processFile } from '~/services/ocrService';
+import Swal from 'sweetalert2'; // Add this if not already imported
+import { userAuth } from '~/store/userAuth';
 
-const tab = ref('document'); // Default tab
+// Set PDF.js worker
+const pdfjsWorker = await import('pdfjs-dist/build/pdf.worker.entry');
+pdfjs.GlobalWorkerOptions.workerSrc = pdfjsWorker;
+
+// Initialize auth and router
+const router = useRouter();
+const authStore = userAuth();
+
+// Initialize auth on mounted with better error handling
+onMounted(async () => {
+  try {
+    // Ensure auth is initialized
+    authStore.init();
+    
+    // Check token validity silently, don't redirect here
+    const isValid = await authStore.checkTokenExpired();
+    if (!isValid) {
+      console.warn('Token validation failed in component');
+      // Don't redirect - let middleware handle it
+    }
+  } catch (error) {
+    console.error('Auth initialization error:', error);
+  }
+});
+
+// Use a more reliable auth check without redirects
+const isAuthenticated = computed(() => {
+  return authStore.isLoggedIn && !!authStore.getToken();
+});
+
+const pdfSelector = ref(null); // Add this line to create the ref
+const tab = ref('document');
 const sheet = ref(false);
 const snackbar = ref(false);
 const snackbarMessage = ref('');
@@ -221,6 +267,11 @@ const imageFile = ref(null);
 const videoFile = ref(null);
 const textContent = ref('');
 const loading = ref(false);
+const totalPages = ref(0);
+const pageSelection = ref('');
+const selectionMode = ref('text');
+const selectedPages = ref(new Set());
+const pdfDocRef = ref(null);
 
 const options = ref([
   { label: 'Document', value: 'document' },
@@ -229,10 +280,30 @@ const options = ref([
   { label: 'Link', value: 'link' },
 ]);
 
-// Handle file selection from FileUploader component
-const handleFileSelected = (type, file) => {
+// Check if file is PDF
+const isPdfFile = computed(() => {
+  return documentFile.value && 
+    (documentFile.value.type === 'application/pdf' || 
+     documentFile.value.name.toLowerCase().endsWith('.pdf'));
+});
+
+// File selection handler
+const handleFileSelected = async (type, file) => {
   if (type === 'document') {
-    documentFile.value = file;
+    // Clean up any previous file data first
+    totalPages.value = 0;
+    pageSelection.value = '';
+    selectedPages.value = new Set();
+    pdfDocRef.value = null;
+    
+    // Set the new file after a small delay to ensure clean state
+    setTimeout(() => {
+      documentFile.value = file;
+      
+      if (isPdfFile.value) {
+        processPdfFile(file);
+      }
+    }, 50);
   } else if (type === 'image') {
     imageFile.value = file;
   } else if (type === 'video') {
@@ -240,10 +311,44 @@ const handleFileSelected = (type, file) => {
   }
 };
 
-// Handle file removal from FileUploader component
+// Extract PDF processing logic to a separate function
+const processPdfFile = async (file) => {
+  try {
+    console.log('Processing PDF file:', file.name);
+    const arrayBuffer = await file.arrayBuffer();
+    const pdfDoc = await PDFDocument.load(arrayBuffer);
+    
+    const pages = pdfDoc.getPageCount();
+    console.log(`PDF has ${pages} pages`);
+    totalPages.value = pages;
+    
+    // Select all pages by default
+    selectedPages.value = new Set();
+    for (let i = 1; i <= pages; i++) {
+      selectedPages.value.add(i);
+    }
+    pageSelection.value = pages > 1 ? `1-${pages}` : '1';
+    
+    // Store PDF document for later use
+    pdfDocRef.value = pdfDoc;
+  } catch (error) {
+    console.error('Error loading PDF:', error);
+    showSnackbar('Error reading PDF file');
+    
+    // Reset on error
+    documentFile.value = null;
+    totalPages.value = 0;
+  }
+};
+
+// Handle file removal with proper cleanup
 const handleFileRemoved = (type) => {
   if (type === 'document') {
     documentFile.value = null;
+    totalPages.value = 0;
+    pageSelection.value = '';
+    selectedPages.value = new Set();
+    pdfDocRef.value = null;
   } else if (type === 'image') {
     imageFile.value = null;
   } else if (type === 'video') {
@@ -251,40 +356,93 @@ const handleFileRemoved = (type) => {
   }
 };
 
-// const generateQuiz = () => {
-//     router.push('/quiz/review-quiz');
-// };
-
 // Show snackbar with custom message
 const showSnackbar = (message) => {
   snackbarMessage.value = message;
   snackbar.value = true;
 };
 
-// Generate Quiz
-
-const generateQuiz = () => {
-  loading.value = true;
-
-  // Simulate API call with timeout
-  setTimeout(() => {
-    loading.value = false;
-    showSnackbar('Quiz generated successfully!');
-  }, 2000);
+// Add auth check function
+const checkAuth = () => {
+  if (!authStore.isLoggedIn) {
+    Swal.fire({
+      title: 'Authentication Required',
+      text: 'You need to login or sign up to generate summaries',
+      icon: 'warning',
+      showCancelButton: true,
+      confirmButtonText: 'Login',
+      cancelButtonText: 'Sign Up'
+    }).then((result) => {
+      if (result.isConfirmed) {
+        // User chose to login
+        router.push('/auth');
+      } else if (result.dismiss === Swal.DismissReason.cancel) {
+        // User chose to sign up
+        router.push('/auth/sign-up');
+      }
+    });
+    return false;
+  }
+  return true;
 };
 
-// const generateQuiz = () => {
-//   loading.value = true;
-  
-//   // Simulate API call with timeout
-//   setTimeout(() => {
-//     loading.value = false;
-//     showSnackbar('Quiz generated successfully!');
-//   }, 2000);
-// };
+// Generate Summary with better auth handling
+const generateFlashcard = async () => {
+  // Use the checkAuth function which shows the alert dialog
+  if (!checkAuth()) return;
 
+  try {
+    loading.value = true;
+
+    // Get fresh token before API request
+    const isValid = await authStore.checkTokenExpired();
+    if (!isValid) {
+      throw new Error('Authentication expired');
+    }
+
+    // Proceed with file processing...
+    if (isPdfFile.value && pdfSelector.value) {
+      const mergedPdfBlob = await pdfSelector.value.getMergedPdf();
+      if (mergedPdfBlob) {
+        const response = await processFile(mergedPdfBlob);
+        if (response.status === 'success') {
+          Swal.fire({
+            icon: 'success',
+            title: 'Success!',
+            text: 'Summary generated successfully',
+            timer: 2000,
+            showConfirmButton: false
+          });
+        } else {
+          throw new Error(response.message || 'Failed to generate summary');
+        }
+      }
+    } else if (imageFile.value) {
+      const response = await processFile(imageFile.value);
+      // ...rest of existing image handling...
+    } else if (textContent.value) {
+      // ...rest of existing text handling...
+    }
+
+  } catch (error) {
+    console.error('Error generating summary:', error);
+    
+    if (error.message?.includes('Authentication')) {
+      authStore.logout();
+      router.push('/auth');
+      return;
+    }
+
+    Swal.fire({
+      icon: 'error', 
+      title: 'Error',
+      text: error.message || 'Failed to generate summary'
+    });
+  } finally {
+    loading.value = false;
+  }
+};
 </script>
-
 <style scoped>
 /* Import Outfit font */
 @import url('https://fonts.googleapis.com/css2?family=Outfit:wght@100..900&display=swap');
@@ -492,110 +650,11 @@ const generateQuiz = () => {
   border-radius: 10px;
 }
 
-/* Custom textarea styling - specific to this component */
-.custom-textarea {
-  margin-bottom: 12px;
-}
-
-.custom-textarea:focus-within {
-  transform: translateY(-3px);
-  box-shadow: 0 10px 25px rgba(157, 123, 252, 0.15);
-}
-
-/* Textarea icon animation */
-.textarea-icon {
-  transition: all 0.3s ease;
-}
-
-:deep(.v-field--focused) .textarea-icon {
-  transform: scale(1.1);
-  color: var(--v-secondary-base) !important;
-}
-
-/* Clear icon styling */
-:deep(.v-field__clearable) {
-  padding-top: 8px;
-}
-
-:deep(.v-field__clearable .v-icon) {
-  color: #aaa;
-  transition: all 0.2s ease;
-}
-
-:deep(.v-field__clearable .v-icon:hover) {
-  color: var(--v-error-base, #DF3131);
-  transform: scale(1.2);
-}
-
-/* Remove duplicate styles and keep only component-specific overrides */
-:deep(.v-field--focused) {
-  border-color: var(--v-secondary-base, #9D7BFC) !important;
-  border-width: 2px !important;
-}
-
-/* Additional styles for better text readability */
-:deep(.v-field__input textarea) {
-  color: #333 !important;
-  font-size: 1.05rem !important;
-  letter-spacing: 0.3px !important;
-  line-height: 1.8 !important;
-}
-
-/* Custom textarea styling for this component */
-.custom-textarea {
-  transition: all 0.3s ease;
-  background-color: white !important;
-  border-radius: 12px !important;
-  margin-bottom: 12px;
-}
-
-/* Remove shadow effects */
-.custom-textarea:focus-within {
-  transform: none;
-  box-shadow: none;
-}
-
-/* Icon position fix */
-.textarea-icon {
-  transition: all 0.3s ease;
-}
-
-:deep(.v-field--focused) .textarea-icon {
-  color: var(--v-secondary-base) !important;
-}
-
-/* Clear icon fix */
-:deep(.v-field__clearable) {
-  padding-top: 22px;
-}
-
-/* Fix spacing for the content itself */
-:deep(.v-field__input) {
-  padding-top: 22px !important;
-}
-
-/* Override focused effect */
-:deep(.v-field--focused) {
-  border-color: var(--v-secondary-base, #9D7BFC) !important;
-  border-width: 2px !important;
-  box-shadow: none !important;
-}
-
-/* Add padding for clear text icon */
-:deep(.v-field__append-inner) {
-  padding-top: 22px !important;
-}
-
 /* Button positioning */
 .button-container {
   margin-top: 8px;
   display: flex;
   justify-content: flex-start;
-}
-
-/* Update the clean-textarea margin */
-:deep(.clean-textarea) {
-  margin-bottom: 0 !important;
 }
 
 /* Remove any conflicting textarea styles */
