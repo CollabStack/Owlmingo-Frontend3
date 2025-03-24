@@ -2,35 +2,38 @@
     <div>
         <div id="paypal-button-container"></div>
     </div>
-
 </template>
 
-<script>
+<script setup>
     import { onMounted } from 'vue';
     import { useNuxtApp } from '#app';
 
-    const {$userPrivateAxios} = useNuxtApp();
+    const { $userPrivateAxios } = useNuxtApp();
 
     onMounted(() => {
-        if (window.paypal){
-            window.paypal.Buttons({
-                createOrder: async () => {
-                    const res = await $userPrivateAxios.post('/create-order');
-                    const order = await res.data;
-                    return order.id;
-                },
-
-                onApprove: async (data, actions) => {
-                    const res = await $userPrivateAxios.post('/capture-order', {
-                        orderID: data.orderID
-                    });
-                    const capture = await res.data;
-                    console.log(capture);
-                }
-            }).render('#paypal-button-container');
+    if (window.paypal) {
+        window.paypal.Buttons({
+        createOrder: async () => {
+            try {
+            const res = await $userPrivateAxios.post('/create-order');
+            return res.data.id;
+            } catch (error) {
+            console.error("Error creating PayPal order:", error);
+            }
+        },
+        onApprove: async (data) => {
+            try {
+            const res = await $userPrivateAxios.post('/capture-order', {
+                orderID: data.orderID
+            });
+            console.log("Payment Captured:", res.data);
+            } catch (error) {
+            console.error("Error capturing PayPal order:", error);
+            }
         }
-    })
-
-
-
+        }).render('#paypal-button-container');
+    } else {
+        console.error("PayPal SDK not loaded.");
+    }
+    });
 </script>
