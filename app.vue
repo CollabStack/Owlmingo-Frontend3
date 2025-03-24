@@ -7,7 +7,7 @@
 import { userAuth } from '~/store/userAuth';
 const userAuthStore = userAuth();
 const config = useRuntimeConfig();
-const paypalClientId = config.public.paypalClientId;
+const paypalClientId = config.public.PAYPAL_CLIENT_ID;
 
 useHead({
   script: [

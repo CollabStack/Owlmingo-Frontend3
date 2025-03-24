@@ -359,6 +359,9 @@ export const userAuth = defineStore('userAuth', {
                 }
                 
                 const token = response.data.data.token;
+                console.log("=============  Refresh Token =============");
+                console.log('Refreshed token:', token);
+                console.log("==========================================");
                 this.setToken(token);
                 
                 // Schedule next token refresh (every 15 minutes)
