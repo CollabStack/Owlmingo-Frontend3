@@ -1,0 +1,3 @@
+<template>
+ <Flashcards-FlashcardView />
+</template>
