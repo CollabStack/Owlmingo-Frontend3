@@ -19,7 +19,7 @@
             try {
             const res = await $UserPrivateAxios.post('/create-order');
             console.log("PayPal Order Created:", res);
-            return res.data.id;
+            return res.data.data.result.id;
             } catch (error) {
             console.error("Error creating PayPal order:", error);
             }
