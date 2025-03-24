@@ -44,27 +44,10 @@ export const userAuth = defineStore('userAuth', {
                 secure: process.env.NODE_ENV === 'production',
                 // sameSite: 'Lax' // Important for cross-site requests
             });
-            
-            // Also store in localStorage as backup
-            localStorage.setItem('auth_token_backup', token);
         },
         
         getToken() {
-            // Try to get token from cookie first, then from localStorage as backup
-            let token = Cookies.get('token');
-            if (!token) {
-                token = localStorage.getItem('auth_token_backup');
-                // If found in localStorage but not in cookies, restore the cookie
-                if (token) {
-                    Cookies.set('token', token, { 
-                        expires: 7,
-                        path: '/',
-                        secure: process.env.NODE_ENV === 'production',
-                        sameSite: 'Lax'
-                    });
-                }
-            }
-            return token;
+            return Cookies.get('token'); 
         },
         
         getUser() {
@@ -320,7 +303,6 @@ export const userAuth = defineStore('userAuth', {
             this.isLoggedIn = false;
             this.tokenInitialized = false;
             Cookies.remove('token', { path: '/' });
-            localStorage.removeItem('auth_token_backup');
         },
 
         async telegramOAuth(data) {
@@ -358,12 +340,7 @@ export const userAuth = defineStore('userAuth', {
                 console.log('Refreshed token:', token);
                 console.log("==========================================");
                 this.setToken(token);
-                
-                // Schedule next token refresh (every 15 minutes)
-                setTimeout(() => {
-                    this.refreshToken();
-                }, 15 * 60 * 1000);
-                
+                                
                 return token;
             } catch (error) {
                 console.error("Refresh Token Error:", error);
