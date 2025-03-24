@@ -8,14 +8,17 @@
     import { onMounted } from 'vue';
     import { useNuxtApp } from '#app';
 
-    const { $userPrivateAxios } = useNuxtApp();
-
     onMounted(() => {
+    const {$UserPrivateAxios} = useNuxtApp();
+    console.log("PayPal Button Mounted");
+    console.log("PayPal Button Axios:", $UserPrivateAxios);
+
     if (window.paypal) {
         window.paypal.Buttons({
         createOrder: async () => {
             try {
-            const res = await $userPrivateAxios.post('/create-order');
+            const res = await $UserPrivateAxios.post('/create-order');
+            console.log("PayPal Order Created:", res);
             return res.data.id;
             } catch (error) {
             console.error("Error creating PayPal order:", error);
@@ -23,7 +26,7 @@
         },
         onApprove: async (data) => {
             try {
-            const res = await $userPrivateAxios.post('/capture-order', {
+            const res = await $UserPrivateAxios.post('/capture-order', {
                 orderID: data.orderID
             });
             console.log("Payment Captured:", res.data);
