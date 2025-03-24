@@ -11,8 +11,8 @@
     <p class="text-info">Info Color</p>
     <p class="text-success">Success Color</p>
     <p class="text-warning">Warning Color</p>
+    <PayPalButton />
     </section>
 
-    <PayPalButton />
 
 </template>
