@@ -12,4 +12,7 @@
     <p class="text-success">Success Color</p>
     <p class="text-warning">Warning Color</p>
     </section>
+
+    <PayPalButton />
+
 </template>
