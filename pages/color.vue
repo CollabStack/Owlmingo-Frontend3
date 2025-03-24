@@ -1,6 +1,5 @@
 <template>
-    <section>
-        <!-- Color Test Section -->
+    <!-- <section>
     <p>Color selection</p>
     <p class="text-primary">Primary Color</p>
     <p class="text-secondary">Secondary Color</p>
@@ -11,8 +10,11 @@
     <p class="text-info">Info Color</p>
     <p class="text-success">Success Color</p>
     <p class="text-warning">Warning Color</p>
-    <PayPalButton />
     </section>
-
-
+ -->
+    <PayPalButton />
 </template>
+
+<script>
+import PayPalButton from '~/components/PayPalButton.vue';
+</script>
