@@ -23,6 +23,7 @@
 
     <QuizzesSection 
       :quizzes="quizzes"
+      :loading="isLoadingQuizzes"
       @edit-quiz="editQuiz"
       @start-quiz="startQuiz"
       @open-quiz-dialog="quizDialog = true"
@@ -341,6 +342,7 @@ import QuizzesSection from './QuizzesSection.vue';
 import SummariesSection from './SummariesSection.vue';
 import { useSummaryStore } from '~/store/summaryStore';
 import { useRouter } from 'vue-router';
+import { useQuizStore } from '~/store/quizStore';
 
 // Tags management
 const tags = ref([]);
@@ -385,33 +387,14 @@ const flashcards = ref([
   }
 ]);
 
-const quizzes = ref([
-  {
-    id: 1,
-    title: "History Final Exam",
-    subtitle: "History",
-    description: "Comprehensive quiz covering World War II topics",
-    questionCount: 25,
-    lastUpdated: "Yesterday",
-    tags: [{ name: "History", color: "#9C27B0" }]
-  },
-  {
-    id: 2,
-    title: "Math Practice",
-    subtitle: "Mathematics",
-    description: "Algebra and calculus practice problems",
-    questionCount: 15,
-    lastUpdated: "3 days ago",
-    tags: [{ name: "Math", color: "#2196F3" }]
-  }
-]);
-
 const summaryStore = useSummaryStore();
 const router = useRouter();
 const isLoadingSummaries = ref(false);
-
-// Replace your hardcoded summaries with an empty array initially
 const summaries = ref([]);
+
+const quizStore = useQuizStore();
+const isLoadingQuizzes = ref(false);
+const quizzes = ref([]);
 
 onMounted(async () => {
   const savedTags = localStorage.getItem('tags');
@@ -421,21 +404,38 @@ onMounted(async () => {
   
   // Load sample data and apply saved tags
   applySavedTags(flashcards.value, 'flashcard_tags');
-  applySavedTags(quizzes.value, 'quiz_tags');
   
   // Always show loading state initially
   isLoadingSummaries.value = true;
+  isLoadingQuizzes.value = true;
   
   try {
-    // Pass false to use cache if available
+    // Fetch quizzes from API
+    const quizResult = await quizStore.fetchQuizSessions();
+    if (quizResult.success) {
+      quizzes.value = quizStore.quizzes;
+      
+      // Ensure each quiz has an id property for compatibility with existing code
+      quizzes.value.forEach(quiz => {
+        if (!quiz.id && quiz.quizId) {
+          quiz.id = quiz.quizId;
+        }
+      });
+      
+      // Apply saved tags to API-fetched quizzes
+      applySavedTags(quizzes.value, 'quiz_tags');
+    }
+  } catch (error) {
+    console.error('Error loading quizzes:', error);
+  } finally {
+    isLoadingQuizzes.value = false;
+  }
+  
+  try {
     const result = await summaryStore.fetchSummaries(false);
     if (result.success) {
       summaries.value = result.data;
-      
-      // Apply saved tags to API-fetched summaries
       applySavedTags(summaries.value, 'summary_tags');
-    } else if (!result.authenticated) {
-      console.log('Authentication required to fetch summaries');
     }
   } catch (error) {
     console.error('Error loading summaries:', error);
@@ -514,7 +514,7 @@ const editQuiz = (id) => {
 
 const startQuiz = (id) => {
   console.log(`Starting quiz with ID: ${id}`);
-  // Implement navigation to quiz start page
+  router.push(`/quiz/do-quiz?id=${id}`);
 };
 
 // Summary action handlers
@@ -560,7 +560,8 @@ const openTagsDialog = (type, id) => {
   if (type === 'flashcard') {
     item = flashcards.value.find(card => card.id === id);
   } else if (type === 'quiz') {
-    item = quizzes.value.find(quiz => quiz.id === id);
+    // Check both id and quizId for compatibility
+    item = quizzes.value.find(quiz => quiz.id === id || quiz.quizId === id);
   } else if (type === 'summary') {
     item = summaries.value.find(summary => summary.id === id);
   }
@@ -648,7 +649,11 @@ const createAndAddTag = () => {
 const removeTagFromItem = ({ id, tagIndex }) => {
   // Find the item type and remove the tag
   const findAndRemoveTag = (items, type) => {
-    const itemIndex = items.findIndex(item => item.id === id);
+    // For quizzes, check both id and quizId
+    const itemIndex = type === 'quiz' 
+      ? items.findIndex(item => item.id === id || item.quizId === id)
+      : items.findIndex(item => item.id === id);
+      
     if (itemIndex !== -1 && items[itemIndex].tags && items[itemIndex].tags[tagIndex]) {
       items[itemIndex].tags.splice(tagIndex, 1);
       
@@ -685,7 +690,11 @@ const saveQuizTags = () => {
   const tagMap = {};
   quizzes.value.forEach(quiz => {
     if (quiz.tags && quiz.tags.length > 0) {
-      tagMap[quiz.id] = quiz.tags;
+      // Use quizId if available, otherwise fall back to id
+      const idToUse = quiz.quizId || quiz.id;
+      if (idToUse) {
+        tagMap[idToUse] = quiz.tags;
+      }
     }
   });
   localStorage.setItem('quiz_tags', JSON.stringify(tagMap));
@@ -707,8 +716,10 @@ const applySavedTags = (items, storageKey) => {
     if (savedTags) {
       const tagMap = JSON.parse(savedTags);
       items.forEach(item => {
-        if (tagMap[item.id]) {
-          item.tags = tagMap[item.id];
+        // For quizzes, check the quizId first, then fallback to id
+        const idToCheck = (storageKey === 'quiz_tags' && item.quizId) ? item.quizId : item.id;
+        if (tagMap[idToCheck]) {
+          item.tags = tagMap[idToCheck];
         }
       });
     }
