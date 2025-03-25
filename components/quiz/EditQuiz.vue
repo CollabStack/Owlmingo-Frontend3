@@ -1,141 +1,215 @@
 <template>
-  <v-card class="pa-4 mt-6 rounded-lg elevation-2">
-    <v-row align="center" justify="space-between">
-      <v-col cols="auto">
-        <h3 class="text-h6">Question</h3>
-      </v-col>
-      <v-col cols="auto">
-        <img
-          src="/icons/icons8-delete-button.svg"
-          alt="Delete"
-          class="icon-size mt-2"
-          @click="$emit('delete')"
-        />
-      </v-col>
-    </v-row>
-
-    <v-label class="mt-4">Question Type</v-label>
-    <v-select
-      v-model="localQuestion.type"
-      :items="questionTypes"
-      item-title="text"
-      item-value="value"
-      variant="flat"
-      class="mt-2 border-radius bg-blue-lighten-5 w-25"
-      density="compact"
-      hide-details
-      @update:modelValue="resetAnswers"
-    />
-
-    <v-label class="mt-4">Question</v-label>
-    <v-textarea
-      v-model="localQuestion.text"
-      class="mt-2 border-radius bg-blue-lighten-5 w-75"
-      variant="flat"
-      auto-grow
-      rows="2"
-      hide-details
-      placeholder="Enter your question"
-      @update:modelValue="emitUpdatedQuestion"
-    />
-
-    <v-label class="mt-4">Options</v-label>
-
-    <v-radio-group v-if="!localQuestion.type" v-model="localQuestion.selectedOption" class="mt-2">
-      <v-row dense>
-        <v-col v-for="(option, index) in localQuestion.options" :key="index" cols="12" class="mt-4">
-          <v-row align="center" no-gutters>
-            <v-col cols="auto">
-              <v-radio :value="option.value" color="blue" />
-            </v-col>
-            <v-col>
-              <v-text-field v-model="option.text" variant="flat" hide-details class="border-radius bg-blue-lighten-5" placeholder="Enter answer" @update:modelValue="emitUpdatedQuestion" />
-            </v-col>
-          </v-row>
-        </v-col>
-      </v-row>
-    </v-radio-group>
-
-    <div v-else class="mt-6">
-      <v-row dense>
-        <v-col v-for="(option, index) in localQuestion.options" :key="index" cols="12">
-          <v-row no-gutters>
-            <v-col cols="auto">
-              <v-checkbox v-model="localQuestion.selectedAnswers" :value="option.value" color="blue" />
-            </v-col>
-            <v-col>
-              <v-text-field v-model="option.text" variant="flat" hide-details class="border-radius bg-blue-lighten-5" placeholder="Enter answer" @update:modelValue="emitUpdatedQuestion" />
-            </v-col>
-          </v-row>
-        </v-col>
-      </v-row>
-    </div>
-  </v-card>
+  <div>
+    <h1 class="text-h5 font-weight-bold mb-6">Edit Quiz Question</h1>
+    <v-form ref="editForm" v-model="isFormValid" @submit.prevent="submitEdit">
+      <v-text-field
+        v-model="questionText"
+        label="Question Text"
+        required
+        variant="outlined"
+        class="mb-4"
+        :rules="[v => !!v || 'Question text is required']"
+      ></v-text-field>
+      
+      <p class="text-subtitle-1 font-weight-medium mb-2">Answer Options</p>
+      
+      <v-card v-for="(option, index) in options" :key="index" class="mb-4 pa-4" variant="outlined">
+        <div class="d-flex align-center mb-2">
+          <span class="text-subtitle-2 font-weight-medium me-4">Option {{ index + 1 }}</span>
+          <v-spacer></v-spacer>
+          <v-checkbox
+            v-model="option.isCorrect"
+            label="Correct Answer"
+            class="mt-0"
+            hide-details
+            density="comfortable"
+            @change="handleCorrectOptionChange(index)"
+          ></v-checkbox>
+        </div>
+        
+        <v-text-field
+          v-model="option.text"
+          label="Option Text"
+          variant="outlined"
+          density="comfortable"
+          :rules="[v => !!v || 'Option text is required']"
+          required
+        ></v-text-field>
+      </v-card>
+      
+      <div class="d-flex mt-6">
+        <v-spacer></v-spacer>
+        <v-btn
+          type="button"
+          color="grey-darken-1"
+          variant="text"
+          class="me-2"
+          @click="router.back()"
+        >
+          Cancel
+        </v-btn>
+        <v-btn
+          type="submit"
+          color="primary"
+          :loading="isSubmitting"
+          :disabled="!isFormValid || isSubmitting"
+        >
+          Save Changes
+        </v-btn>
+      </div>
+    </v-form>
+  </div>
 </template>
 
 <script setup>
-import { defineProps, defineEmits, ref, watch } from 'vue';
+import { ref, onMounted } from 'vue';
+import { useRouter } from 'vue-router';
+import { userAuth } from '~/store/userAuth';
+import Swal from 'sweetalert2';
 
-const emit = defineEmits(['delete', 'update-question']);
+const router = useRouter();
+const authStore = userAuth();
+
+const questionText = ref('');
+const options = ref([
+  { text: '', isCorrect: false },
+  { text: '', isCorrect: false },
+  { text: '', isCorrect: false },
+  { text: '', isCorrect: false },
+]);
+const isFormValid = ref(false);
+const isSubmitting = ref(false);
 
 const props = defineProps({
-  question: Object
+  quizId: {
+    type: String,
+    required: true,
+  },
+  questionIndex: {
+    type: Number,
+    required: true,
+  },
+  initialQuestion: {
+    type: Object,
+    default: null,
+  }
 });
 
-const localQuestion = ref({ ...props.question });
-
-const questionTypes = [
-  { text: 'Single Choice', value: false },
-  { text: 'Multiple Choice', value: true }
-];
-
-watch(
-  () => props.question,
-  (newQuestion) => {
-    localQuestion.value = { ...newQuestion };
-  },
-  { deep: true, immediate: true }
-);
-
-const resetAnswers = () => {
-  localQuestion.value.selectedOption = null;
-  localQuestion.value.selectedAnswers = [];
-  localQuestion.value.options = generateDefaultOptions();
-  emitUpdatedQuestion();
+// Ensure only one option is marked as correct
+const handleCorrectOptionChange = (changedIndex) => {
+  if (options.value[changedIndex].isCorrect) {
+    // Uncheck other options
+    options.value.forEach((option, index) => {
+      if (index !== changedIndex) {
+        option.isCorrect = false;
+      }
+    });
+  }
 };
 
-const generateDefaultOptions = () => {
-  return Array.from({ length: 4 }, (_, index) => ({
-    value: `${index + 1}`,
-    text: ''
-  }));
-};
+// Initialize form with quiz question data
+onMounted(() => {
+  if (props.initialQuestion) {
+    questionText.value = props.initialQuestion.question;
+    
+    // If we have options, use them
+    if (props.initialQuestion.options && props.initialQuestion.options.length > 0) {
+      const initialOptions = [...props.initialQuestion.options];
+      
+      // Make sure we have at least 4 options
+      while (initialOptions.length < 4) {
+        initialOptions.push({ text: '', isCorrect: false });
+      }
+      
+      // Map the options to our expected format
+      options.value = initialOptions.map(opt => ({
+        text: opt.text || '',
+        isCorrect: !!opt.isCorrect,
+        id: opt.id || null
+      }));
+    }
+  }
+});
 
-const emitUpdatedQuestion = () => {
-  emit('update-question', localQuestion.value);
+const submitEdit = async () => {
+  if (!isFormValid.value) return;
+  
+  isSubmitting.value = true;
+  try {
+    // Make sure at least one option is marked as correct
+    const hasCorrectOption = options.value.some(opt => opt.isCorrect);
+    if (!hasCorrectOption) {
+      Swal.fire({
+        icon: 'warning',
+        title: 'Missing Correct Answer',
+        text: 'Please mark at least one option as the correct answer.'
+      });
+      isSubmitting.value = false;
+      return;
+    }
+    
+    // Get token
+    const token = authStore.getToken();
+    if (!token) {
+      throw new Error('Authentication required');
+    }
+
+    const endpoint = `https://owlmingo-16f448c07f1f.herokuapp.com/api/v1/user/auth/quiz/${props.quizId}/questions/${props.questionIndex}`;
+    
+    // Prepare payload
+    const payload = {
+      question: questionText.value,
+      options: options.value.map(opt => ({
+        text: opt.text,
+        isCorrect: opt.isCorrect,
+        // Include ID if available
+        ...(opt.id ? { id: opt.id } : {})
+      }))
+    };
+
+    const response = await fetch(endpoint, {
+      method: 'PUT',
+      headers: {
+        'Content-Type': 'application/json',
+        'Authorization': `Bearer ${token}`
+      },
+      body: JSON.stringify(payload),
+    });
+
+    if (!response.ok) {
+      const errorData = await response.json();
+      throw new Error(errorData.message || 'Failed to update question');
+    }
+
+    const responseData = await response.json();
+    console.log('Update response:', responseData);
+    
+    Swal.fire({
+      icon: 'success',
+      title: 'Success',
+      text: 'Question updated successfully!',
+      timer: 2000,
+      showConfirmButton: false
+    });
+
+    // Go back to the quiz review
+    setTimeout(() => {
+      router.push(`/quiz/review-quiz?id=${props.quizId}`);
+    }, 2000);
+    
+  } catch (error) {
+    console.error('Error updating question:', error);
+    Swal.fire({
+      icon: 'error',
+      title: 'Error',
+      text: error.message || 'An error occurred while updating the question.',
+    });
+  } finally {
+    isSubmitting.value = false;
+  }
 };
 </script>
 
 <style scoped>
-  @import url('https://fonts.googleapis.com/css2?family=Outfit:wght@100..900&display=swap');
-
-  /* Outfit font classes */
-  .outfit {
-    font-family: "Outfit", sans-serif;
-    font-optical-sizing: auto;
-    font-style: normal;
-  }
-
-  .outfit-regular { font-weight: 400; }
-  .outfit-medium { font-weight: 500; }
-  .outfit-bold { font-weight: 700; }
-  
-  .icon-size {
-    width: 30px;
-    height: 30px;
-    cursor: pointer;
-  }
-  .border-radius{
-    border-radius: 12px;
-  }
+/* Add any necessary styles here */
 </style>

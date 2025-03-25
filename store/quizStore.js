@@ -439,6 +439,49 @@ export const useQuizStore = defineStore('quizStore', {
       } catch (error) {
         console.error('Error loading quiz history:', error);
       }
+    },
+
+    /**
+     * Update a quiz question
+     * @param {string} quizId - The ID of the quiz
+     * @param {number} questionIndex - Index of the question to update
+     * @param {object} questionData - New question data
+     */
+    async updateQuestion(quizId, questionIndex, questionData) {
+      const authStore = userAuth();
+      const { $UserPrivateAxios } = useNuxtApp();
+      
+      if (!authStore.isLoggedIn) {
+        return { authenticated: false };
+      }
+      
+      this.isLoading = true;
+      this.error = null;
+      
+      try {
+        const endpoint = `${this.apiBaseUrl}/user/auth/quiz/${quizId}/questions/${questionIndex}`;
+        
+        const response = await $UserPrivateAxios.put(endpoint, questionData);
+        
+        // If the current quiz is loaded and matches the one we're updating
+        if (this.currentQuiz && this.currentQuiz.quizId === quizId) {
+          // Update the question in the current quiz
+          if (this.currentQuiz.questions && this.currentQuiz.questions.length > questionIndex) {
+            this.currentQuiz.questions[questionIndex] = {
+              ...this.currentQuiz.questions[questionIndex],
+              ...response.data.question
+            };
+          }
+        }
+        
+        return { authenticated: true, success: true, data: response.data };
+      } catch (error) {
+        console.error('Question update error:', error);
+        this.error = error.response?.data?.message || 'Failed to update question';
+        return { authenticated: true, success: false, error: this.error };
+      } finally {
+        this.isLoading = false;
+      }
     }
   }
 });
