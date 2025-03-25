@@ -149,6 +149,10 @@ const props = defineProps({
   summaryData: {
     type: Object,
     required: true
+  },
+  disableAnimation: {
+    type: Boolean,
+    default: false
   }
 });
 
@@ -302,9 +306,9 @@ const animateText = () => {
     return;
   }
   
-  // Skip animation if this summary has already been animated
-  if (hasBeenAnimated.value) {
-    console.log('Skipping animation - already animated this summary');
+  // Skip animation if this summary has already been animated OR if animation is disabled
+  if (hasBeenAnimated.value || props.disableAnimation) {
+    console.log('Skipping animation - already animated or animation disabled');
     displayText.value = formattedContent.value;
     isTyping.value = false;
     return;
@@ -425,8 +429,8 @@ onMounted(() => {
   
   // Only animate if not already done by watch
   if (props.summaryData && !displayText.value) {
-    // Set the text immediately if already animated
-    if (hasBeenAnimated.value) {
+    // Set the text immediately if already animated or animation is disabled
+    if (hasBeenAnimated.value || props.disableAnimation) {
       displayText.value = formattedContent.value;
     } else {
       animateText();
