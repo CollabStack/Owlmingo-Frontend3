@@ -88,7 +88,7 @@
         <div class="button-container" style="margin: 12px 0;">
           <v-btn color="royal_blue" min-width="92" variant="outlined"
             class="custom-btn text-none animated-btn outfit outfit-medium" 
-            @click="generateQuiz"
+            @click="handleGenerateQuiz"
             :disabled="!documentFile || (isPdfFile && selectedPages.size === 0)" 
             rounded="xl">
             <span class="d-flex align-center">
@@ -113,7 +113,7 @@
         <div class="button-container">
           <v-btn color="royal_blue" min-width="92" variant="outlined"
             class="custom-btn text-none animated-btn outfit outfit-medium" 
-            @click="generateQuiz"
+            @click="handleGenerateQuiz"
             :disabled="!textContent" 
             rounded="xl">
             <span class="d-flex align-center">
@@ -138,7 +138,7 @@
         <div class="button-container" style="margin: 12px 0;">
           <v-btn color="royal_blue" min-width="92" variant="outlined"
             class="custom-btn text-none animated-btn outfit outfit-medium" 
-            @click="generateQuiz"
+            @click="handleGenerateQuiz"
             :disabled="!imageFile" 
             rounded="xl">
             <span class="d-flex align-center">
@@ -163,7 +163,7 @@
         <div class="button-container">
           <v-btn color="royal_blue" min-width="92" variant="outlined"
             class="custom-btn text-none animated-btn outfit outfit-medium" 
-            @click="generateQuiz"
+            @click="handleGenerateQuiz"
             :disabled="!textContent" 
             rounded="xl">
             <span class="d-flex align-center">
@@ -232,9 +232,11 @@ import PdfPageSelector from '../summary/PdfPageSelector.vue';
 import { useRouter } from 'vue-router';
 import { PDFDocument } from 'pdf-lib';
 import * as pdfjs from 'pdfjs-dist';
-import { processFile } from '~/services/ocrService';
-import Swal from 'sweetalert2'; // Add this if not already imported
 import { userAuth } from '~/store/userAuth';
+import { generateQuiz, useQuizState } from '~/services/quizService';
+
+// Get quiz state from the service
+const { isLoading, quizData, showQuizDisplay } = useQuizState();
 
 // Set PDF.js worker
 const pdfjsWorker = await import('pdfjs-dist/build/pdf.worker.entry');
@@ -243,6 +245,7 @@ pdfjs.GlobalWorkerOptions.workerSrc = pdfjsWorker;
 // Initialize auth and router
 const router = useRouter();
 const authStore = userAuth();
+const loading = isLoading; // Use the shared loading state
 
 // Initialize auth on mounted with better error handling
 onMounted(async () => {
@@ -275,7 +278,6 @@ const documentFile = ref(null);
 const imageFile = ref(null);
 const videoFile = ref(null);
 const textContent = ref('');
-const loading = ref(false);
 const totalPages = ref(0);
 const pageSelection = ref('');
 const selectionMode = ref('text');
@@ -395,60 +397,39 @@ const checkAuth = () => {
   return true;
 };
 
-// Generate Summary with better auth handling
-const generateQuiz = async () => {
-  // Use the checkAuth function which shows the alert dialog
-  if (!checkAuth()) return;
-
+// Generate Quiz function using the quizService
+const handleGenerateQuiz = async () => {
   try {
-    loading.value = true;
-
-    // Get fresh token before API request
-    const isValid = await authStore.checkTokenExpired();
-    if (!isValid) {
-      throw new Error('Authentication expired');
+    if (!isAuthenticated.value) {
+      console.log("User not authenticated, authentication will be handled by the service");
     }
-
-    // Proceed with file processing...
-    if (isPdfFile.value && pdfSelector.value) {
-      const mergedPdfBlob = await pdfSelector.value.getMergedPdf();
-      if (mergedPdfBlob) {
-        const response = await processFile(mergedPdfBlob);
-        if (response.status === 'success') {
-          Swal.fire({
-            icon: 'success',
-            title: 'Success!',
-            text: 'Summary generated successfully',
-            timer: 2000,
-            showConfirmButton: false
-          });
+    
+    if (documentFile.value) {
+      console.log(`Processing document file: ${documentFile.value.name}, type: ${documentFile.value.type}`);
+      
+      if (isPdfFile.value && pdfSelector.value) {
+        console.log("Processing as PDF with page selection");
+        const mergedPdfBlob = await pdfSelector.value.getMergedPdf();
+        if (mergedPdfBlob) {
+          console.log(`Got merged PDF blob, size: ${mergedPdfBlob.size} bytes`);
+          await generateQuiz({ documentBlob: mergedPdfBlob });
         } else {
-          throw new Error(response.message || 'Failed to generate summary');
+          showSnackbar('Failed to prepare PDF for processing');
         }
+      } else {
+        // Handle non-PDF documents directly
+        console.log("Processing as non-PDF document");
+        await generateQuiz({ documentBlob: documentFile.value });
       }
     } else if (imageFile.value) {
-      const response = await processFile(imageFile.value);
-      // ...rest of existing image handling...
-    } else if (textContent.value) {
-      // ...rest of existing text handling...
+      console.log(`Processing image file: ${imageFile.value.name}, type: ${imageFile.value.type}`);
+      await generateQuiz({ imageFile: imageFile.value });
+    } else {
+      showSnackbar('Please select a file to generate a quiz');
     }
-
   } catch (error) {
-    console.error('Error generating summary:', error);
-    
-    if (error.message?.includes('Authentication')) {
-      authStore.logout();
-      router.push('/auth');
-      return;
-    }
-
-    Swal.fire({
-      icon: 'error', 
-      title: 'Error',
-      text: error.message || 'Failed to generate summary'
-    });
-  } finally {
-    loading.value = false;
+    console.error('Error in handleGenerateQuiz:', error);
+    showSnackbar(error.message || 'Failed to process your request');
   }
 };
 </script>

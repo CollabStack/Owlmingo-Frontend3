@@ -1,320 +1,361 @@
 <template>
-  <!-- ============= During Quiz ============= -->
-  <v-row v-if="!isQuizComplete" class="d-flex justify-center align-center flex-column outfit mx-16 mt-4">
-    <v-row class="d-flex justify-between align-center" style="width: 100%;">
-      <!-- Progress Bar -->
-      <v-progress-linear
-        :model-value="progressPercentage"
-        color="green"
-        height="18"
-        class="mb-10 progress-linear"
-      ></v-progress-linear>
-
-      <!-- Display Current Question Number / Total Questions -->
-      <p class="text-h6 mt-8 mx-4">{{ currentIndex + 1 }}/{{ totalQuestions }}</p>
-    </v-row>
-
-    <!-- Question and Options -->
-    <v-row class="mt-6 mb-2 answer-option" dense>
-      <p class="text-h5 text-center mb-6 outfit">{{ currentQuestion.text }}</p>
-      <v-col v-for="(option, index) in currentQuestion.options" :key="index" cols="12">
-        <v-card
-          class="card-answer mt-2"
-          :class="getOptionClass(option)"
-          @click="selectAnswer(index)"
-        >
-          <v-card-text class="d-flex align-center">
-            <p class="text-h6">
-              {{ index + 1 }}. {{ option.text }}
-            </p>
-          </v-card-text>
-        </v-card>
-      </v-col>
-    </v-row>
-  </v-row>
-  
-  <!-- ============= During Quiz ============= -->
-  <v-row v-if="isQuizComplete" class="d-flex justify-center align-center flex-column outfit mx-16 mt-4">
-    <v-row class="d-flex justify-between align-center" style="width: 100%;">
-      <!-- Progress Bar -->
-      <v-progress-linear
-        :model-value="progressPercentage"
-        color="green"
-        height="18"
-        class="mb-10 progress-linear"
-      ></v-progress-linear>
-
-      <!-- Display Current Question Number / Total Questions -->
-      <p class="text-h6 mt-8 mx-4">{{ currentIndex + 1 }}/{{ totalQuestions }}</p>
-    </v-row>
-
-    <img src="public/images/image-done.png" alt="Completed" class="mt-3" style="height: 240px; width: 240px;">
-
-      <!-- Quiz Complete Title -->
-      <p class="text-h4 font-weight-bold mt-4 text-blue-grey-darken-4 outfit">Quiz Complete</p>
-
+  <v-container>
+    <!-- Quiz Completed View -->
+    <div v-if="isQuizComplete" class="text-center py-8">
+      <v-img src="/images/quiz-complete.png" alt="Quiz Complete" max-height="240" class="mb-6" contain></v-img>
+      <h2 class="text-h4 font-weight-bold text-primary mb-4">Quiz Complete</h2>
+      
       <!-- Score Display -->
-      <p class="text-h5 text-blue-grey-darken-3 mt-2 outfit">
-        Your final score is {{ correctAnswerCount }}/{{ totalQuestions }} ({{ scorePercentage }}%)
-      </p>
-
-      <!-- Buttons -->
-    <div class="mt-6 d-flex justify-center">
-          <v-btn class="mx-3 rounded-xl px-6" color="#0D47A1" variant="outlined" @click="resultsQuiz">Results</v-btn>
-          <v-btn class="mx-3 rounded-xl px-6" color="#0D47A1" variant="outlined" @click="resetQuiz">Restart</v-btn>
-    </div>
-  </v-row>
-
-  <!-- ============= During Quiz ============= -->
-  <!-- Before Check Answer  -->
-  <v-card v-if="!answerChecked" class="mt-16 card-check bg-blue-grey-lighten-5">
-    <v-row class="mx-16 mt-16" justify="center">
-      <v-col cols="5">
-        <v-btn class="ml-16 rounded-xl" variant="outlined">Option</v-btn>
-      </v-col>
-      <v-col cols="5" class="d-flex justify-end">
-        <v-btn class="rounded-xl mr-16" variant="outlined" @click="checkAnswer">Check</v-btn>
-      </v-col>
-    </v-row>
-  </v-card>
-
-  <!-- After Check Answer -->
-  <v-card v-else v-if="!isQuizComplete" class="mt-16 card-check" :class="isCorrect ? 'bg-green-lighten-4' : 'bg-red-lighten-4'">
-    <v-row class="mx-16 mt-16" justify="center">
-      <v-col cols="5" class="d-flex align-center">
-        <v-icon v-if="isCorrect" color="green" class="mr-2">mdi-check-circle</v-icon>
-        <v-icon v-else color="red" class="mr-2">mdi-close-circle</v-icon>
-        <p class="text-h6">{{ feedbackMessage }}</p>
-      </v-col>
-      <v-col cols="5" class="d-flex justify-end">
-        <!-- Display 'Next Question' or 'Finish' button -->
-        <v-btn class="rounded-xl mr-16" variant="outlined" @click="nextQuestion">
-          {{ isLastQuestion ? 'Finish' : 'Next Question' }}
+      <div class="score-display py-4 px-6 rounded-lg mb-6">
+        <h3 class="text-h5 mb-2">Your Score</h3>
+        <div class="text-h3 font-weight-bold">
+          {{ quiz.progress?.score || calculateScorePercentage }}%
+        </div>
+        <p class="mt-2">
+          You got {{ quiz.progress?.correctAnswers || correctAnswersCount }} out of {{ quiz.progress?.totalQuestions || quiz.questions.length }} questions correct
+        </p>
+      </div>
+      
+      <!-- Action Buttons -->
+      <div class="d-flex justify-center mt-6">
+        <v-btn
+          color="grey-darken-1"
+          variant="outlined"
+          rounded="xl"
+          class="mx-2"
+          @click="$emit('restart')"
+        >
+          Try Again
         </v-btn>
-      </v-col>
-    </v-row>
-  </v-card>
+        <v-btn
+          color="primary"
+          variant="flat"
+          rounded="xl"
+          class="mx-2"
+          @click="$emit('view-results')"
+        >
+          View Results
+        </v-btn>
+      </div>
+    </div>
 
-  <!-- ============= After Quiz ============= -->
-  <v-card v-if="isQuizComplete" class="mt-16 card-check bg-blue-grey-lighten-5">
-    <v-row class="mx-16 mt-16" justify="center">
-      <v-col cols="5">
-        <v-btn class="ml-16 rounded-xl" variant="outlined">Option</v-btn>
-      </v-col>
-      <v-col cols="5" class="d-flex justify-end">
-        <v-btn class="rounded-xl mr-16" variant="outlined" @click="quizPage">Quiz</v-btn>
-      </v-col>
-    </v-row>
-  </v-card>
+    <!-- Active Quiz View -->
+    <div v-else class="quiz-container">
+      <!-- Quiz Title -->
+      <h1 class="text-h5 font-weight-bold text-center mb-6">{{ quiz.title }}</h1>
+
+      <!-- Progress Bar -->
+      <div class="progress-container mb-8">
+        <div class="d-flex justify-space-between align-center mb-2">
+          <span class="text-body-2">Question {{ activeQuestionIndex + 1 }} of {{ quiz.questions.length }}</span>
+          <span class="text-body-2">{{ calculateProgress }}% Complete</span>
+        </div>
+        <v-progress-linear
+          :model-value="(activeQuestionIndex / quiz.questions.length) * 100"
+          height="8"
+          rounded
+          color="primary"
+        ></v-progress-linear>
+      </div>
+      
+      <!-- Current Question -->
+      <div class="question-container" v-if="currentQuestion">
+        <h2 class="text-h5 mb-6 text-center">{{ currentQuestion.question }}</h2>
+        
+        <!-- Answer Options -->
+        <div class="options-container">
+          <v-card
+            v-for="option in currentQuestion.options" 
+            :key="option.id"
+            :class="getOptionClass(option)"
+            class="option-card mb-4 pa-4"
+            :disabled="currentQuestion.isAnswered"
+            @click="!currentQuestion.isAnswered && selectOption(option)"
+            elevation="2"
+            rounded="lg"
+          >
+            <div class="d-flex align-center">
+              <div class="option-indicator me-3">
+                <v-icon v-if="currentQuestion.isAnswered && selectedOptionId === option.id && option.isCorrect" 
+                       color="success">mdi-check-circle</v-icon>
+                <v-icon v-else-if="currentQuestion.isAnswered && selectedOptionId === option.id && !option.isCorrect" 
+                       color="error">mdi-close-circle</v-icon>
+                <v-icon v-else-if="currentQuestion.isAnswered && option.isCorrect" 
+                       color="success">mdi-check</v-icon>
+                <span v-else class="option-letter">{{ getOptionLetter(option, currentQuestion.options) }}</span>
+              </div>
+              <div>{{ option.text }}</div>
+            </div>
+          </v-card>
+        </div>
+        
+        <!-- Feedback Message -->
+        <div v-if="currentQuestion.isAnswered" 
+            :class="['feedback-message mt-4 pa-4 rounded-lg', 
+                   currentQuestion.isCorrect ? 'feedback-correct' : 'feedback-incorrect']">
+          <v-icon :color="currentQuestion.isCorrect ? 'success' : 'error'" class="me-2">
+            {{ currentQuestion.isCorrect ? 'mdi-check-circle' : 'mdi-alert-circle' }}
+          </v-icon>
+          <span>{{ currentQuestion.isCorrect ? 'Correct!' : 'Incorrect' }}</span>
+        </div>
+        
+        <!-- Navigation Buttons -->
+        <div class="d-flex justify-space-between mt-8">
+          <v-btn
+            v-if="activeQuestionIndex > 0"
+            variant="outlined"
+            rounded="xl"
+            @click="previousQuestion"
+            prepend-icon="mdi-chevron-left"
+          >
+            Previous
+          </v-btn>
+          <div v-else></div>
+          
+          <v-btn
+            v-if="activeQuestionIndex < quiz.questions.length - 1"
+            color="primary"
+            variant="flat"
+            rounded="xl"
+            :disabled="!currentQuestion.isAnswered"
+            @click="nextQuestion"
+            append-icon="mdi-chevron-right"
+          >
+            Next Question
+          </v-btn>
+          <v-btn
+            v-else-if="currentQuestion.isAnswered"
+            color="success"
+            variant="flat"
+            rounded="xl"
+            @click="finishQuiz"
+            append-icon="mdi-flag-checkered"
+          >
+            Finish Quiz
+          </v-btn>
+        </div>
+      </div>
+    </div>
+  </v-container>
 </template>
 
 <script setup>
 import { ref, computed, watch } from 'vue';
-import { useRouter } from 'vue-router';
 
-const router = useRouter();
+const props = defineProps({
+  quiz: {
+    type: Object,
+    required: true
+  }
+});
 
+const emit = defineEmits(['restart', 'view-results', 'submit-answer']);
+
+// State
+const activeQuestionIndex = ref(0);
+const selectedOptionId = ref(null);
 const isQuizComplete = ref(false);
-const currentIndex = ref(0);
-const answerChecked = ref(false);
-const feedbackMessage = ref('');
-const isCorrect = ref(false);
-const correctAnswerCount = ref('1');
 
-const totalQuestions = computed(() => questions.value.length);
-const currentQuestion = computed(() => questions.value[currentIndex.value]);
-const progressPercentage = computed(() => (currentIndex.value / (questions.value.length - 1)) * 100);
-const isLastQuestion = computed(() => currentIndex.value === questions.value.length - 1);
-
-const questions = ref([
-  {
-    id: 1742428461348,
-    text: "Which programming language is primarily used for web development?",
-    type: false,
-    options: [
-      { value: "opt1", text: "Python", correct: false },
-      { value: "opt2", text: "Java", correct: false },
-      { value: "opt3", text: "JavaScript", correct: true },
-      { value: "opt4", text: "C++", correct: false }
-    ],
-    selectedOption: null,
-    selectedAnswers: [],
-    correctAnswer: "JavaScript",
-  },
-  {
-    id: 1742428461349,
-    text: "Which of the following are front-end frameworks/libraries?",
-    type: true,
-    options: [
-      { value: "opt1", text: "Vue.js", correct: true },
-      { value: "opt2", text: "React", correct: true },
-      { value: "opt3", text: "Laravel", correct: false },
-      { value: "opt4", text: "Angular", correct: true }
-    ],
-    selectedOption: null,
-    selectedAnswers: [],
-    correctAnswer: ["Vue.js", "React", "Angular"],
-  }
-]);
-
-// Handle option selection
-const selectAnswer = (index) => {
-  if (answerChecked.value) return;
-
-  const optionValue = currentQuestion.value.options[index].text;
-
-  if (currentQuestion.value.type) {
-    // For multiple-choice, toggle the selected answer
-    if (currentQuestion.value.selectedAnswers.includes(optionValue)) {
-      currentQuestion.value.selectedAnswers = currentQuestion.value.selectedAnswers.filter(answer => answer !== optionValue);
-    } else {
-      currentQuestion.value.selectedAnswers.push(optionValue);
-    }
+// Reset selected option when moving to a different question
+watch(activeQuestionIndex, () => {
+  const question = props.quiz.questions[activeQuestionIndex.value];
+  // If this question has been answered already, restore the selected option
+  if (question && question.isAnswered) {
+    // Look for the selected option (in a real app, you might store this separately)
+    const selectedOption = question.options.find(o => 
+      (question.isCorrect && o.isCorrect) || 
+      (selectedOptionHistory.value[activeQuestionIndex.value] === o.id)
+    );
+    selectedOptionId.value = selectedOption?.id || null;
   } else {
-    // For single-choice, set the selected option
-    currentQuestion.value.selectedOption = optionValue;
+    selectedOptionId.value = null;
   }
-};
+});
 
-// Check if the answer is correct
-const checkAnswer = () => {
-  if (currentQuestion.value.type) {
-    const selectedAnswers = currentQuestion.value.selectedAnswers;
-    const correctAnswers = currentQuestion.value.correctAnswer;
+// Track selected options history across questions
+const selectedOptionHistory = ref({});
 
-    const isAllCorrect = correctAnswers.every(answer => selectedAnswers.includes(answer)) &&
-                         selectedAnswers.every(answer => correctAnswers.includes(answer));
+// Current question
+const currentQuestion = computed(() => {
+  return props.quiz.questions[activeQuestionIndex.value];
+});
 
-    isCorrect.value = isAllCorrect;
-    feedbackMessage.value = isAllCorrect
-      ? 'Correct!'
-      : 'Incorrect. The correct answers are highlighted.';
-  } else {
-    isCorrect.value = currentQuestion.value.selectedOption === currentQuestion.value.correctAnswer;
-    feedbackMessage.value = isCorrect.value
-      ? 'Correct!'
-      : 'Incorrect. The correct answer is highlighted.';
-  }
+// Calculate progress percentage
+const calculateProgress = computed(() => {
+  const total = props.quiz.questions.length;
+  // Show percentage of questions answered
+  const answeredCount = props.quiz.questions.filter(q => q.isAnswered).length;
+  return Math.round((answeredCount / total) * 100);
+});
 
-  answerChecked.value = true;
-};
+// Count correct answers (fallback if not provided in progress)
+const correctAnswersCount = computed(() => {
+  if (!props.quiz || !props.quiz.questions) return 0;
+  return props.quiz.questions.filter(q => q.isAnswered && q.isCorrect).length;
+});
 
-// Go to the next question or finish quiz
-const nextQuestion = () => {
-  if (isLastQuestion.value) {
-    isQuizComplete.value = true; // Mark quiz as complete when the last question is reached
-  } else {
-    currentIndex.value++;
-    resetState();
-  }
-};
+// Calculate score percentage (fallback if not provided in progress)
+const calculateScorePercentage = computed(() => {
+  if (!props.quiz || !props.quiz.questions || props.quiz.questions.length === 0) return 0;
+  
+  const answeredCount = props.quiz.questions.filter(q => q.isAnswered).length;
+  if (answeredCount === 0) return 0;
+  
+  return Math.round((correctAnswersCount.value / props.quiz.questions.length) * 100);
+});
 
-// Reset state for the next question
-const resetState = () => {
-  answerChecked.value = false;
-  feedbackMessage.value = '';
-  isCorrect.value = false;
-  currentQuestion.value.selectedOption = null;
-  currentQuestion.value.selectedAnswers = [];
-};
+// Check if quiz is complete
+const isAllQuestionsAnswered = computed(() => {
+  return props.quiz.questions.every(q => q.isAnswered);
+});
 
-// Ensure options reset when switching questions
-watch(currentIndex, resetState);
-
-// Get the correct class for answer options
-const getOptionClass = (option) => {
-  // For single-choice questions
-  if (!currentQuestion.value.type) {
-    if (!answerChecked.value) {
-      // Highlight the selected option for single-choice question
-      return currentQuestion.value.selectedOption === option.text ? 'bg-blue-lighten-4' : 'bg-blue-lighten-5';
-    }
+// Select an option and submit answer
+const selectOption = async (option) => {
+  if (currentQuestion.value.isAnswered) return;
+  
+  selectedOptionId.value = option.id;
+  selectedOptionHistory.value[activeQuestionIndex.value] = option.id;
+  
+  try {
+    console.log(`Submitting answer: question ${activeQuestionIndex.value}, option ${option.id}`);
     
-    // After checking the answer, highlight correct/incorrect answer
-    if (option.text === currentQuestion.value.correctAnswer) {
-      return 'bg-green-lighten-4'; // Correct answer
-    } else if (currentQuestion.value.selectedOption === option.text) {
-      return 'bg-red-lighten-4'; // Selected but incorrect answer
-    }
-
-    return 'bg-blue-lighten-5'; // Default color for unselected options
-  }
-
-  // For multiple-choice questions
-  if (currentQuestion.value.type) {
-    if (!answerChecked.value) {
-      // Highlight the selected options for multiple-choice question
-      return currentQuestion.value.selectedAnswers.includes(option.text) ? 'bg-blue-lighten-4' : 'bg-blue-lighten-5';
-    }
-
-    // After checking the answer, highlight correct/incorrect answer
-    if (currentQuestion.value.selectedAnswers.includes(option.text)) {
-      if (option.correct) {
-        return 'bg-green-lighten-4'; // Correctly selected option
-      } else {
-        return 'bg-red-lighten-4'; // Incorrectly selected option
-      }
-    } else if (option.correct) {
-      return 'bg-green-lighten-4'; // Correct answer not selected
-    }
-
-    return 'bg-blue-lighten-5'; // Default color for unselected options
+    // Submit the answer through the parent component
+    const result = await emit('submit-answer', activeQuestionIndex.value, option.id);
+    
+    // Log the result for debugging
+    console.log('Answer submission result from parent:', result);
+    
+    // If no explicit result is returned (emit doesn't return the handler result),
+    // we'll rely on the parent to update the quiz data prop
+    
+  } catch (error) {
+    console.error('Error during answer submission:', error);
   }
 };
 
-// Navigate to quiz page
-const quizPage = () => {
-  router.push('/quiz'); 
+// Navigation
+const nextQuestion = () => {
+  if (activeQuestionIndex.value < props.quiz.questions.length - 1) {
+    activeQuestionIndex.value++;
+  }
 };
 
-// Navigate to results page
-const resultsQuiz = () => {
-  router.push('/quiz/results-quiz'); 
+const previousQuestion = () => {
+  if (activeQuestionIndex.value > 0) {
+    activeQuestionIndex.value--;
+  }
 };
 
-// Method Restart quiz 
-const resetQuiz = () => {
-  router.push('/quiz/do-quiz');
-}
+const finishQuiz = () => {
+  isQuizComplete.value = true;
+};
+
+// Helper to get option letter (A, B, C, etc.)
+const getOptionLetter = (option, options) => {
+  const index = options.findIndex(o => o.id === option.id);
+  return String.fromCharCode(65 + index); // 65 is ASCII for 'A'
+};
+
+// Get option styling class based on selection and correctness
+const getOptionClass = (option) => {
+  if (!currentQuestion.value.isAnswered) {
+    return selectedOptionId.value === option.id ? 'option-selected' : '';
+  }
+  
+  if (option.isCorrect) {
+    return 'option-correct';
+  }
+  
+  if (selectedOptionId.value === option.id && !option.isCorrect) {
+    return 'option-incorrect';
+  }
+  
+  return '';
+};
 </script>
 
-
 <style scoped>
-@import url('https://fonts.googleapis.com/css2?family=Outfit:wght@100..900&display=swap');
-
-.outfit {
-  font-family: "Outfit", sans-serif;
+.quiz-container {
+  max-width: 800px;
+  margin: 0 auto;
 }
 
-.progress-linear {
-  width: 80%;
-  margin-top: 70px;
-  border-radius: 10px;
-  margin-left: 120px;
+.progress-container {
+  margin-bottom: 2rem;
 }
 
-.card-answer {
-  border-radius: 15px;
+.question-container {
+  background-color: white;
+  border-radius: 12px;
+  padding: 2rem;
+  box-shadow: 0 2px 12px rgba(0, 0, 0, 0.08);
 }
 
-.answer-option {
-  margin-left: 160px;
-  margin-right: 160px;
+.option-card {
+  cursor: pointer;
+  transition: all 0.2s ease;
+  border: 2px solid transparent;
 }
 
-.card-check {
-  height: 195px;
+.option-card:hover:not(:disabled) {
+  transform: translateY(-2px);
+  box-shadow: 0 5px 15px rgba(0, 0, 0, 0.1);
+  border-color: #9D7BFC40;
 }
 
-.card-answer.bg-blue-lighten-4 {
-  background-color: #90caf9;
+.option-selected {
+  border-color: #9D7BFC;
+  background-color: #9D7BFC10;
 }
 
-.card-answer.bg-green-lighten-4 {
-  background-color: #81c784; /* Correct answer color */
+.option-correct {
+  border-color: #4CAF50;
+  background-color: #E8F5E9;
 }
 
-.card-answer.bg-red-lighten-4 {
-  background-color: #e57373; /* Incorrect answer color */
+.option-incorrect {
+  border-color: #F44336;
+  background-color: #FFEBEE;
+}
+
+.option-indicator {
+  min-width: 30px;
+  min-height: 30px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.option-letter {
+  width: 30px;
+  height: 30px;
+  border-radius: 50%;
+  background-color: #f0f0f0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-weight: 600;
+}
+
+.feedback-message {
+  background-color: #F5F5F5;
+}
+
+.feedback-correct {
+  background-color: #E8F5E9;
+  border-left: 4px solid #4CAF50;
+}
+
+.feedback-incorrect {
+  background-color: #FFEBEE;
+  border-left: 4px solid #F44336;
+}
+
+.score-display {
+  background-color: #F3F4FF;
+  border-radius: 12px;
+  max-width: 400px;
+  margin: 0 auto;
+  box-shadow: 0 2px 12px rgba(0, 0, 0, 0.08);
 }
 </style>
