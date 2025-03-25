@@ -509,7 +509,9 @@ const viewFlashcard = (id) => {
 // Quiz action handlers
 const editQuiz = (id) => {
   console.log(`Editing quiz with ID: ${id}`);
-  // Implement navigation to edit quiz page
+  // Navigate to the quiz edit page for the first question
+  // You can later enhance this to navigate to a question selection screen
+  router.push(`/quiz/edit/${id}/question/0`);
 };
 
 const startQuiz = (id) => {
