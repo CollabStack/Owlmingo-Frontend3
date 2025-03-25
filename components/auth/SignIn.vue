@@ -88,7 +88,6 @@
     import { ref, onMounted } from 'vue';
     import { userAuth } from '~/store/userAuth';
     import TelegramLogin from './TelegramLogin.vue';
-    import { useNuxtApp } from '#app';
 
     const authStore = userAuth();
     const email = ref('');

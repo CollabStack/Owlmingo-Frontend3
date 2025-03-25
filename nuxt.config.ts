@@ -46,6 +46,7 @@ export default defineNuxtConfig({
       TELEGRAM_BOT_USERNAME: process.env.TELEGRAM_BOT_USERNAME, // Store in .env
       TELEGRAM_BOT_ID: process.env.TELEGRAM_BOT_ID, // Store in .env
       TELEGRAM_BOT_RETURN_URL: process.env.TELEGRAM_BOT_RETURN_URL, // Store in .env
+      PAYPAL_CLIENT_ID: process.env.PAYPAL_CLIENT_ID, // Store in .env
     },
   },
 

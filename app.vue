@@ -6,11 +6,17 @@
 <script setup>
 import { userAuth } from '~/store/userAuth';
 const userAuthStore = userAuth();
+const config = useRuntimeConfig();
+const paypalClientId = config.public.PAYPAL_CLIENT_ID;
 
 useHead({
   script: [
     {
       src: "https://telegram.org/js/telegram-widget.js?22",
+      async: true,
+    },
+    {
+      src: `https://www.paypal.com/sdk/js?client-id=${paypalClientId}&currency=USD`,
       async: true,
     },
   ],
