@@ -28,7 +28,8 @@
     "troisjs": "^0.3.4",
     "vue": "latest",
     "vue-router": "latest",
-    "vue-telegram-login": "^2.1.0"
+    "vue-telegram-login": "^2.1.0",
+    "vuedraggable": "^4.1.0"
   },
   "devDependencies": {
     "vite-plugin-vuetify": "^2.1.0",
