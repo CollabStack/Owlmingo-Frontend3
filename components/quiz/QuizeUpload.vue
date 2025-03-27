@@ -424,8 +424,11 @@ const handleGenerateQuiz = async () => {
     } else if (imageFile.value) {
       console.log(`Processing image file: ${imageFile.value.name}, type: ${imageFile.value.type}`);
       await generateQuiz({ imageFile: imageFile.value });
+    } else if (textContent.value) {
+      console.log(`Processing ${tab.value} content: ${textContent.value.substring(0, 50)}...`);
+      await generateQuiz({ textContent: textContent.value });
     } else {
-      showSnackbar('Please select a file to generate a quiz');
+      showSnackbar('Please select a file or enter text to generate a quiz');
     }
   } catch (error) {
     console.error('Error in handleGenerateQuiz:', error);

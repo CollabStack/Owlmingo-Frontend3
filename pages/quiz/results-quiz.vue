@@ -1,100 +1,181 @@
 <template>
-  <v-container class="d-flex justify-center">
-    <v-card class="pa-5 rounded-lg" style="max-width: 900px; width: 100%;">
-      <v-card-title class="text-h6 d-flex justify-space-between align-center w-100 outfit">
-        Quiz Results
-        <v-btn class="ml-auto text-blue rounded-xl" @click="backQuiz" variant="outlined"
-          :class="{'hovered-btn': isHovered}" 
-          @mouseenter="isHovered = true" 
-          @mouseleave="isHovered = false"
+  <v-container class="mb-16">
+    <!-- Header Section with Animation -->
+    <v-row align="center" justify="space-between" class="my-6" v-motion
+      :initial="{ opacity: 0, y: 20 }"
+      :enter="{ opacity: 1, y: 0, transition: { duration: 600 } }">
+      <v-col cols="12" sm="8">
+        <h1 class="text-h4 font-weight-bold outfit mb-2">Quiz Results</h1>
+        <p class="text-body-1 text-grey-darken-2">Review your answers and see how you performed</p>
+      </v-col>
+      <v-col cols="12" sm="4" class="d-flex justify-sm-end">
+        <v-btn 
+          variant="outlined" 
+          color="grey-darken-1" 
+          prepend-icon="mdi-arrow-left" 
+          class="rounded-xl px-6" 
+          @click="backQuiz"
         >
-          Close
+          Back to History
         </v-btn>
-      </v-card-title>
+      </v-col>
+    </v-row>
+    
+    <!-- States Management -->
+    <div v-if="loading" class="text-center py-16">
+      <v-progress-circular indeterminate color="primary" size="64" class="mb-6"></v-progress-circular>
+      <h2 class="text-h6 outfit">Loading quiz results...</h2>
+    </div>
+    <div v-else-if="error" class="text-center py-16">
+      <v-icon color="error" size="64" class="mb-4">mdi-alert-circle</v-icon>
+      <h2 class="text-h5 outfit mb-2">{{ error }}</h2>
+      <v-btn color="primary" class="mt-6 rounded-xl" @click="fetchQuizData">Try Again</v-btn>
+    </div>
+    
+    <!-- Quiz Results Content -->
+    <template v-else>
+      <!-- Score Summary Card with Animation -->
+      <v-card 
+        class="mb-8 rounded-lg score-card" 
+        elevation="3" 
+        v-motion
+        :initial="{ opacity: 0, y: 20 }"
+        :enter="{ opacity: 1, y: 0, transition: { duration: 600, delay: 200 } }">
+        <v-card-item>
+          <div class="d-flex flex-column flex-sm-row align-center justify-space-between">
+            <div class="text-center text-sm-start">
+              <h2 class="text-h5 outfit mb-2">Your Performance</h2>
+              <p class="text-subtitle-1 text-medium-emphasis">
+                {{ quizData?.title || 'Quiz Results' }}
+              </p>
+            </div>
+            <div class="score-circle mt-4 mt-sm-0">
+              <div class="inner">{{ calculateScorePercentage }}%</div>
+            </div>
+          </div>
+        </v-card-item>
+        <v-card-text>
+          <v-divider class="my-4"></v-divider>
+          <div class="d-flex flex-wrap justify-space-around">
+            <div class="stat-item">
+              <v-icon color="primary" class="mb-2">mdi-check-circle</v-icon>
+              <div class="stat-value">{{ correctAnswers }}</div>
+              <div class="stat-label">Correct</div>
+            </div>
+            <div class="stat-item">
+              <v-icon color="error" class="mb-2">mdi-close-circle</v-icon>
+              <div class="stat-value">{{ totalQuestions - correctAnswers }}</div>
+              <div class="stat-label">Incorrect</div>
+            </div>
+            <div class="stat-item">
+              <v-icon color="info" class="mb-2">mdi-help-circle</v-icon>
+              <div class="stat-value">{{ totalQuestions }}</div>
+              <div class="stat-label">Total</div>
+            </div>
+          </div>
+        </v-card-text>
+      </v-card>
 
-      <div v-if="loading" class="text-center py-16">
-        <v-progress-circular indeterminate color="primary" size="64"></v-progress-circular>
-        <p class="text-h6 mt-6">Loading results...</p>
-      </div>
-
-      <div v-else-if="error" class="text-center py-16">
-        <v-icon color="error" size="64">mdi-alert-circle</v-icon>
-        <h2 class="text-h5 mt-4">{{ error }}</h2>
-        <v-btn color="primary" class="mt-6" @click="fetchQuizData">Try Again</v-btn>
-      </div>
-
-      <template v-else>
-        <v-card-subtitle class="text-body-1">
-          Score: {{ correctAnswers }} / {{ totalQuestions }} ({{ calculateScorePercentage }}%)
-        </v-card-subtitle>
-
-        <v-divider class="mb-4 mt-4"></v-divider>
-
-        <v-row>
-          <v-col cols="12">
-            <v-card outlined v-for="(question, qIndex) in questions" :key="qIndex" class="mb-4">
-              <v-card-title
-                :class="{ 'incorrect-title': !isQuestionCorrect(question), 'correct-title': isQuestionCorrect(question) }"
+      <!-- Questions List with Animation -->
+      <div class="questions-list">
+        <v-card 
+          v-for="(question, qIndex) in questions" 
+          :key="qIndex" 
+          class="mb-6 rounded-lg question-card"
+          :class="{ 'question-correct': isQuestionCorrect(question), 'question-incorrect': !isQuestionCorrect(question) }" 
+          elevation="2"
+          v-motion
+          :initial="{ opacity: 0, y: 20 }"
+          :enter="{ opacity: 1, y: 0, transition: { duration: 600, delay: 100 * qIndex } }">
+          <v-card-title class="question-title pa-4 d-flex align-center">
+            <v-avatar
+              :color="isQuestionCorrect(question) ? 'success' : 'error'"
+              size="36"
+              class="mr-3"
+            >
+              <v-icon color="white">
+                {{ isQuestionCorrect(question) ? 'mdi-check' : 'mdi-close' }}
+              </v-icon>
+            </v-avatar>
+            <div>
+              <span class="text-subtitle-2 text-grey-darken-1">Question {{ qIndex + 1 }}</span>
+              <h3 class="text-h6 outfit mt-1">{{ question.question }}</h3>
+            </div>
+          </v-card-title>
+          
+          <v-divider></v-divider>
+          
+          <v-card-text class="pa-4">
+            <div class="options-grid">
+              <div
+                v-for="(option, index) in question.options"
+                :key="index"
+                class="option-item pa-3 d-flex align-center"
+                :class="getOptionClass(question, option)"
               >
-                <v-icon v-if="!isQuestionCorrect(question)" color="red" class="mr-2">
-                  mdi-alert-circle
-                </v-icon>
-                <v-icon v-else color="green">mdi-check-circle</v-icon>
-                <span class="ml-2">Question {{ qIndex + 1 }}: {{ question.question }} ({{ isQuestionCorrect(question) ? 'Correct' : 'Incorrect' }})</span>
-              </v-card-title>
-              <v-divider></v-divider>
-
-              <v-list>
-                <v-list-item
-                  v-for="(option, index) in question.options" 
-                  :key="index"
-                  class="answer-option"
-                  :class="getOptionClass(question, option)"
-                >
-                  <v-list-item-content>
-                    <v-list-item-title class="d-flex align-center">
-                      <span class="option-letter mr-2">{{ String.fromCharCode(65 + index) }}</span>
-                      {{ option.text }}
-                      <v-icon v-if="isSelectedOption(question, option) && option.isCorrect" 
-                        color="success" class="ml-2">mdi-check-circle</v-icon>
-                      <v-icon v-else-if="isSelectedOption(question, option) && !option.isCorrect" 
-                        color="error" class="ml-2">mdi-close-circle</v-icon>
-                      <v-icon v-else-if="!isSelectedOption(question, option) && option.isCorrect" 
-                        color="success" class="ml-2">mdi-check</v-icon>
-                    </v-list-item-title>
-                  </v-list-item-content>
-                </v-list-item>
-              </v-list>
-
-              <v-card-text v-if="question.explanation" class="pt-2 pb-4 explanation-text">
-                <strong>Explanation:</strong> {{ question.explanation }}
-              </v-card-text>
-            </v-card>
-          </v-col>
-        </v-row>
-
-        <div class="d-flex justify-center mt-6">
-          <v-btn
-            color="grey-darken-1"
-            variant="outlined"
-            rounded="xl"
-            class="mx-2"
-            @click="tryAgain"
-          >
-            Try Again
-          </v-btn>
-          <v-btn
-            color="primary"
-            variant="flat"
-            rounded="xl"
-            class="mx-2"
-            @click="backToHome"
-          >
-            New Quiz
-          </v-btn>
-        </div>
-      </template>
-    </v-card>
+                <div class="option-indicator mr-3">
+                  <span>{{ String.fromCharCode(65 + index) }}</span>
+                </div>
+                <div class="option-text">{{ option.text }}</div>
+                <v-spacer></v-spacer>
+                <div class="option-status">
+                  <v-icon v-if="isSelectedOption(question, option) && option.isCorrect" 
+                    color="success" size="small">mdi-check-circle</v-icon>
+                  <v-icon v-else-if="isSelectedOption(question, option) && !option.isCorrect" 
+                    color="error" size="small">mdi-close-circle</v-icon>
+                  <v-icon v-else-if="!isSelectedOption(question, option) && option.isCorrect" 
+                    color="success" size="small">mdi-check</v-icon>
+                </div>
+              </div>
+            </div>
+            
+            <div v-if="question.explanation" class="explanation-container mt-4">
+              <v-alert
+                color="info"
+                variant="tonal"
+                border="start"
+                density="comfortable"
+                class="explanation-text"
+              >
+                <template v-slot:prepend>
+                  <v-avatar color="info" class="explanation-avatar">
+                    <v-icon color="white">mdi-information</v-icon>
+                  </v-avatar>
+                </template>
+                <strong class="explanation-title">Explanation</strong>
+                <div class="mt-1">{{ question.explanation }}</div>
+              </v-alert>
+            </div>
+          </v-card-text>
+        </v-card>
+      </div>
+      
+      <!-- Action Buttons -->
+      <div class="d-flex flex-column flex-sm-row justify-center gap-3 mt-10 action-buttons" v-motion
+        :initial="{ opacity: 0, y: 20 }"
+        :enter="{ opacity: 1, y: 0, transition: { duration: 600, delay: questions.length * 100 } }">
+        <v-btn
+          color="grey-darken-1"
+          variant="outlined"
+          class="action-btn"
+          rounded="xl"
+          prepend-icon="mdi-refresh"
+          @click="tryAgain"
+        >
+          Try Again
+        </v-btn>
+        <v-btn
+          color="primary"
+          variant="flat"
+          class="action-btn"
+          rounded="xl"
+          prepend-icon="mdi-lightning-bolt"
+          @click="backToHome"
+        >
+          New Quiz
+        </v-btn>
+      </div>
+    </template>
   </v-container>
 </template>
 
@@ -108,7 +189,6 @@ const route = useRoute();
 const router = useRouter();
 const quizStore = useQuizStore();
 
-const isHovered = ref(false);
 const loading = ref(true);
 const error = ref(null);
 const quizData = ref(null);
@@ -120,7 +200,6 @@ const getQuizId = () => route.query.id || localStorage.getItem('lastQuizId');
 const isSelectedOption = (question, option) => {
   // Check if the question already has the selected option information directly attached
   if (question.selectedOptionId) {
-    console.log(`Question ${question.question} has stored selectedOptionId: ${question.selectedOptionId}`);
     return question.selectedOptionId === option.id;
   }
 
@@ -142,17 +221,14 @@ const isSelectedOption = (question, option) => {
     questionIndex = questions.value.indexOf(question);
   }
   
-  console.log(`Question index for "${question.question.substring(0, 20)}...": ${questionIndex}`);
-  
   // Get the selected option ID from store answers
   const selectedOptionId = quizStore.answers[questionIndex];
-  console.log(`Selected option ID for question index ${questionIndex}: ${selectedOptionId}`);
   
   // Check if this is the selected option
   return selectedOptionId === option.id;
 };
 
-// Add this function to help debug
+// Debug function to help trace answers
 const logAnswers = () => {
   console.log('Quiz store answers:', quizStore.answers);
   console.log('Questions with answers:', questions.value.map((q, i) => ({

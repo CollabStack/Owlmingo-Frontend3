@@ -1,6 +1,5 @@
 <template>
-    <!-- <v-container app fixed class="d-flex justify-space-between align-center app-bar"> -->
-        <v-app-bar app fixed class="d-flex justify-space-between align-center app-bar">
+    <v-app-bar app fixed class="d-flex justify-space-between align-center app-bar">
         <v-container fluid class="mx-2 mx-sm-2 mx-md-12 mx-lg-16" >
             <v-row align="center" justify="space-between" class="d-flex" no-gutters>
                 <!-- Left: Navigation Tabs -->
@@ -60,12 +59,10 @@
                             <v-btn color="secondary" @click="logout">Sign Out</v-btn>
                         </div>
                     </v-menu>
-
                 </v-col>
             </v-row>
         </v-container>
-    <!-- </v-container> -->
-</v-app-bar>
+    </v-app-bar>
 </template>
 
 <script setup lang="ts">
@@ -80,9 +77,27 @@ const router = useRouter();
 const tabs = [
     { label: 'Home', route: '/' },
     { label: 'Library', route: '/library' },
-    { label: 'Flashcard', route: '/flashcard' },
-    { label: 'Quiz', route: '/quiz' },
-    { label: 'Summary', route: '/summary' }, // Add this line
+    { 
+        label: 'Flashcard', 
+        route: '/flashcard',
+        childRoutes: ['/flashcard/'] // All paths starting with /flashcard/ are related
+    },
+    { 
+        label: 'Quiz', 
+        route: '/quiz',
+        childRoutes: [
+            '/quiz/', 
+            '/history-quiz', 
+            '/review-quiz', 
+            '/result-quiz', 
+            '/do-quiz'
+        ] 
+    },
+    { 
+        label: 'Summary', 
+        route: '/summary',
+        childRoutes: ['/summary/'] // All paths starting with /summary/ are related
+    },
     { label: 'About', route: '/about' },
     { label: 'ColorView', route: '/color'},
 ];
@@ -95,14 +110,52 @@ const isLoggedIn = computed(() => {
 });
 
 /* ========== METHODS ==========*/
-// Function to check if a route is active (including nested routes)
+// Enhanced function to check if a route is active (including nested & related routes)
 function isActiveRoute(tabRoute: string): boolean {
-    if (tabRoute === '/') {
-        // For home route, only match exact path
-        return route.path === '/';
+    // First check for exact match (home route special case)
+    if (tabRoute === '/' && route.path === '/') {
+        return true;
     }
-    // For other routes, check if the current path starts with this route
-    return route.path.startsWith(tabRoute);
+    
+    // Find the tab that matches the route
+    const tab = tabs.find(tab => tab.route === tabRoute);
+    
+    // If it's a simple route without child routes
+    if (!tab || !tab.childRoutes) {
+        // For non-home routes, check if current path starts with this route
+        return tabRoute !== '/' && route.path.startsWith(tabRoute);
+    }
+    
+    // Check main route or any child routes
+    if (route.path === tabRoute) return true;
+    
+    // Check all defined child routes
+    for (const childRoute of tab.childRoutes) {
+        if (route.path.startsWith(childRoute)) {
+            return true;
+        }
+    }
+    
+    // Special case for quiz-related routes
+    if (tabRoute === '/quiz') {
+        // List of all quiz-related paths that should highlight the Quiz tab
+        const quizRelatedPaths = [
+            '/quiz', 
+            '/history-quiz', 
+            '/review-quiz', 
+            '/result-quiz',
+            '/do-quiz'
+        ];
+        
+        // Check if the current path starts with any quiz-related path
+        for (const quizPath of quizRelatedPaths) {
+            if (route.path.startsWith(quizPath)) {
+                return true;
+            }
+        }
+    }
+    
+    return false;
 }
 
 function setActive(tab: string) {
@@ -148,23 +201,53 @@ function logout() {
     text-transform: none;
     font-size: 15px;
     font-weight: 400;
+    letter-spacing: 0.01em;
+    min-width: 70px; /* Ensure consistent tab width */
+    transition: all 0.3s ease;
+    position: relative;
+    opacity: 0.8;
 }
 
-/* Active tab styling updated for consistency */
+.custom-tab:hover {
+    opacity: 1;
+    background: rgba(0, 0, 0, 0.03);
+}
+
+/* Active tab styling improved for consistency */
 .active-tab {
     color: var(--v-primary);
-    font-weight: bold;
-    border-bottom: 2px solid;
+    font-weight: 600;
+    opacity: 1;
+    position: relative;
+}
+
+/* Improved active indicator with animated bottom border */
+.active-tab::after {
+    content: '';
+    position: absolute;
+    bottom: 0;
+    left: 0;
+    width: 100%;
+    height: 2px;
+    background-color: currentColor;
+    transform-origin: center;
+    transition: transform 0.3s ease;
 }
 
 .app-bar {
-    /* background-color: var(--v-theme-primary); */
-    box-shadow: none;
+    background-color: white;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.05);
     border-bottom: 1px solid #e0e0e0;
+    z-index: 100;
 }
 
 .logo {
     max-width: 100px;
+    transition: transform 0.3s ease;
+}
+
+.logo:hover {
+    transform: scale(1.1);
 }
 
 .tab-items {
@@ -187,5 +270,15 @@ function logout() {
     .gap-x-20 {
         gap: 5px;
     }
+}
+
+/* Style improvements for dropdown menu */
+.cursor-pointer {
+    cursor: pointer;
+    transition: transform 0.3s ease;
+}
+
+.cursor-pointer:hover {
+    transform: scale(1.05);
 }
 </style>

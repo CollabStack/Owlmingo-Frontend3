@@ -28,7 +28,7 @@
             :description="getQuizDescription(quiz)"
             :subtitle="getQuizStatus(quiz)"
             :item-count="quiz.totalQuestions || 0"
-            :last-updated="formatDate(quiz.createdAt)"
+            :last-updated="formatDate(quiz.createdAt || quiz.startedAt)"
             :tags="quiz.tags || []"
             :index="index"
             :id="quiz.quizId || quiz.id" 
@@ -36,6 +36,7 @@
             @action="$emit('start-quiz', quiz.quizId || quiz.id)"
             @editTags="$emit('open-tags-dialog', 'quiz', quiz.quizId || quiz.id)"
             @removeTag="$emit('remove-tag-from-item', $event)"
+            @delete="$emit('delete-quiz', quiz.quizId || quiz.id)"
           />
         </v-col>
       </v-row>
@@ -91,17 +92,23 @@ defineEmits([
   'start-quiz',
   'open-quiz-dialog',
   'open-tags-dialog',
-  'remove-tag-from-item'
+  'remove-tag-from-item',
+  'delete-quiz'
 ]);
 
 const formatDate = (dateString) => {
   if (!dateString) return 'Unknown date';
+  
   const date = new Date(dateString);
-  return date.toLocaleDateString('en-US', {
-    year: 'numeric',
-    month: 'short',
-    day: 'numeric'
-  });
+  const now = new Date();
+  const diffDays = Math.floor((now - date) / (1000 * 60 * 60 * 24));
+  
+  if (diffDays === 0) return 'Today';
+  if (diffDays === 1) return 'Yesterday';
+  if (diffDays < 7) return `${diffDays} days ago`;
+  if (diffDays < 30) return `${Math.floor(diffDays / 7)} weeks ago`;
+  if (diffDays < 365) return `${Math.floor(diffDays / 30)} months ago`;
+  return `${Math.floor(diffDays / 365)} years ago`;
 };
 
 const getQuizDescription = (quiz) => {
