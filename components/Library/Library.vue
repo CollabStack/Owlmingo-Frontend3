@@ -12,11 +12,14 @@
 
     <FlashcardsSection 
       :flashcards="flashcards"
+      :loading="isLoadingFlashcards"
       @edit-flashcard="editFlashcard"
       @view-flashcard="viewFlashcard"
       @open-flashcard-dialog="flashcardDialog = true"
       @open-tags-dialog="openTagsDialog"
       @remove-tag-from-item="removeTagFromItem"
+      @refresh-flashcards="refreshFlashcards"
+      @delete-flashcard="confirmDeleteFlashcard"
     />
 
     <v-divider class="mb-8"></v-divider>
@@ -340,7 +343,14 @@ import FlashcardsSection from './FlashcardsSection.vue';
 import QuizzesSection from './QuizzesSection.vue';
 import SummariesSection from './SummariesSection.vue';
 import { useSummaryStore } from '~/store/summaryStore';
+import { useFlashcardStore } from '~/store/flashcardStore';
 import { useRouter } from 'vue-router';
+import Swal from 'sweetalert2';
+
+// Router and stores
+const router = useRouter();
+const summaryStore = useSummaryStore();
+const flashcardStore = useFlashcardStore();
 
 // Tags management
 const tags = ref([]);
@@ -353,8 +363,8 @@ const deletingIndex = ref(null);
 
 // Predefined swatch colors
 const swatchColors = [
-  ['#4CAF50', '#8BC34A', '#CDDC39', '#FFEB3B', '#FFC107', '#FF9800'],
   ['#F44336', '#E91E63', '#9C27B0', '#673AB7', '#3F51B5', '#2196F3'],
+  ['#4CAF50', '#8BC34A', '#CDDC39', '#FFEB3B', '#FFC107', '#FF9800'],
   ['#03A9F4', '#00BCD4', '#009688', '#607D8B', '#795548', '#9E9E9E'],
 ];
 
@@ -362,29 +372,12 @@ const swatchColors = [
 const flashcardDialog = ref(false);
 const quizDialog = ref(false);
 const summaryDialog = ref(false);
+const tagsDialog = ref(false);
+const deleteSummaryDialog = ref(false);
+const deleteFlashcardDialog = ref(false);
 
-// Sample data (Replace this with your actual data from API or store)
-const flashcards = ref([
-  {
-    id: 1,
-    title: "Biology Terms",
-    subtitle: "Science",
-    description: "Key biology terms and definitions covering cell biology and genetics",
-    cardCount: 15,
-    lastUpdated: "2 days ago",
-    tags: [{ name: "Biology", color: "#4CAF50" }]
-  },
-  {
-    id: 2,
-    title: "Spanish Vocabulary",
-    subtitle: "Language",
-    description: "Common Spanish words and phrases for beginners",
-    cardCount: 30,
-    lastUpdated: "5 days ago",
-    tags: [{ name: "Spanish", color: "#FFC107" }]
-  }
-]);
-
+// Content data
+const flashcards = ref([]);
 const quizzes = ref([
   {
     id: 1,
@@ -405,13 +398,21 @@ const quizzes = ref([
     tags: [{ name: "Math", color: "#2196F3" }]
   }
 ]);
-
-const summaryStore = useSummaryStore();
-const router = useRouter();
-const isLoadingSummaries = ref(false);
-
-// Replace your hardcoded summaries with an empty array initially
 const summaries = ref([]);
+
+// Loading states
+const isLoadingFlashcards = ref(false);
+const isLoadingSummaries = ref(false);
+const isDeleteLoading = ref(false);
+
+// Tag dialog state
+const currentItemType = ref(null);
+const currentItemId = ref(null);
+const currentItemTags = ref([]);
+const itemTagName = ref('');
+const itemTagColor = ref('#4CAF50');
+const deletingSummaryId = ref(null);
+const deletingFlashcardId = ref(null);
 
 onMounted(async () => {
   const savedTags = localStorage.getItem('tags');
@@ -419,11 +420,39 @@ onMounted(async () => {
     tags.value = JSON.parse(savedTags);
   }
   
-  // Load sample data and apply saved tags
-  applySavedTags(flashcards.value, 'flashcard_tags');
+  // Always show loading state initially for flashcards
+  isLoadingFlashcards.value = true;
+  
+  try {
+    // Fetch flashcard decks from API
+    const flashcardResult = await flashcardStore.getDecks();
+    if (flashcardResult.success) {
+      // Map the API response to match the format expected by FlashcardsSection
+      flashcards.value = flashcardResult.data.map(deck => ({
+        id: deck.globalId || deck._id,
+        title: deck.flash_card_title || 'Untitled Deck',
+        subtitle: deck.category || 'General',
+        description: `Deck created on ${new Date(deck.createdAt).toLocaleDateString()}`,
+        cardCount: deck.cards?.length || 0,
+        lastUpdated: formatDate(deck.updatedAt || deck.createdAt),
+        tags: []
+      }));
+      
+      // Apply saved tags to API-fetched flashcards
+      applySavedTags(flashcards.value, 'flashcard_tags');
+    } else if (!flashcardResult.authenticated) {
+      console.log('Authentication required to fetch flashcards');
+    }
+  } catch (error) {
+    console.error('Error loading flashcards:', error);
+  } finally {
+    isLoadingFlashcards.value = false;
+  }
+
+  // Load sample quiz data and apply saved tags
   applySavedTags(quizzes.value, 'quiz_tags');
   
-  // Always show loading state initially
+  // Always show loading state initially for summaries
   isLoadingSummaries.value = true;
   
   try {
@@ -443,6 +472,22 @@ onMounted(async () => {
     isLoadingSummaries.value = false;
   }
 });
+
+// Helper function to format dates nicely
+const formatDate = (dateString) => {
+  if (!dateString) return 'Just now';
+  
+  const date = new Date(dateString);
+  const now = new Date();
+  const diffDays = Math.floor((now - date) / (1000 * 60 * 60 * 24));
+  
+  if (diffDays === 0) return 'Today';
+  if (diffDays === 1) return 'Yesterday';
+  if (diffDays < 7) return `${diffDays} days ago`;
+  if (diffDays < 30) return `${Math.floor(diffDays / 7)} weeks ago`;
+  if (diffDays < 365) return `${Math.floor(diffDays / 30)} months ago`;
+  return `${Math.floor(diffDays / 365)} years ago`;
+};
 
 // Tag management functions
 const addTag = () => {
@@ -498,12 +543,14 @@ const resetDialog = () => {
 // Flashcard action handlers
 const editFlashcard = (id) => {
   console.log(`Editing flashcard with ID: ${id}`);
-  // Implement navigation to edit page
+  // Navigate to edit page with the flashcard ID
+  router.push(`/flashcard/flashcards?id=${id}`);
 };
 
 const viewFlashcard = (id) => {
   console.log(`Viewing flashcard with ID: ${id}`);
-  // Implement navigation to view/study page
+  // Navigate to view/study page with the flashcard ID
+  router.push(`/flashcard/flashcardView?id=${id}`);
 };
 
 // Quiz action handlers
@@ -535,14 +582,6 @@ const viewSummary = async (id) => {
     console.error(`Error loading summary ${id}:`, error);
   }
 };
-
-// Tags dialog
-const tagsDialog = ref(false);
-const currentItemType = ref(null);
-const currentItemId = ref(null);
-const currentItemTags = ref([]);
-const itemTagName = ref('');
-const itemTagColor = ref('#4CAF50');
 
 // Computed property to get available tags (tags that aren't already assigned to the current item)
 const availableTags = computed(() => {
@@ -718,11 +757,6 @@ const applySavedTags = (items, storageKey) => {
 };
 
 // Delete Summary functionality
-const deleteSummaryDialog = ref(false);
-const deletingSummaryId = ref(null);
-const isDeleteLoading = ref(false);
-
-// Delete summary handlers
 const confirmDeleteSummary = (id) => {
   deletingSummaryId.value = id;
   deleteSummaryDialog.value = true;
@@ -746,15 +780,70 @@ const deleteSummary = async () => {
       // Remove from the local list if not already done by the store
       summaries.value = summaries.value.filter(summary => summary.id !== deletingSummaryId.value);
       deleteSummaryDialog.value = false;
+      Swal.fire({
+        title: 'Deleted!',
+        text: 'Your summary has been deleted.',
+        icon: 'success',
+        timer: 2000,
+        showConfirmButton: false
+      });
     } else {
-      alert(result.error || 'Failed to delete summary');
+      throw new Error(result.error || 'Failed to delete summary');
     }
   } catch (error) {
     console.error('Error deleting summary:', error);
-    alert('An error occurred while deleting the summary');
+    Swal.fire({
+      title: 'Error!',
+      text: error.message || 'An error occurred while deleting the summary.',
+      icon: 'error',
+      confirmButtonText: 'OK'
+    });
   } finally {
     isDeleteLoading.value = false;
     deletingSummaryId.value = null;
+  }
+};
+
+// Delete Flashcard functionality
+const confirmDeleteFlashcard = (id) => {
+  Swal.fire({
+    title: 'Delete Flashcard Deck',
+    text: 'Are you sure you want to delete this flashcard deck? This action cannot be undone.',
+    icon: 'warning',
+    showCancelButton: true,
+    confirmButtonText: 'Yes, delete it',
+    cancelButtonText: 'Cancel'
+  }).then((result) => {
+    if (result.isConfirmed) {
+      deleteFlashcard(id);
+    }
+  });
+};
+
+const deleteFlashcard = async (id) => {
+  try {
+    const result = await flashcardStore.deleteDeck(id);
+    
+    if (result.success) {
+      flashcards.value = flashcards.value.filter(flashcard => flashcard.id !== id);
+      Swal.fire({
+        title: 'Deleted!',
+        text: 'Your flashcard deck has been deleted.',
+        icon: 'success',
+        timer: 2000,
+        showConfirmButton: false
+      });
+    } else {
+      throw new Error(result.error || 'Failed to delete flashcard deck');
+    }
+  } catch (error) {
+    console.error('Error deleting flashcard deck:', error);
+    Swal.fire({
+      title: 'Error!',
+      text: error.message || 'An error occurred while deleting the flashcard deck.',
+      icon: 'error',
+      confirmButtonText: 'OK'
+    });
   }
 };
 
@@ -772,6 +861,30 @@ const refreshSummaries = async () => {
     isLoadingSummaries.value = false;
   }
 };
+
+// Function to refresh flashcards
+const refreshFlashcards = async () => {
+  isLoadingFlashcards.value = true;
+  try {
+    const flashcardResult = await flashcardStore.getDecks(true); // Force refresh
+    if (flashcardResult.success) {
+      flashcards.value = flashcardResult.data.map(deck => ({
+        id: deck.globalId || deck._id,
+        title: deck.flash_card_title || 'Untitled Deck',
+        subtitle: deck.category || 'General',
+        description: `Deck created on ${new Date(deck.createdAt).toLocaleDateString()}`,
+        cardCount: deck.cards?.length || 0,
+        lastUpdated: formatDate(deck.updatedAt || deck.createdAt),
+        tags: []
+      }));
+      applySavedTags(flashcards.value, 'flashcard_tags');
+    }
+  } catch (error) {
+    console.error('Error refreshing flashcards:', error);
+  } finally {
+    isLoadingFlashcards.value = false;
+  }
+};
 </script>
 
 <style scoped>
@@ -787,6 +900,7 @@ const refreshSummaries = async () => {
   font-family: 'Outfit', sans-serif;
 }
 
+/* Action button styling */
 .outfit-medium {
   font-weight: 500;
 }
@@ -799,10 +913,9 @@ const refreshSummaries = async () => {
   font-weight: 700;
 }
 
-/* Action button styling */
 .action-btn {
-  transition: all 0.25s ease;
   border-radius: 6px;
+  transition: all 0.25s ease;
   letter-spacing: 0.015em;
   text-transform: none;
   font-size: 0.875rem;
@@ -824,6 +937,8 @@ const refreshSummaries = async () => {
   background: linear-gradient(145deg, #ffffff, #fafafa);
   box-shadow: 0 6px 12px rgba(0, 0, 0, 0.03);
   border: 1px solid rgba(0,0,0,0.05);
+  overflow: hidden;
+  border-radius: 12px;
 }
 
 .empty-state:hover {
@@ -835,7 +950,6 @@ const refreshSummaries = async () => {
 /* Dialog styling */
 :deep(.v-dialog) {
   border-radius: 12px;
-  overflow: hidden;
 }
 
 :deep(.v-card) {

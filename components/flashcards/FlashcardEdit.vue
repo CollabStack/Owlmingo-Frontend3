@@ -288,8 +288,17 @@
 </template>
 
 <script setup>
-import { ref, onMounted, nextTick } from 'vue';
+import { ref, onMounted, nextTick, watch } from 'vue';
+import { useFlashcardStore } from '~/store/flashcardStore';
+import { useRoute, useRouter } from 'vue-router';
+import { userAuth } from '~/store/userAuth';
 import draggable from 'vuedraggable';
+import Swal from 'sweetalert2';
+
+const route = useRoute();
+const router = useRouter();
+const flashcardStore = useFlashcardStore();
+const authStore = userAuth();
 
 const deckName = ref('');
 const flashcards = ref([]);
@@ -300,6 +309,77 @@ const snackbarMessage = ref('');
 const imagePreviewDialog = ref(false);
 const previewImageSrc = ref('');
 const draggedCardIndex = ref(null);
+const loading = ref(false);
+const saving = ref(false);
+const editMode = ref(false);
+const globalId = ref(null);
+
+// Check if we're editing an existing deck or creating a new one
+onMounted(async () => {
+  // Check if we have a deck ID in the query parameters
+  const id = route.query.id;
+  if (id) {
+    globalId.value = id;
+    editMode.value = true;
+    await loadFlashcardDeck(id);
+  } else {
+    // Load from localStorage for new deck
+    loadFlashcards();
+  }
+});
+
+// Load flashcard deck from API
+const loadFlashcardDeck = async (id) => {
+  try {
+    loading.value = true;
+    
+    if (!authStore.isLoggedIn) {
+      router.push('/auth');
+      return;
+    }
+    
+    const result = await flashcardStore.getDeck(id);
+    
+    if (!result.authenticated) {
+      router.push('/auth');
+      return;
+    }
+    
+    if (result.success) {
+      const deck = result.data;
+      deckName.value = deck.flash_card_title || 'Untitled Deck';
+      
+      // Format the cards for the editor
+      if (deck.cards && deck.cards.length > 0) {
+        flashcards.value = deck.cards.map(card => ({
+          _id: card._id,
+          frontText: card.front,
+          backText: card.back,
+          frontImage: card.frontImage || null,
+          backImage: card.backImage || null,
+          category: card.category,
+          difficulty: card.difficulty,
+          status: card.status,
+          nextReviewDate: card.nextReviewDate
+        }));
+      } else {
+        // Start with an empty card if the deck exists but has no cards
+        addFlashcard();
+      }
+    } else {
+      showMessage(`Failed to load flashcard deck: ${result.error}`);
+      // Start with an empty card
+      addFlashcard();
+    }
+  } catch (err) {
+    console.error('Error loading flashcard deck:', err);
+    showMessage(`Error: ${err.message || 'Unknown error'}`);
+    // Start with an empty card
+    addFlashcard();
+  } finally {
+    loading.value = false;
+  }
+};
 
 // Undo and Redo (requires contentEditable element)
 const undo = () => document.execCommand('undo');
@@ -310,9 +390,6 @@ const applyFormat = (command) => {
   document.execCommand(command, false, null);
 };
 
-// Apply Text Color (Example: Blue)
-const applyColor = () => document.execCommand('foreColor', false, '#1976D2');
-
 // Set file input reference dynamically
 const setFileInputRef = (index, side, el) => {
   if (!fileInputRefs.value[index]) {
@@ -321,16 +398,30 @@ const setFileInputRef = (index, side, el) => {
   fileInputRefs.value[index][side] = el;
 };
 
-// Load flashcards from localStorage
+// Load flashcards from localStorage (for new decks only)
 const loadFlashcards = () => {
+  if (editMode.value) return;
+  
+  const savedDeckName = localStorage.getItem('flashcardDeckName');
+  if (savedDeckName) {
+    deckName.value = savedDeckName;
+  }
+  
   const savedFlashcards = localStorage.getItem('flashcards');
   if (savedFlashcards) {
     flashcards.value = JSON.parse(savedFlashcards);
   }
+  
+  // Always ensure at least one empty card
+  if (!flashcards.value.length) {
+    addFlashcard();
+  }
 };
 
-// Save flashcards to localStorage
+// Save flashcards to localStorage (only for new decks)
 const saveFlashcards = () => {
+  if (editMode.value) return;
+  
   localStorage.setItem('flashcards', JSON.stringify(flashcards.value));
 };
 
@@ -343,10 +434,14 @@ const addFlashcard = () => {
     backText: '',
     frontImage: null,
     backImage: null,
+    category: 'General',
+    difficulty: 'Medium',
     isNew: true  // Flag for new cards to handle animations differently
   });
   
-  saveFlashcards();
+  if (!editMode.value) {
+    saveFlashcards();
+  }
   
   // Immediately scroll to the new card without delay
   nextTick(() => {
@@ -373,30 +468,102 @@ const selectImage = (index, side) => {
 };
 
 // Handle image upload
-const onImageChange = (event, index, side) => {
+const onImageChange = async (event, index, side) => {
   const file = event.target.files[0];
-  if (file) {
-    // File size validation (max 5MB)
-    if (file.size > 5 * 1024 * 1024) {
-      showMessage('Image is too large. Please upload an image smaller than 5MB.');
-      return;
+  if (!file) return;
+  
+  // File size validation (max 5MB)
+  if (file.size > 5 * 1024 * 1024) {
+    showMessage('Image is too large. Please upload an image smaller than 5MB.');
+    return;
+  }
+  
+  try {
+    if (editMode.value && flashcards.value[index]._id) {
+      // If we're editing an existing card, upload the image directly to the API
+      loading.value = true;
+      const result = await flashcardStore.uploadCardImage(
+        globalId.value,
+        flashcards.value[index]._id,
+        file,
+        side === 'frontImage' ? 'front' : 'back'
+      );
+      
+      if (result.success) {
+        // Update the card image with the URL from the API
+        if (result.data && result.data.cards) {
+          const updatedCard = result.data.cards.find(c => c._id === flashcards.value[index]._id);
+          if (updatedCard) {
+            flashcards.value[index][side] = side === 'frontImage' 
+              ? updatedCard.frontImage 
+              : updatedCard.backImage;
+          }
+        }
+        
+        showMessage('Image uploaded successfully');
+      } else {
+        throw new Error(result.error || 'Failed to upload image');
+      }
+    } else {
+      // For new cards or offline mode, use local storage
+      const reader = new FileReader();
+      reader.onload = (e) => {
+        flashcards.value[index][side] = e.target.result;
+        if (!editMode.value) {
+          saveFlashcards();
+        }
+        showMessage('Image uploaded successfully');
+      };
+      reader.readAsDataURL(file);
     }
-    
-    const reader = new FileReader();
-    reader.onload = (e) => {
-      flashcards.value[index][`${side}Image`] = e.target.result;
-      saveFlashcards();
-      showMessage('Image uploaded successfully');
-    };
-    reader.readAsDataURL(file);
+  } catch (err) {
+    console.error('Error uploading image:', err);
+    showMessage(`Error uploading image: ${err.message || 'Unknown error'}`);
+  } finally {
+    loading.value = false;
   }
 };
 
 // Remove uploaded image
-const removeImage = (index, side) => {
-  flashcards.value[index][`${side}Image`] = null;
-  saveFlashcards();
-  showMessage('Image removed');
+const removeImage = async (index, side) => {
+  try {
+    if (editMode.value && flashcards.value[index]._id) {
+      // For existing cards, need to update via API
+      loading.value = true;
+      
+      // Prepare update data
+      const updateData = {
+        _id: flashcards.value[index]._id,
+      };
+      
+      // Set the appropriate field to null
+      if (side === 'front') {
+        updateData.frontImage = null;
+      } else if (side === 'back') {
+        updateData.backImage = null;
+      }
+      
+      const result = await flashcardStore.updateDeck(globalId.value, updateData);
+      
+      if (!result.success) {
+        throw new Error(result.error || 'Failed to remove image');
+      }
+    }
+    
+    // Update local state
+    flashcards.value[index][`${side}Image`] = null;
+    
+    if (!editMode.value) {
+      saveFlashcards();
+    }
+    
+    showMessage('Image removed');
+  } catch (err) {
+    console.error('Error removing image:', err);
+    showMessage(`Error removing image: ${err.message || 'Unknown error'}`);
+  } finally {
+    loading.value = false;
+  }
 };
 
 // Preview image in dialog
@@ -408,35 +575,164 @@ const previewImage = (imageSrc) => {
 // Update text content
 const updateText = (event, index, field) => {
   flashcards.value[index][field] = event.target.innerHTML;
-  saveFlashcards();
+  
+  if (!editMode.value) {
+    saveFlashcards();
+  }
 };
 
 // Delete flashcard
-const deleteFlashcard = (index) => {
-  flashcards.value.splice(index, 1);
-  saveFlashcards();
+const confirmDeleteFlashcard = (index) => {
+  Swal.fire({
+    title: 'Delete Card',
+    text: 'Are you sure you want to delete this card?',
+    icon: 'warning',
+    showCancelButton: true,
+    confirmButtonColor: '#d33',
+    cancelButtonColor: '#3085d6',
+    confirmButtonText: 'Yes, delete it'
+  }).then((result) => {
+    if (result.isConfirmed) {
+      deleteFlashcard(index);
+    }
+  });
+};
+
+const deleteFlashcard = async (index) => {
+  try {
+    if (editMode.value && globalId.value && flashcards.value[index]._id) {
+      // Delete the card via API
+      loading.value = true;
+      const result = await flashcardStore.deleteCard(globalId.value, flashcards.value[index]._id);
+      
+      if (!result.success) {
+        throw new Error(result.error || 'Failed to delete card');
+      }
+    }
+    
+    // Update local state
+    flashcards.value.splice(index, 1);
+    
+    if (!editMode.value) {
+      saveFlashcards();
+    }
+    
+    showMessage('Card deleted successfully');
+  } catch (err) {
+    console.error('Error deleting card:', err);
+    showMessage(`Error deleting card: ${err.message || 'Unknown error'}`);
+  } finally {
+    loading.value = false;
+  }
 };
 
 // Update indices after drag and drop
 const handleDragEnd = () => {
-  saveFlashcards();
+  if (!editMode.value) {
+    saveFlashcards();
+  }
   showMessage('Card order updated');
-}
+};
 
 // Drag start handler
 const handleDragStart = (index) => {
   draggedCardIndex.value = index;
-}
-
-// Save flashcard deck
-const saveFlashcard = () => {
-  localStorage.setItem('flashcardDeckName', deckName.value);
-  saveFlashcards();
-  showMessage('Flashcard deck saved successfully!');
 };
 
-// Load flashcards on mount
-onMounted(loadFlashcards);
+// Save flashcard deck to API or localStorage
+const saveFlashcard = async () => {
+  if (!deckName.value) {
+    showMessage('Please enter a deck name');
+    return;
+  }
+  
+  try {
+    saving.value = true;
+    
+    if (editMode.value && globalId.value) {
+      // Save to API
+      if (!authStore.isLoggedIn) {
+        router.push('/auth');
+        return;
+      }
+      
+      // First update the deck title
+      let result = await flashcardStore.updateDeck(globalId.value, {
+        flash_card_title: deckName.value
+      });
+      
+      if (!result.success) {
+        throw new Error(result.error || 'Failed to update deck title');
+      }
+      
+      // Then save any new/modified cards
+      for (const card of flashcards.value) {
+        // Skip cards that already have an _id (they should be updated separately when modified)
+        if (card._id) continue;
+        
+        // Add new card to the deck
+        result = await flashcardStore.addCard(globalId.value, {
+          front: card.frontText,
+          back: card.backText,
+          category: card.category || 'General',
+          difficulty: card.difficulty || 'Medium'
+        });
+        
+        if (!result.success) {
+          throw new Error(result.error || 'Failed to add card to deck');
+        }
+      }
+      
+      showMessage('Flashcard deck saved successfully!');
+    } else {
+      // Save to localStorage
+      localStorage.setItem('flashcardDeckName', deckName.value);
+      saveFlashcards();
+      showMessage('Flashcard deck saved to browser storage');
+      
+      // Ask if user wants to save to their account
+      if (authStore.isLoggedIn) {
+        const confirmResult = await Swal.fire({
+          title: 'Save to Account?',
+          text: 'Would you like to save this flashcard deck to your account?',
+          icon: 'question',
+          showCancelButton: true,
+          confirmButtonText: 'Yes, save it',
+          cancelButtonText: 'No, just keep locally'
+        });
+        
+        if (confirmResult.isConfirmed) {
+          // Create a new deck on the server
+          const apiResult = await flashcardStore.generateFlashcards(
+            flashcards.value.map(card => ({
+              front: card.frontText,
+              back: card.backText,
+              category: card.category || 'General',
+              difficulty: card.difficulty || 'Medium'
+            })),
+            'custom'
+          );
+          
+          if (apiResult.success) {
+            // Clear local storage now that it's saved to the account
+            localStorage.removeItem('flashcardDeckName');
+            localStorage.removeItem('flashcards');
+            
+            // Navigate to the new deck
+            router.push(`/flashcard/flashcardView?id=${apiResult.data.globalId}`);
+          } else {
+            throw new Error(apiResult.error || 'Failed to save deck to account');
+          }
+        }
+      }
+    }
+  } catch (err) {
+    console.error('Error saving flashcard deck:', err);
+    showMessage(`Error saving deck: ${err.message || 'Unknown error'}`);
+  } finally {
+    saving.value = false;
+  }
+};
 
 const showMessage = (message) => {
   snackbarMessage.value = message;

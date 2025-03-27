@@ -2,68 +2,90 @@
   <section class="mb-8">
     <div class="d-flex align-center justify-space-between mb-4">
       <h2 class="text-h5 outfit outfit-semibold">My Flashcards</h2>
-      <v-btn 
-        color="primary" 
-        class="rounded-lg action-btn outfit outfit-medium"
-        prepend-icon="mdi-plus"
-        @click="$emit('open-flashcard-dialog')"
-        size="small"
-      >
-        Create
-      </v-btn>
+      <div class="d-flex align-center">
+        <v-btn
+          v-if="flashcards.length > 0"
+          icon="mdi-refresh"
+          variant="text"
+          size="small"
+          class="me-2 action-btn"
+          :loading="loading"
+          @click="$emit('refresh-flashcards')"
+        ></v-btn>
+        <v-btn 
+          color="primary" 
+          class="rounded-lg action-btn outfit outfit-medium"
+          prepend-icon="mdi-plus"
+          @click="$emit('open-flashcard-dialog')"
+          size="small"
+        >
+          Create
+        </v-btn>
+      </div>
     </div>
 
     <!-- Flashcard Content -->
     <div>
-      <v-row v-if="flashcards.length > 0">
-        <v-col cols="12" sm="6" md="4" v-for="(card, index) in flashcards" :key="index">
-          <Card_Display
-            type="flashcard"
-            :title="card.title"
-            :description="card.description"
-            :subtitle="card.subtitle"
-            :item-count="card.cardCount"
-            :last-updated="card.lastUpdated"
-            :tags="card.tags"
-            :index="index"
-            :id="card.id"
-            @edit="$emit('edit-flashcard', card.id)"
-            @action="$emit('view-flashcard', card.id)"
-            @editTags="$emit('open-tags-dialog', 'flashcard', card.id)"
-            @removeTag="$emit('remove-tag-from-item', $event)"
-          />
-        </v-col>
-      </v-row>
+      <!-- Always show loading state when loading is true -->
+      <v-skeleton-loader
+        v-if="loading"
+        type="card, card, card"
+        class="mb-4"
+      ></v-skeleton-loader>
 
-      <!-- Empty State -->
-      <v-card v-else class="pa-8 text-center rounded-lg empty-state">
-        <v-icon size="64" color="primary" class="mb-4">mdi-cards-outline</v-icon>
-        <h3 class="text-h5 outfit outfit-semibold mb-3">No flashcards yet</h3>
-        <p class="text-body-1 text-medium-emphasis mb-6 outfit">Create your first flashcard deck to start studying effectively</p>
-        
-        <div class="d-flex justify-center" style="gap: 16px;">
-          <nuxt-link to="/flashcard" style="text-decoration: none;">
-            <v-btn 
-              color="primary" 
-              class="action-btn outfit"
-              variant="flat"
-              prepend-icon="mdi-robot"
-            >
-              Generate with AI
-            </v-btn>
-          </nuxt-link>
-          <nuxt-link to="/flashcard/flashcards" style="text-decoration: none;">
-            <v-btn 
-              color="grey-darken-1" 
-              variant="outlined"
-              class="action-btn outfit"
-              prepend-icon="mdi-pencil"
-            >
-              Create Manually
-            </v-btn>
-          </nuxt-link>
-        </div>
-      </v-card>
+      <!-- When not loading, show either content or empty state -->
+      <template v-else>
+        <v-row v-if="flashcards.length > 0">
+          <v-col cols="12" sm="6" md="4" v-for="(card, index) in flashcards" :key="index">
+            <Card_Display
+              type="flashcard"
+              :title="card.title"
+              :description="card.description"
+              :subtitle="card.subtitle"
+              :item-count="card.cardCount"
+              :last-updated="card.lastUpdated"
+              :tags="card.tags"
+              :index="index"
+              :id="card.id"
+              @edit="$emit('edit-flashcard', card.id)"
+              @action="$emit('view-flashcard', card.id)"
+              @editTags="$emit('open-tags-dialog', 'flashcard', card.id)"
+              @removeTag="$emit('remove-tag-from-item', $event)"
+              @delete="$emit('delete-flashcard', card.id)"
+            />
+          </v-col>
+        </v-row>
+
+        <!-- Empty State -->
+        <v-card v-else class="pa-8 text-center rounded-lg empty-state">
+          <v-icon size="64" color="primary" class="mb-4">mdi-cards-outline</v-icon>
+          <h3 class="text-h5 outfit outfit-semibold mb-3">No flashcards yet</h3>
+          <p class="text-body-1 text-medium-emphasis mb-6 outfit">Create your first flashcard deck to start studying effectively</p>
+          
+          <div class="d-flex justify-center" style="gap: 16px;">
+            <nuxt-link to="/flashcard" style="text-decoration: none;">
+              <v-btn 
+                color="primary" 
+                class="action-btn outfit"
+                variant="flat"
+                prepend-icon="mdi-robot"
+              >
+                Generate with AI
+              </v-btn>
+            </nuxt-link>
+            <nuxt-link to="/flashcard/flashcards" style="text-decoration: none;">
+              <v-btn 
+                color="grey-darken-1" 
+                variant="outlined"
+                class="action-btn outfit"
+                prepend-icon="mdi-pencil"
+              >
+                Create Manually
+              </v-btn>
+            </nuxt-link>
+          </div>
+        </v-card>
+      </template>
     </div>
   </section>
 </template>
@@ -75,6 +97,10 @@ defineProps({
   flashcards: {
     type: Array,
     required: true
+  },
+  loading: {
+    type: Boolean,
+    default: false
   }
 });
 
@@ -83,6 +109,8 @@ defineEmits([
   'view-flashcard',
   'open-flashcard-dialog',
   'open-tags-dialog',
-  'remove-tag-from-item'
+  'remove-tag-from-item',
+  'refresh-flashcards',
+  'delete-flashcard'
 ]);
 </script>

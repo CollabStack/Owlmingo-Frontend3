@@ -51,10 +51,10 @@
           <p class="text-primary text-h6 text-left">Flashcard Format</p>
           <v-select clearable chips label="Term - Definition" 
             :items="['Term - Definition', 'Question - Answer', 'Concept - Example']"
-            class="my-3 animated-input"></v-select>
+            class="my-3 animated-input" v-model="flashCardFormat"></v-select>
 
           <p class="text-primary text-h6 text-left">Number of Flashcards</p>
-          <v-select clearable chips label="Auto" :items="['Auto', '10', '20', '30']" class="my-3 animated-input"></v-select>
+          <v-select clearable chips label="Auto" :items="['Auto', '10', '20', '30']" class="my-3 animated-input" v-model="numberOfCards"></v-select>
         </v-container>
       </v-card>
     </v-bottom-sheet>
@@ -224,8 +224,9 @@ import { useRouter } from 'vue-router';
 import { PDFDocument } from 'pdf-lib';
 import * as pdfjs from 'pdfjs-dist';
 import { processFile } from '~/services/ocrService';
-import Swal from 'sweetalert2'; // Add this if not already imported
+import Swal from 'sweetalert2';
 import { userAuth } from '~/store/userAuth';
+import { useFlashcardStore } from '~/store/flashcardStore';
 
 // Set PDF.js worker
 const pdfjsWorker = await import('pdfjs-dist/build/pdf.worker.entry');
@@ -234,6 +235,7 @@ pdfjs.GlobalWorkerOptions.workerSrc = pdfjsWorker;
 // Initialize auth and router
 const router = useRouter();
 const authStore = userAuth();
+const flashcardStore = useFlashcardStore();
 
 // Initialize auth on mounted with better error handling
 onMounted(async () => {
@@ -257,7 +259,7 @@ const isAuthenticated = computed(() => {
   return authStore.isLoggedIn && !!authStore.getToken();
 });
 
-const pdfSelector = ref(null); // Add this line to create the ref
+const pdfSelector = ref(null);
 const tab = ref('document');
 const sheet = ref(false);
 const snackbar = ref(false);
@@ -272,6 +274,8 @@ const pageSelection = ref('');
 const selectionMode = ref('text');
 const selectedPages = ref(new Set());
 const pdfDocRef = ref(null);
+const flashCardFormat = ref('Term - Definition');
+const numberOfCards = ref('Auto');
 
 const options = ref([
   { label: 'Document', value: 'document' },
@@ -367,7 +371,7 @@ const checkAuth = () => {
   if (!authStore.isLoggedIn) {
     Swal.fire({
       title: 'Authentication Required',
-      text: 'You need to login or sign up to generate summaries',
+      text: 'You need to login or sign up to generate flashcards',
       icon: 'warning',
       showCancelButton: true,
       confirmButtonText: 'Login',
@@ -386,7 +390,7 @@ const checkAuth = () => {
   return true;
 };
 
-// Generate Summary with better auth handling
+// Generate Flashcards with API integration
 const generateFlashcard = async () => {
   // Use the checkAuth function which shows the alert dialog
   if (!checkAuth()) return;
@@ -400,32 +404,101 @@ const generateFlashcard = async () => {
       throw new Error('Authentication expired');
     }
 
-    // Proceed with file processing...
-    if (isPdfFile.value && pdfSelector.value) {
-      const mergedPdfBlob = await pdfSelector.value.getMergedPdf();
-      if (mergedPdfBlob) {
-        const response = await processFile(mergedPdfBlob);
-        if (response.status === 'success') {
-          Swal.fire({
-            icon: 'success',
-            title: 'Success!',
-            text: 'Summary generated successfully',
-            timer: 2000,
-            showConfirmButton: false
-          });
+    let fileOcrId = null;
+    let textToProcess = '';
+    
+    // Handle different input types
+    if (tab.value === 'document' && documentFile.value) {
+      if (isPdfFile.value && pdfSelector.value) {
+        const mergedPdfBlob = await pdfSelector.value.getMergedPdf();
+        if (mergedPdfBlob) {
+          // Process the PDF through OCR service first
+          const ocrResponse = await processFile(mergedPdfBlob);
+          if (ocrResponse.status === 'success') {
+            // Use id from OCR response instead of global_id
+            // Check for both fields to ensure compatibility
+            fileOcrId = ocrResponse.data.id || ocrResponse.data._id || ocrResponse.data.global_id;
+            console.log('OCR Response data:', ocrResponse.data);
+            console.log('Using file OCR ID:', fileOcrId);
+          } else {
+            throw new Error(ocrResponse.message || 'Failed to process document');
+          }
+        }
+      } else {
+        // Handle non-PDF documents
+        const ocrResponse = await processFile(documentFile.value);
+        if (ocrResponse.status === 'success') {
+          // Use id from OCR response instead of global_id
+          // Check for both fields to ensure compatibility
+          fileOcrId = ocrResponse.data.id || ocrResponse.data._id || ocrResponse.data.global_id;
+          console.log('OCR Response data:', ocrResponse.data);
+          console.log('Using file OCR ID:', fileOcrId);
         } else {
-          throw new Error(response.message || 'Failed to generate summary');
+          throw new Error(ocrResponse.message || 'Failed to process document');
         }
       }
-    } else if (imageFile.value) {
-      const response = await processFile(imageFile.value);
-      // ...rest of existing image handling...
-    } else if (textContent.value) {
-      // ...rest of existing text handling...
+    } else if (tab.value === 'image' && imageFile.value) {
+      // Process image through OCR
+      const ocrResponse = await processFile(imageFile.value);
+      if (ocrResponse.status === 'success') {
+        // Use id from OCR response instead of global_id
+        // Check for both fields to ensure compatibility
+        fileOcrId = ocrResponse.data.id || ocrResponse.data._id || ocrResponse.data.global_id;
+        console.log('OCR Response data:', ocrResponse.data);
+        console.log('Using file OCR ID:', fileOcrId);
+      } else {
+        throw new Error(ocrResponse.message || 'Failed to process image');
+      }
+    } else if (tab.value === 'text' && textContent.value) {
+      // Use the text content directly
+      textToProcess = textContent.value;
+    } else if (tab.value === 'link' && textContent.value) {
+      // Use the link directly
+      textToProcess = textContent.value;
+    } else if (tab.value === 'video' && videoFile.value) {
+      // Process video through OCR service
+      const ocrResponse = await processFile(videoFile.value);
+      if (ocrResponse.status === 'success') {
+        // Use id from OCR response instead of global_id
+        // Check for both fields to ensure compatibility
+        fileOcrId = ocrResponse.data.id || ocrResponse.data._id || ocrResponse.data.global_id;
+        console.log('OCR Response data:', ocrResponse.data);
+        console.log('Using file OCR ID:', fileOcrId);
+      } else {
+        throw new Error(ocrResponse.message || 'Failed to process video');
+      }
+    } else {
+      throw new Error('No content provided to generate flashcards');
+    }
+
+    // Call the flashcard store to generate flashcards with debug logging
+    console.log('Generating flashcards with:', fileOcrId ? `fileOcrId: ${fileOcrId}` : `textContent: ${textToProcess.substring(0, 20)}...`);
+    const result = fileOcrId 
+      ? await flashcardStore.generateFlashcards(fileOcrId, tab.value)
+      : await flashcardStore.generateFlashcards(textToProcess, tab.value);
+
+    if (!result.authenticated) {
+      throw new Error('Authentication required');
+    }
+
+    if (result.success) {
+      Swal.fire({
+        icon: 'success',
+        title: 'Success!',
+        text: 'Flashcards generated successfully',
+        timer: 2000,
+        showConfirmButton: false
+      }).then(() => {
+        // Navigate to flashcard view to see the generated flashcards
+        router.push(`/flashcard/flashcardView?id=${result.data.globalId}`);
+      });
+    } else {
+      // More specific error message
+      throw new Error(result.error || 'Failed to generate flashcards. Please try again.');
     }
 
   } catch (error) {
-    console.error('Error generating summary:', error);
+    console.error('Error generating flashcards:', error);
     
     if (error.message?.includes('Authentication')) {
       authStore.logout();
@@ -433,10 +506,12 @@ const generateFlashcard = async () => {
       return;
     }
 
+    // Better error feedback with more detailed message
     Swal.fire({
       icon: 'error', 
       title: 'Error',
-      text: error.message || 'Failed to generate summary'
+      text: error.message || 'Failed to generate flashcards. Please check your input and try again.',
+      confirmButtonText: 'Try Again'
     });
   } finally {
     loading.value = false;
