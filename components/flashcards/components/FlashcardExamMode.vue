@@ -52,9 +52,7 @@
                 </div>
               </template>
             </v-img>
-            <div class="card-content outfit outfit-medium">
-              {{ flashcards?.[currentIndex]?.text || 'Loading...' }}
-            </div>
+            <div class="card-content outfit outfit-medium" v-html="flashcards?.[currentIndex]?.text || 'Loading...'"></div>
           </div>
         </v-card>
         
@@ -389,6 +387,15 @@ const localUserAnswer = computed({
   max-width: 90%;
   color: #333;
   text-shadow: 0 1px 2px rgba(255, 255, 255, 0.8);
+}
+
+.card-content :deep(p) {
+  margin-top: 0;
+  margin-bottom: 1rem;
+}
+
+.card-content :deep(p:last-child) {
+  margin-bottom: 0;
 }
 
 /* Answer section styling */

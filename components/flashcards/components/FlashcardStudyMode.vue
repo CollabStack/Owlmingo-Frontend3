@@ -48,9 +48,7 @@
                   </div>
                 </template>
               </v-img>
-              <div class="card-content outfit outfit-medium">
-                {{ flashcards?.fronts?.[currentIndex]?.text || 'Loading...' }}
-              </div>
+              <div class="card-content outfit outfit-medium" v-html="flashcards?.fronts?.[currentIndex]?.text || 'Loading...'"></div>
               <div class="flip-hint">
                 <v-icon size="small" color="grey-darken-1">mdi-gesture-tap</v-icon>
                 <span class="outfit outfit-regular text-grey-darken-1">Tap to flip</span>
@@ -88,9 +86,7 @@
                   </div>
                 </template>
               </v-img>
-              <div class="card-content outfit outfit-medium">
-                {{ flashcards?.backs?.[currentIndex]?.text || 'Loading...' }}
-              </div>
+              <div class="card-content outfit outfit-medium" v-html="flashcards?.backs?.[currentIndex]?.text || 'Loading...'"></div>
               <div class="flip-hint">
                 <v-icon size="small" color="grey-darken-1">mdi-gesture-tap</v-icon>
                 <span class="outfit outfit-regular text-grey-darken-1">Tap to flip</span>
@@ -329,6 +325,15 @@ const localCardSideOrder = computed({
   max-width: 90%;
   font-weight: 500;
   word-break: break-word; /* Added for text wrapping */
+}
+
+.card-content :deep(p) {
+  margin-top: 0;
+  margin-bottom: 1rem;
+}
+
+.card-content :deep(p:last-child) {
+  margin-bottom: 0;
 }
 
 /* Reposition the flip hint to bottom right corner */

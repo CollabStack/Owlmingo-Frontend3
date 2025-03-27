@@ -51,4 +51,12 @@ export default defineNuxtConfig({
   },
 
   compatibilityDate: '2025-03-27',
+
+  modules: [
+    // ...other modules
+    'nuxt-tiptap-editor',
+  ],
+  tiptap: {
+    prefix: 'Tiptap',
+  },
 });

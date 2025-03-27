@@ -360,6 +360,53 @@ export const useFlashcardStore = defineStore('flashcardStore', {
     },
     
     /**
+     * Update a specific card in a flashcard deck
+     * @param {String} globalId - The global ID of the flashcard deck
+     * @param {String} cardId - The ID of the card
+     * @param {Object} updateData - The data to update (front, back, category, etc.)
+     */
+    async updateCard(globalId, cardId, updateData) {
+      const authStore = userAuth();
+      const { $UserPrivateAxios } = useNuxtApp();
+      
+      if (!authStore.isLoggedIn) {
+        return { authenticated: false };
+      }
+      
+      try {
+        console.log(`Updating card ${cardId} in deck ${globalId}:`, updateData);
+        
+        const response = await $UserPrivateAxios.put(
+          `/flashcards/${globalId}/cards/${cardId}`,
+          updateData
+        );
+        
+        // Update current deck if applicable
+        if (this.currentDeck && 
+            (this.currentDeck._id === globalId || this.currentDeck.globalId === globalId)) {
+          // Find the card in the current deck and update it
+          const cardIndex = this.currentDeck.cards.findIndex(c => c._id === cardId);
+          if (cardIndex !== -1) {
+            this.currentDeck.cards[cardIndex] = {
+              ...this.currentDeck.cards[cardIndex],
+              ...response.data.data
+            };
+          }
+        }
+        
+        return { authenticated: true, success: true, data: response.data.data };
+      } catch (error) {
+        console.error(`Error updating card ${cardId}:`, error);
+        if (error.response) {
+          console.error('Response status:', error.response.status);
+          console.error('Response data:', error.response.data);
+        }
+        const errorMessage = error.response?.data?.message || 'Failed to update card';
+        return { authenticated: true, success: false, error: errorMessage };
+      }
+    },
+    
+    /**
      * Evaluate an answer for a specific card
      * @param {String} globalId - The global ID of the flashcard deck
      * @param {String} cardId - The ID of the card
@@ -453,6 +500,59 @@ export const useFlashcardStore = defineStore('flashcardStore', {
           console.error('Response data:', error.response.data);
         }
         this.error = error.response?.data?.message || `Failed to upload ${side} image`;
+        return { authenticated: true, success: false, error: this.error };
+      } finally {
+        this.loading = false;
+      }
+    },
+
+    /**
+     * Remove an image from a card (front or back)
+     * @param {String} globalId - The global ID of the flashcard deck
+     * @param {String} cardId - The ID of the card
+     * @param {String} side - Either 'front' or 'back'
+     */
+    async removeCardImage(globalId, cardId, side) {
+      const authStore = userAuth();
+      const { $UserPrivateAxios } = useNuxtApp();
+      
+      if (!authStore.isLoggedIn) {
+        return { authenticated: false };
+      }
+      
+      if (side !== 'front' && side !== 'back') {
+        return { 
+          authenticated: true, 
+          success: false, 
+          error: `Side must be either "front" or "back", received "${side}"` 
+        };
+      }
+      
+      this.loading = true;
+      
+      try {
+        // Debug log the request
+        console.log(`Removing ${side} image for card ${cardId} in deck ${globalId}`);
+        
+        const response = await $UserPrivateAxios.delete(
+          `/flashcards/${globalId}/cards/${cardId}/images/${side}`
+        );
+        
+        console.log('Image removal response:', response.data);
+        
+        // Update current deck if applicable
+        if (this.currentDeck && (this.currentDeck._id === globalId || this.currentDeck.globalId === globalId)) {
+          this.currentDeck = response.data.data;
+        }
+        
+        return { authenticated: true, success: true, data: response.data.data };
+      } catch (error) {
+        console.error(`Error removing ${side} image for card ${cardId}:`, error);
+        if (error.response) {
+          console.error('Response status:', error.response.status);
+          console.error('Response data:', error.response.data);
+        }
+        this.error = error.response?.data?.message || `Failed to remove ${side} image`;
         return { authenticated: true, success: false, error: this.error };
       } finally {
         this.loading = false;
@@ -636,6 +736,6 @@ export const useFlashcardStore = defineStore('flashcardStore', {
     
     clearError() {
       this.error = null;
-    }
+    },
   }
 });

@@ -1,45 +1,17 @@
 <template>
   <div class="flashcard-edit-container">
     <div class="background-pattern"></div>
-    <v-container class="py-6" v-motion :initial="{ opacity: 0, y: 20 }" :enter="{ opacity: 1, y: 0, transition: { duration: 600 } }">
-      <div class="d-flex flex-column flex-md-row align-md-center justify-space-between mb-4">
-        <h1 class="text-h4 outfit outfit-bold gradient-text mb-4 mb-md-0">Create Flashcard Deck</h1>
-        <v-btn 
-          color="primary" 
-          variant="elevated" 
-          class="animated-btn outfit outfit-medium"
-          prepend-icon="mdi-check"
-          rounded="xl"
-          elevation="1"
-          @click="saveFlashcard"
-        >
-          Save Deck
-        </v-btn>
-      </div>
-    </v-container>
-    <v-container class="mb-6" v-motion :initial="{ opacity: 0, y: 20 }" :enter="{ opacity: 1, y: 0, transition: { duration: 600, delay: 200 } }">
-      <v-card class="pa-4 rounded-xl content-card" elevation="2">
-        <v-card-title class="text-h5 outfit outfit-semibold mb-2">Deck Name</v-card-title>
-        <v-card-text>
-          <v-text-field
-            v-model="deckName"
-            label="Enter a name for your deck"
-            variant="outlined"
-            placeholder="e.g., Biology Terms, Spanish Vocabulary"
-            density="comfortable"
-            class="clean-input mb-2"
-            bg-color="white"
-            hide-details
-            clearable
-            :disabled="loading"
-          ></v-text-field>
-          <p class="text-caption text-grey-darken-2 outfit outfit-regular mt-2 d-flex align-center">
-            <v-icon size="small" color="grey-darken-1" class="me-1">mdi-information-outline</v-icon>
-            All changes are automatically saved to your browser.
-          </p>
-        </v-card-text>
-      </v-card>
-    </v-container>
+    
+    <!-- Header with deck name - pass isEditing prop -->
+    <flashcard-header
+      v-model:deck-name="deckName"
+      :disabled="loading"
+      :saving="saving"
+      :is-editing="editMode"
+      @save="saveFlashcard"
+    />
+    
+    <!-- Loading state -->
     <v-container v-if="loading" v-motion-slide-visible-bottom>
       <v-skeleton-loader
         v-if="loading"
@@ -47,6 +19,8 @@
         class="mb-4"
       ></v-skeleton-loader>
     </v-container>
+    
+    <!-- Flashcard list -->
     <v-container v-else-if="flashcards.length" v-motion-slide-visible-bottom>
       <draggable 
         v-model="flashcards" 
@@ -61,191 +35,24 @@
         chosen-class="chosen-card"
       >
         <template v-slot:item="{element: flashcard, index}">
-          <v-card 
-            :key="index"
-            class="pa-4 mb-5 rounded-xl flashcard-item content-card" 
-            :class="{'new-card': flashcard.isNew}"
-            elevation="1"
-            v-motion
-            :initial="{ opacity: 0, y: flashcard.isNew ? 0 : 20 }"
-            :enter="{ 
-              opacity: 1, 
-              y: 0, 
-              transition: { 
-                duration: flashcard.isNew ? 300 : 500, 
-                delay: flashcard.isNew ? 0 : Math.min(index * 50, 300) 
-              } 
-            }"
-          >
-            <div class="d-flex justify-space-between align-center mb-2">
-              <div class="d-flex align-center">
-                <div class="drag-handle me-2">
-                  <v-icon size="small" color="grey" class="drag-icon">mdi-drag</v-icon>
-                </div>
-                <v-avatar size="36" color="primary" class="me-3 card-number">
-                  <span class="text-white outfit outfit-medium">{{ index + 1 }}</span>
-                </v-avatar>
-                <span class="text-subtitle-1 outfit outfit-medium">Card {{ index + 1 }}</span>
-              </div>
-              <div class="d-flex">
-                <v-card class="me-3 editor-toolbar" rounded="lg" elevation="0">
-                  <v-btn-toggle class="d-flex align-center flex-wrap" v-model="selectedFormat" density="comfortable">
-                    <v-btn icon size="small" @click="undo" variant="text"><v-icon size="small">mdi-undo</v-icon></v-btn>
-                    <v-btn icon size="small" @click="redo" variant="text"><v-icon size="small">mdi-redo</v-icon></v-btn>
-                    <v-divider vertical class="mx-1"></v-divider>
-                    <v-btn icon size="small" @click="applyFormat('bold')" variant="text"><v-icon size="small">mdi-format-bold</v-icon></v-btn>
-                    <v-btn icon size="small" @click="applyFormat('italic')" variant="text"><v-icon size="small">mdi-format-italic</v-icon></v-btn>
-                    <v-btn icon size="small" @click="applyFormat('underline')" variant="text"><v-icon size="small">mdi-format-underline</v-icon></v-btn>
-                    <v-divider vertical class="mx-1"></v-divider>
-                    <v-btn icon size="small" @click="applyFormat('insertUnorderedList')" variant="text"><v-icon size="small">mdi-format-list-bulleted</v-icon></v-btn>
-                    <v-btn icon size="small" @click="applyFormat('insertOrderedList')" variant="text"><v-icon size="small">mdi-format-list-numbered</v-icon></v-btn>
-                  </v-btn-toggle>
-                </v-card>
-                <v-btn 
-                  icon 
-                  color="error" 
-                  size="small" 
-                  @click="confirmDeleteFlashcard(index)"
-                  variant="text"
-                  class="delete-btn"
-                >
-                  <v-icon>mdi-delete</v-icon>
-                </v-btn>
-              </div>
-            </div>
-            <v-divider class="mb-4"></v-divider>
-            <v-row>
-              <v-col cols="12" md="6" class="card-side">
-                <div class="side-label d-flex align-center mb-2">
-                  <v-icon size="small" color="primary" class="me-2">mdi-card-text-outline</v-icon>
-                  <span class="text-subtitle-2 outfit outfit-medium">Front Side</span>
-                </div>
-                <div class="card-content-wrapper">
-                  <div class="image-upload-container">
-                    <v-card 
-                      class="upload-image-btn" 
-                      @click="selectImage(index, 'front')" 
-                      elevation="1"
-                      :class="{'has-image': flashcard.frontImage}"
-                    >
-                      <input
-                        type="file"
-                        :ref="(el) => setFileInputRef(index, 'front', el)"
-                        @change="onImageChange($event, index, 'front')"
-                        accept="image/*"
-                        hidden
-                      />
-                      <!-- Show loading indicator when uploading -->
-                      <div v-if="imageLoadingStates[index]?.front" class="upload-loading-container">
-                        <v-progress-circular indeterminate color="primary" size="30"></v-progress-circular>
-                        <span class="upload-loading-text outfit outfit-medium mt-2">Uploading...</span>
-                      </div>
-                      <!-- Show image if available -->
-                      <v-img 
-                        v-else-if="flashcard.frontImage" 
-                        :src="flashcard.frontImage" 
-                        contain 
-                        height="120"
-                        width="120"
-                        class="image-preview"
-                        @click.stop="previewImage(flashcard.frontImage)"
-                      />
-                      <!-- Default upload placeholder -->
-                      <div v-else class="upload-placeholder">
-                        <v-icon size="36" color="primary" class="upload-icon">mdi-image-plus</v-icon>
-                        <span class="upload-text outfit outfit-medium">Add Image</span>
-                      </div>
-                    </v-card>
-                    <div class="image-actions" v-if="flashcard.frontImage">
-                      <v-btn 
-                        icon 
-                        size="x-small" 
-                        color="error" 
-                        variant="tonal" 
-                        class="remove-image-btn"
-                        @click.stop="removeImage(index, 'front')"
-                      >
-                        <v-icon size="small">mdi-close</v-icon>
-                      </v-btn>
-                    </div>
-                  </div>
-                  <div
-                    contenteditable="true"
-                    class="editable-textarea"
-                    v-html="flashcard.frontText"
-                    @input="updateText($event, index, 'frontText')"
-                    placeholder="Enter term or question here"
-                  ></div>
-                </div>
-              </v-col>
-              <v-col cols="12" md="6" class="card-side">
-                <div class="side-label d-flex align-center mb-2">
-                  <v-icon size="small" color="secondary" class="me-2">mdi-card-text</v-icon>
-                  <span class="text-subtitle-2 outfit outfit-medium">Back Side</span>
-                </div>
-                <div class="card-content-wrapper">
-                  <div class="image-upload-container">
-                    <v-card 
-                      class="upload-image-btn" 
-                      @click="selectImage(index, 'back')" 
-                      elevation="1"
-                      :class="{'has-image': flashcard.backImage}"
-                    >
-                      <input
-                        type="file"
-                        :ref="(el) => setFileInputRef(index, 'back', el)"
-                        @change="onImageChange($event, index, 'back')"
-                        accept="image/*"
-                        hidden
-                      />
-                      <!-- Show loading indicator when uploading -->
-                      <div v-if="imageLoadingStates[index]?.back" class="upload-loading-container">
-                        <v-progress-circular indeterminate color="primary" size="30"></v-progress-circular>
-                        <span class="upload-loading-text outfit outfit-medium mt-2">Uploading...</span>
-                      </div>
-                      <!-- Show image if available -->
-                      <v-img 
-                        v-else-if="flashcard.backImage" 
-                        :src="flashcard.backImage" 
-                        contain 
-                        height="120"
-                        width="120"
-                        class="image-preview"
-                        @click.stop="previewImage(flashcard.backImage)"
-                      />
-                      <!-- Default upload placeholder -->
-                      <div v-else class="upload-placeholder">
-                        <v-icon size="36" color="primary" class="upload-icon">mdi-image-plus</v-icon>
-                        <span class="upload-text outfit outfit-medium">Add Image</span>
-                      </div>
-                    </v-card>
-                    <div class="image-actions" v-if="flashcard.backImage">
-                      <v-btn 
-                        icon 
-                        size="x-small" 
-                        color="error" 
-                        variant="tonal" 
-                        class="remove-image-btn"
-                        @click.stop="removeImage(index, 'back')"
-                      >
-                        <v-icon size="small">mdi-close</v-icon>
-                      </v-btn>
-                    </div>
-                  </div>
-                  <div
-                    contenteditable="true"
-                    class="editable-textarea"
-                    v-html="flashcard.backText"
-                    @input="updateText($event, index, 'backText')"
-                    placeholder="Enter definition or answer here"
-                  ></div>
-                </div>
-              </v-col>
-            </v-row>
-          </v-card>
+          <flashcard-card
+            :flashcard="flashcard"
+            :index="index"
+            :is-new="flashcard.isNew"
+            :loading-states="imageLoadingStates[index]"
+            :removing-states="imageRemovingStates[index]"
+            @text-update="handleTextUpdate"
+            @delete="confirmDeleteFlashcard(index)"
+            @image-upload="(side, file) => onImageChange(file, index, side)"
+            @image-remove="(side) => removeImage(index, side)"
+            @image-preview="previewImage"
+            @show-message="showMessage"
+          />
         </template>
       </draggable>
     </v-container>
+    
+    <!-- Empty state -->
     <v-container v-if="!flashcards.length" class="text-center py-10" v-motion-slide-visible-bottom>
       <v-card class="pa-8 rounded-xl content-card" elevation="1">
         <v-icon size="64" color="primary" class="mb-4">mdi-cards-outline</v-icon>
@@ -265,6 +72,8 @@
         </v-btn>
       </v-card>
     </v-container>
+    
+    <!-- Add card button -->
     <v-container class="text-center pb-10" v-if="flashcards.length && !loading" v-motion-slide-visible-bottom>
       <v-btn 
         color="primary" 
@@ -310,34 +119,43 @@
 </template>
 
 <script setup>
-import { ref, onMounted, nextTick, watch } from 'vue';
+import { ref, onMounted, nextTick } from 'vue';
 import { useFlashcardStore } from '~/store/flashcardStore';
 import { useRoute, useRouter } from 'vue-router';
 import { userAuth } from '~/store/userAuth';
 import draggable from 'vuedraggable';
 import Swal from 'sweetalert2';
 
+// Import our new components
+import FlashcardHeader from './components/FlashcardHeader.vue';
+import FlashcardCard from './components/FlashcardCard.vue';
+
 const route = useRoute();
 const router = useRouter();
 const flashcardStore = useFlashcardStore();
 const authStore = userAuth();
 
+// Core state
 const deckName = ref('');
 const flashcards = ref([]);
-const fileInputRefs = ref({});
-const selectedFormat = ref(null);
-const snackbar = ref(false);
-const snackbarMessage = ref('');
-const imagePreviewDialog = ref(false);
-const previewImageSrc = ref('');
-const draggedCardIndex = ref(null);
 const loading = ref(false);
 const saving = ref(false);
 const editMode = ref(false);
 const globalId = ref(null);
 
-// Add a new ref to track loading state for individual images
+// UI state
+const snackbar = ref(false);
+const snackbarMessage = ref('');
+const imagePreviewDialog = ref(false);
+const previewImageSrc = ref('');
+const draggedCardIndex = ref(null);
+
+// Tracking states for images
 const imageLoadingStates = ref({});
+const imageRemovingStates = ref({});
+
+// Debounce timers for text updates
+const textUpdateTimers = ref({});
 
 // Check if we're editing an existing deck or creating a new one
 onMounted(async () => {
@@ -409,23 +227,6 @@ const loadFlashcardDeck = async (id) => {
   }
 };
 
-// Undo and Redo (requires contentEditable element)
-const undo = () => document.execCommand('undo');
-const redo = () => document.execCommand('redo');
-
-// Apply Formatting
-const applyFormat = (command) => {
-  document.execCommand(command, false, null);
-};
-
-// Set file input reference dynamically
-const setFileInputRef = (index, side, el) => {
-  if (!fileInputRefs.value[index]) {
-    fileInputRefs.value[index] = {};
-  }
-  fileInputRefs.value[index][side] = el;
-};
-
 // Load flashcards from localStorage (for new decks only)
 const loadFlashcards = () => {
   if (editMode.value) return;
@@ -488,26 +289,64 @@ const addFlashcard = () => {
   });
 };
 
-// Select image input
-const selectImage = (index, side) => {
-  if (fileInputRefs.value[index] && fileInputRefs.value[index][side]) {
-    fileInputRefs.value[index][side].click();
-  }
-};
-
-// Handle image upload
-const onImageChange = async (event, index, side) => {
-  const file = event.target.files[0];
-  if (!file) return;
+// Handle text update from child component
+const handleTextUpdate = ({ index, field, value }) => {
+  flashcards.value[index][field] = value;
   
-  // File size validation (max 5MB)
-  if (file.size > 5 * 1024 * 1024) {
-    showMessage('Image is too large. Please upload an image smaller than 5MB.');
+  if (!editMode.value) {
+    // For local storage mode, just save to localStorage
+    saveFlashcards();
     return;
   }
   
-  // For debugging
-  console.log(`Uploading image for side: ${side}, file type: ${file.type}, size: ${file.size} bytes`);
+  // For API mode, use debouncing to avoid excessive API calls
+  const cardId = flashcards.value[index]._id;
+  if (!cardId) return; // Skip if card doesn't have an ID yet
+  
+  // Clear previous timer if it exists
+  if (textUpdateTimers.value[`${cardId}-${field}`]) {
+    clearTimeout(textUpdateTimers.value[`${cardId}-${field}`]);
+  }
+  
+  // Set a new timer
+  textUpdateTimers.value[`${cardId}-${field}`] = setTimeout(async () => {
+    try {
+      const updateData = {};
+      
+      // Map local field names to API field names
+      if (field === 'frontText') {
+        updateData.front = value;
+      } else if (field === 'backText') {
+        updateData.back = value;
+      }
+      
+      // Make sure the store and method exist before calling
+      if (!flashcardStore || typeof flashcardStore.updateCard !== 'function') {
+        console.error('flashcardStore.updateCard is not available:', flashcardStore);
+        throw new Error('Update card functionality is not available');
+      }
+      
+      const result = await flashcardStore.updateCard(
+        globalId.value, 
+        cardId, 
+        updateData
+      );
+      
+      if (!result.success) {
+        throw new Error(result.error || 'Failed to update card');
+      }
+      
+      console.log(`Card ${cardId} ${field} updated successfully`);
+    } catch (err) {
+      console.error('Error updating card text:', err);
+      showMessage(`Error updating card: ${err.message || 'Unknown error'}`);
+    }
+  }, 1000); // Wait 1 second after typing stops before sending update
+};
+
+// Handle image upload
+const onImageChange = async (file, index, side) => {
+  if (!file) return;
   
   // Set loading state for specific image
   if (!imageLoadingStates.value[index]) {
@@ -518,9 +357,6 @@ const onImageChange = async (event, index, side) => {
   try {
     if (editMode.value && flashcards.value[index]._id) {
       // If we're editing an existing card, upload the image directly to the API
-      // Note: No need to set the global loading.value = true here anymore
-      
-      // Upload the image directly with the correct side parameter
       const result = await flashcardStore.uploadCardImage(
         globalId.value,
         flashcards.value[index]._id,
@@ -532,15 +368,12 @@ const onImageChange = async (event, index, side) => {
         // Update the card image with the URL from the API
         if (result.data && result.data.cards) {
           const updatedCard = result.data.cards.find(c => c._id === flashcards.value[index]._id);
-          console.log("Found updated card:", updatedCard);
           
           if (updatedCard) {
             // In our local state, we use sideImage (frontImage or backImage)
             const imageField = `${side}Image`;
             
             // Make sure we're getting the correct property from the API response
-            // Some APIs might return frontImage/backImage, others might return front_image/back_image
-            // or just have the URLs directly on the side properties
             let imageUrl = null;
             if (updatedCard[imageField]) {
               imageUrl = updatedCard[imageField];
@@ -552,15 +385,12 @@ const onImageChange = async (event, index, side) => {
             
             if (imageUrl) {
               flashcards.value[index][imageField] = imageUrl;
-              console.log(`Updated ${imageField} with URL:`, imageUrl);
             } else {
               console.warn(`Could not find image URL for ${side} in the response:`, updatedCard);
             }
           } else {
             console.error("Could not find card with ID", flashcards.value[index]._id, "in response");
           }
-        } else {
-          console.error("Unexpected response format:", result.data);
         }
         
         showMessage('Image uploaded successfully');
@@ -596,34 +426,43 @@ const onImageChange = async (event, index, side) => {
 // Remove uploaded image
 const removeImage = async (index, side) => {
   try {
+    // Set loading state for specific image
+    if (!imageLoadingStates.value[index]) {
+      imageLoadingStates.value[index] = {};
+    }
+    imageLoadingStates.value[index][side] = true;
+    
+    // Set removing state to true
+    if (!imageRemovingStates.value[index]) {
+      imageRemovingStates.value[index] = {};
+    }
+    imageRemovingStates.value[index][side] = true;
+    
     if (editMode.value && flashcards.value[index]._id) {
-      // For existing cards, need to update via API
-      loading.value = true;
-      
-      // Prepare update data
-      const updateData = {
-        _id: flashcards.value[index]._id,
-      };
-      
-      // Set the appropriate field to null
-      if (side === 'front') {
-        updateData.frontImage = null;
-      } else if (side === 'back') {
-        updateData.backImage = null;
-      }
-      
-      const result = await flashcardStore.updateDeck(globalId.value, updateData);
+      // For existing cards, use the dedicated DELETE endpoint
+      const result = await flashcardStore.removeCardImage(
+        globalId.value,
+        flashcards.value[index]._id,
+        side
+      );
       
       if (!result.success) {
-        throw new Error(result.error || 'Failed to remove image');
+        throw new Error(result.error || `Failed to remove ${side} image`);
       }
-    }
-    
-    // Update local state
-    flashcards.value[index][`${side}Image`] = null;
-    
-    if (!editMode.value) {
-      saveFlashcards();
+      
+      // The card should be updated in the response, but let's ensure the local state is updated
+      const imageField = `${side}Image`;
+      flashcards.value[index][imageField] = null;
+      
+      // Force reactivity update by creating a new reference
+      flashcards.value = [...flashcards.value];
+    } else {
+      // For new cards or offline mode, just update local state
+      flashcards.value[index][`${side}Image`] = null;
+      
+      if (!editMode.value) {
+        saveFlashcards();
+      }
     }
     
     showMessage('Image removed');
@@ -631,7 +470,14 @@ const removeImage = async (index, side) => {
     console.error('Error removing image:', err);
     showMessage(`Error removing image: ${err.message || 'Unknown error'}`);
   } finally {
-    loading.value = false;
+    // Clear loading and removing states
+    if (imageLoadingStates.value[index]) {
+      imageLoadingStates.value[index][side] = false;
+    }
+    
+    if (imageRemovingStates.value[index]) {
+      imageRemovingStates.value[index][side] = false;
+    }
   }
 };
 
@@ -639,15 +485,6 @@ const removeImage = async (index, side) => {
 const previewImage = (imageSrc) => {
   previewImageSrc.value = imageSrc;
   imagePreviewDialog.value = true;
-};
-
-// Update text content
-const updateText = (event, index, field) => {
-  flashcards.value[index][field] = event.target.innerHTML;
-  
-  if (!editMode.value) {
-    saveFlashcards();
-  }
 };
 
 // Delete flashcard
@@ -753,6 +590,9 @@ const saveFlashcard = async () => {
       }
       
       showMessage('Flashcard deck saved successfully!');
+      
+      // Reload the deck data to get the latest changes
+      await loadFlashcardDeck(globalId.value);
     } else {
       // Save to localStorage
       localStorage.setItem('flashcardDeckName', deckName.value);
@@ -787,8 +627,18 @@ const saveFlashcard = async () => {
             localStorage.removeItem('flashcardDeckName');
             localStorage.removeItem('flashcards');
             
-            // Navigate to the new deck
-            router.push(`/flashcard/flashcardView?id=${apiResult.data.globalId}`);
+            // CHANGED: Stay in edit mode by updating the URL without navigating away
+            globalId.value = apiResult.data.globalId;
+            editMode.value = true;
+            
+            // Update the URL without full navigation
+            const newUrl = `/flashcard/flashcardEdit?id=${apiResult.data.globalId}`;
+            window.history.pushState({}, '', newUrl);
+            
+            // Reload the deck to ensure everything is properly synchronized
+            await loadFlashcardDeck(apiResult.data.globalId);
+            
+            showMessage('Deck saved to your account successfully!');
           } else {
             throw new Error(apiResult.error || 'Failed to save deck to account');
           }
@@ -803,6 +653,7 @@ const saveFlashcard = async () => {
   }
 };
 
+// Display feedback message
 const showMessage = (message) => {
   snackbarMessage.value = message;
   snackbar.value = true;
@@ -815,267 +666,35 @@ const showMessage = (message) => {
 /* Outfit font classes */
 .outfit { font-family: "Outfit", sans-serif; }
 
-.editable-textarea {
-  width: 100%;
-  min-height: 50px;
-  padding: 8px;
-  border: 1px solid #ccc;
-  border-radius: 4px;
-  font-size: 16px;
-  line-height: 1.5;
-  background-color: #fff;
-  overflow: auto;
-  margin-top: 8px;
+.background-pattern {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background-image: radial-gradient(#7b83e015 1px, rgba(245, 245, 255, 0.8) 1px);
+  background-size: 20px 20px;
+  z-index: -1;
+  pointer-events: none;
 }
 
-.editable-textarea:empty:before {
-  content: attr(placeholder);
-  color: #ccc;
-}
-
-.editable-textarea:focus {
-  border-color: #1976D2;
-  outline: none;
-}
-
-.image-placeholder {
-  cursor: pointer;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  border: 1px dashed #ccc;
-  border-radius: 4px;
-  width: 80px;
-  height: 80px;
-  overflow: hidden;
-}
-
-.upload-placeholder {
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  justify-content: center;
-  color: #ccc;
-}
-
-/* Image Upload Styling */
-.image-upload-container {
-  position: relative;
-  margin-bottom: 10px;
-  display: inline-block;
-}
-
-.upload-image-btn {
-  cursor: pointer;
-  border-radius: 12px;
-  min-width: 120px;
-  height: 120px;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  background-color: rgba(245, 246, 255, 0.9);
-  border: 2px dashed rgba(123, 131, 224, 0.3);
+/* Animation for the add button */
+.animated-btn {
   transition: all 0.3s ease;
-  overflow: hidden;
-  margin: 4px;
 }
 
-.upload-image-btn:hover {
-  border-color: var(--v-primary-base);
-  background-color: rgba(123, 131, 224, 0.05);
+.animated-btn:hover {
   transform: translateY(-2px);
-  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
 }
 
-.upload-image-btn.has-image {
-  border-style: solid;
-  border-color: rgba(123, 131, 224, 0.6);
-}
-
-.upload-placeholder {
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  justify-content: center;
-  height: 100%;
-  width: 100%;
-  transition: all 0.3s ease;
-}
-
-.upload-text {
-  font-size: 0.9rem;
-  margin-top: 8px;
-  color: rgba(123, 131, 224, 0.8);
-}
-
-.upload-icon {
-  transition: transform 0.3s ease;
-}
-
-.upload-image-btn:hover .upload-icon {
-  transform: scale(1.1);
-}
-
-.image-preview {
-  transition: transform 0.3s ease;
-}
-
-.upload-image-btn:hover .image-preview {
-  transform: scale(1.05);
-}
-
-.image-actions {
-  position: absolute;
-  top: -8px;
-  right: -8px;
-  z-index: 1;
-}
-
-.remove-image-btn {
-  opacity: 0.8;
-  backdrop-filter: blur(4px);
-  transition: all 0.2s ease;
-}
-
-.remove-image-btn:hover {
-  opacity: 1;
-  transform: scale(1.1);
-}
-
-/* Improve layout on mobile */
-@media (max-width: 600px) {
-  .card-content-wrapper {
-    flex-direction: column;
-    align-items: center;
-  }
-  
-  .upload-image-btn {
-    width: 100%;
-    margin-bottom: 12px;
-  }
-  
-  .editable-textarea {
-    width: 100%;
-  }
-}
-
-/* Updated layout styling */
-.card-content-wrapper {
-  display: flex;
-  align-items: flex-start;
-  gap: 16px;
-}
-
-.image-upload-container {
+/* Card list transitions for smoother reordering */
+.flashcard-list {
   position: relative;
-  margin-right: 12px;
-  flex-shrink: 0;
-}
-
-.upload-image-btn {
-  cursor: pointer;
-  border-radius: 12px;
-  width: 120px;
-  height: 120px;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  background-color: rgba(245, 246, 255, 0.9);
-  border: 2px dashed rgba(123, 131, 224, 0.3);
-  transition: all 0.3s ease;
-  overflow: hidden;
-}
-
-.editable-textarea {
-  flex-grow: 1;
-  min-height: 120px;
-  padding: 12px;
-  border: 1px solid rgba(123, 131, 224, 0.2);
-  border-radius: 12px;
-  font-size: 16px;
-  line-height: 1.5;
-  background-color: white;
-  overflow: auto;
-  transition: all 0.3s ease;
-  margin-top: 0;
-}
-
-/* Improve layout on mobile */
-@media (max-width: 600px) {
-  .card-content-wrapper {
-    flex-direction: column;
-    align-items: center;
-  }
-  
-  .image-upload-container {
-    margin-right: 0;
-    margin-bottom: 12px;
-    width: 100%;
-    display: flex;
-    justify-content: center;
-  }
-  
-  .upload-image-btn {
-    width: 100%;
-    max-width: 200px;
-  }
-  
-  .editable-textarea {
-    width: 100%;
-  }
-}
-
-/* Fast appearing animation for new cards */
-.new-card {
-  animation: highlight-new 0.6s ease-out;
-}
-
-@keyframes highlight-new {
-  0% {
-    box-shadow: 0 0 0 2px rgba(123, 131, 224, 0.5);
-    transform: translateY(10px);
-  }
-  100% {
-    box-shadow: 0 8px 20px rgba(123, 131, 224, 0.08);
-    transform: translateY(0);
-  }
-}
-
-/* Fix animation timing */
-.card-list-enter-active {
-  transition: all 0.3s ease-out;
 }
 
 .card-list-move {
-  transition: transform 0.3s ease;
-}
-
-/* Drag and drop styling */
-.drag-handle {
-  cursor: grab;
-  padding: 4px;
-  display: flex;
-  align-items: center;
-  opacity: 0.5;
-  transition: all 0.2s ease;
-  border-radius: 4px;
-}
-
-.drag-handle:hover {
-  opacity: 1;
-  background-color: rgba(123, 131, 224, 0.1);
-}
-
-.drag-handle:active {
-  cursor: grabbing;
-}
-
-.drag-icon {
-  transition: transform 0.2s ease;
-}
-
-.drag-handle:hover .drag-icon {
-  transform: scale(1.2);
+  transition: transform 0.5s ease;
 }
 
 .ghost-card {
@@ -1087,73 +706,5 @@ const showMessage = (message) => {
 
 .chosen-card {
   box-shadow: 0 10px 20px rgba(123, 131, 224, 0.2) !important;
-}
-
-/* Updated card list transitions for smoother reordering */
-.flashcard-list {
-  position: relative;
-}
-
-.card-list-move {
-  transition: transform 0.5s ease;
-}
-
-.card-list-enter-active {
-  transition: all 0.3s ease-in;
-}
-
-.card-list-leave-active {
-  transition: all 0.3s ease-out;
-  position: absolute;
-  width: 100%;
-}
-
-.card-list-enter-from,
-.card-list-leave-to {
-  opacity: 0;
-  transform: translateY(30px);
-}
-
-/* Fade in animation for content after loading */
-.fade-in {
-  animation: fadeIn 0.5s ease;
-}
-
-@keyframes fadeIn {
-  from { opacity: 0; }
-  to { opacity: 1; }
-}
-
-/* Responsive skeleton adjustments */
-@media (max-width: 600px) {
-  .skeleton-image-container {
-    margin-right: 0;
-    margin-bottom: 12px;
-    width: 100%;
-    display: flex;
-    justify-content: center;
-  }
-  
-  .skeleton-image {
-    width: 100%;
-    max-width: 200px;
-  }
-}
-
-/* Add styling for the loading container */
-.upload-loading-container {
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  justify-content: center;
-  width: 100%;
-  height: 100%;
-  min-height: 120px;
-}
-
-.upload-loading-text {
-  font-size: 0.9rem;
-  color: rgba(123, 131, 224, 0.8);
-  margin-top: 8px;
 }
 </style>

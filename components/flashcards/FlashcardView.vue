@@ -6,6 +6,7 @@
     <!-- Header Section -->
     <FlashcardHeader 
       :deck-title="deckTitle" 
+      :mode="'view'"
       @back="navigateToLibrary" 
     />
     
@@ -181,12 +182,12 @@ const loadFlashcardDeck = async (globalId) => {
       if (deck.cards && deck.cards.length > 0) {
         // Update to capture both text and image URLs
         flashcards.value = deck.cards.map(card => ({
-          text: card.front || '',
+          text: ensureHtmlContent(card.front) || '',
           image: card.frontImage || null
         }));
         
         backFlashcards.value = deck.cards.map(card => ({
-          text: card.back || '',
+          text: ensureHtmlContent(card.back) || '',
           image: card.backImage || null
         }));
         
@@ -223,6 +224,21 @@ const loadFlashcardDeck = async (globalId) => {
   } finally {
     loading.value = false;
   }
+};
+
+// Helper function to ensure content has proper HTML formatting
+const ensureHtmlContent = (content) => {
+  if (!content) return '';
+  
+  // Check if content already has HTML formatting (paragraphs, etc.)
+  const hasHtmlTags = /<\/?[a-z][\s\S]*>/i.test(content);
+  
+  if (!hasHtmlTags) {
+    // If plain text, wrap in paragraph tags
+    return `<p>${content}</p>`;
+  }
+  
+  return content;
 };
 
 // Computed property for sorted flashcards
