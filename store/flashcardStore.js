@@ -278,11 +278,14 @@ export const useFlashcardStore = defineStore('flashcardStore', {
       this.loading = true;
       
       try {
+        // Debug log to check ID format
+        console.log(`Adding card to deck with ID: ${flashCardId} (type: ${typeof flashCardId})`);
+        
         // Remove duplicate 'auth/' from URL path
         const response = await $UserPrivateAxios.post(`/flashcards/${flashCardId}/cards`, cardData);
         
         // Update current deck if applicable
-        if (this.currentDeck && this.currentDeck._id === flashCardId) {
+        if (this.currentDeck && (this.currentDeck._id === flashCardId || this.currentDeck.globalId === flashCardId)) {
           this.currentDeck = response.data.data;
         }
         

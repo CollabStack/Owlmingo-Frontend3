@@ -142,6 +142,7 @@ const loading = ref(false);
 const saving = ref(false);
 const editMode = ref(false);
 const globalId = ref(null);
+const mongoId = ref(null); // Add this line to store MongoDB ObjectId
 
 // UI state
 const snackbar = ref(false);
@@ -191,6 +192,10 @@ const loadFlashcardDeck = async (id) => {
     if (result.success) {
       const deck = result.data;
       deckName.value = deck.flash_card_title || 'Untitled Deck';
+      
+      // Store both the globalId and _id
+      globalId.value = deck.globalId || id;
+      mongoId.value = deck._id || null;
       
       // Format the cards for the editor
       if (deck.cards && deck.cards.length > 0) {
@@ -576,8 +581,11 @@ const saveFlashcard = async () => {
         // Skip cards that already have an _id (they should be updated separately when modified)
         if (card._id) continue;
         
+        // Use the mongoId for adding cards, as that's what the API expects
+        const deckIdForApi = mongoId.value || globalId.value;
+        
         // Add new card to the deck
-        result = await flashcardStore.addCard(globalId.value, {
+        result = await flashcardStore.addCard(deckIdForApi, {
           front: card.frontText,
           back: card.backText,
           category: card.category || 'General',
@@ -629,6 +637,7 @@ const saveFlashcard = async () => {
             
             // CHANGED: Stay in edit mode by updating the URL without navigating away
             globalId.value = apiResult.data.globalId;
+            mongoId.value = apiResult.data._id;
             editMode.value = true;
             
             // Update the URL without full navigation
