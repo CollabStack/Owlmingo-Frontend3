@@ -97,15 +97,82 @@ async function generateQuizFromFile(fileId) {
 }
 
 /**
+ * Process text content directly via API for quiz generation
+ * @param {string} content - The text content to process
+ * @returns {Promise<Object>} - Result of text processing
+ */
+async function processText(content: string) {
+  const authStore = userAuth();
+  const config = useRuntimeConfig();
+  
+  const url = `${config.public.USER_PRIVATE_API}process-text`;
+  
+  console.log('Text Processing - Starting text processing');
+  
+  let token = authStore.getToken();
+  if (!token) {
+    throw new Error('Authentication required');
+  }
+
+  try {
+    console.log(`Text Processing - Request to ${url}`);
+    
+    const response = await fetch(url, {
+      method: 'POST',
+      headers: {
+        'Authorization': `Bearer ${token}`,
+        'Content-Type': 'application/json'
+      },
+      body: JSON.stringify({ text: content }),
+      credentials: 'include'
+    });
+
+    if (!response.ok) {
+      if (response.status === 401) {
+        authStore.logout();
+        throw new Error('Authentication expired');
+      }
+      
+      const contentType = response.headers.get('content-type');
+      if (contentType && contentType.includes('application/json')) {
+        const errorData = await response.json();
+        throw new Error(errorData.message || 'Failed to process text');
+      } else {
+        const errorText = await response.text();
+        throw new Error(`Server error (${response.status}): Failed to process text`);
+      }
+    }
+
+    const responseData = await response.json();
+    console.log('Text Processing - Response data:', responseData);
+
+    if (responseData.status === 'success') {
+      const fileId = responseData.data?.id || responseData.data?._id;
+      if (!fileId) {
+        throw new Error('Missing file ID in server response');
+      }
+      return await generateQuizFromFile(fileId);
+    }
+    
+    return responseData;
+  } catch (error) {
+    console.error('Text processing error:', error);
+    throw error;
+  }
+}
+
+/**
  * Generate a quiz based on the uploaded file
  * @param {Object} params - Parameters for generating the quiz
  * @param {Blob} [params.documentBlob] - Document file blob
  * @param {File} [params.imageFile] - Image file
+ * @param {string} [params.textContent] - Text content
  * @returns {Promise<Object>} - Result of the quiz generation
  */
 export const generateQuiz = async ({
   documentBlob = null,
-  imageFile = null
+  imageFile = null,
+  textContent = null
 }) => {
   const authStore = userAuth();
   const quizStore = useQuizStore();
@@ -145,6 +212,9 @@ export const generateQuiz = async ({
       } else {
         throw new Error(ocrResponse.message || 'Failed to process image');
       }
+    } else if (textContent) {
+      console.log(`Processing text content, length: ${textContent.length}`);
+      quizResponse = await processText(textContent);
     } else {
       throw new Error('No content provided for quiz generation');
     }
