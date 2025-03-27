@@ -19,8 +19,37 @@
           <div class="card-inner">
             <!-- Front face with enhanced styling -->
             <div class="card-face card-front">
+              <!-- Show image if available - directly without container -->
+              <v-img 
+                v-if="flashcards?.fronts?.[currentIndex]?.image" 
+                :src="flashcards.fronts[currentIndex].image" 
+                alt="Card Front Image" 
+                class="card-image mb-4"
+                :aspect-ratio="16/9"
+                eager
+                max-height="220"
+                width="95%"
+              >
+                <!-- Loading overlay -->
+                <template v-slot:placeholder>
+                  <div class="d-flex align-center justify-center fill-height">
+                    <v-progress-circular 
+                      indeterminate 
+                      color="primary"
+                      size="30"
+                    ></v-progress-circular>
+                  </div>
+                </template>
+                
+                <!-- Error handling -->
+                <template v-slot:error>
+                  <div class="d-flex align-center justify-center fill-height">
+                    <v-icon color="error">mdi-image-off</v-icon>
+                  </div>
+                </template>
+              </v-img>
               <div class="card-content outfit outfit-medium">
-                {{ flashcards.fronts[currentIndex] }}
+                {{ flashcards?.fronts?.[currentIndex]?.text || 'Loading...' }}
               </div>
               <div class="flip-hint">
                 <v-icon size="small" color="grey-darken-1">mdi-gesture-tap</v-icon>
@@ -30,8 +59,37 @@
 
             <!-- Back face with enhanced styling -->
             <div class="card-face card-back outfit">
+              <!-- Show image if available - directly without container -->
+              <v-img 
+                v-if="flashcards?.backs?.[currentIndex]?.image" 
+                :src="flashcards.backs[currentIndex].image" 
+                alt="Card Back Image" 
+                class="card-image mb-4"
+                :aspect-ratio="16/9"
+                eager
+                max-height="220"
+                width="95%"
+              >
+                <!-- Loading overlay -->
+                <template v-slot:placeholder>
+                  <div class="d-flex align-center justify-center fill-height">
+                    <v-progress-circular 
+                      indeterminate 
+                      color="primary"
+                      size="30"
+                    ></v-progress-circular>
+                  </div>
+                </template>
+                
+                <!-- Error handling -->
+                <template v-slot:error>
+                  <div class="d-flex align-center justify-center fill-height">
+                    <v-icon color="error">mdi-image-off</v-icon>
+                  </div>
+                </template>
+              </v-img>
               <div class="card-content outfit outfit-medium">
-                {{ flashcards.backs[currentIndex] }}
+                {{ flashcards?.backs?.[currentIndex]?.text || 'Loading...' }}
               </div>
               <div class="flip-hint">
                 <v-icon size="small" color="grey-darken-1">mdi-gesture-tap</v-icon>
@@ -208,7 +266,7 @@ const localCardSideOrder = computed({
 
 /* Enhanced flashcard styling */
 .flashcard {
-  height: 340px;
+  height: 380px; /* Increased from 340px */
   perspective: 1500px;
   cursor: pointer;
   transition: all 0.4s cubic-bezier(0.34, 1.56, 0.64, 1);
@@ -369,7 +427,7 @@ const localCardSideOrder = computed({
 /* Responsive design */
 @media (max-width: 960px) {
   .flashcard {
-    height: 300px;
+    height: 340px; /* Increased from 300px */
   }
   
   .card-content {
@@ -383,7 +441,7 @@ const localCardSideOrder = computed({
 
 @media (max-width: 600px) {
   .flashcard {
-    height: 260px;
+    height: 300px; /* Increased from 260px */
   }
 
   .card-content {
@@ -397,5 +455,14 @@ const localCardSideOrder = computed({
   .progress-dots {
     max-width: 50%;
   }
+}
+
+/* Updated image styling - direct styling without container */
+.card-image {
+  border-radius: 8px;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+  transition: transform 0.3s ease;
+  align-self: center; /* Center the image */
+  object-fit: contain; /* Ensure image maintains proportions */
 }
 </style>

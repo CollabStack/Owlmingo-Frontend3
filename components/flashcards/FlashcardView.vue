@@ -127,6 +127,10 @@ const deckTitle = ref('');
 const deckId = ref('');
 const error = ref(null);
 
+// Initialize with empty objects to prevent errors before data loads
+flashcards.value = [{text: '', image: null}];
+backFlashcards.value = [{text: '', image: null}];
+
 // Explanation text for exam mode
 const explanationText = ref('This is a detailed explanation that helps you understand the correct answer. It provides additional context about why this answer is correct and what concepts are involved.');
 
@@ -175,8 +179,17 @@ const loadFlashcardDeck = async (globalId) => {
       
       // Format the cards for display and make sure both front and back are populated
       if (deck.cards && deck.cards.length > 0) {
-        flashcards.value = deck.cards.map(card => card.front || '');
-        backFlashcards.value = deck.cards.map(card => card.back || '');
+        // Update to capture both text and image URLs
+        flashcards.value = deck.cards.map(card => ({
+          text: card.front || '',
+          image: card.frontImage || null
+        }));
+        
+        backFlashcards.value = deck.cards.map(card => ({
+          text: card.back || '',
+          image: card.backImage || null
+        }));
+        
         quizAnswers.value = deck.cards.map(card => card.back || '');
         cardIds.value = deck.cards.map(card => card._id || ''); // Store the actual card IDs
         
@@ -187,6 +200,9 @@ const loadFlashcardDeck = async (globalId) => {
         console.log("Sample card ID:", cardIds.value[0]);
       } else {
         error.value = 'This flashcard deck has no cards';
+        // Initialize with empty arrays to prevent errors
+        flashcards.value = [{text: 'No cards available', image: null}];
+        backFlashcards.value = [{text: 'No cards available', image: null}];
       }
       
       isShared.value = deck.isPublic || false;
@@ -201,6 +217,9 @@ const loadFlashcardDeck = async (globalId) => {
   } catch (err) {
     console.error('Error loading flashcard deck:', err);
     error.value = err.message || 'An error occurred while loading the flashcard deck';
+    // Initialize with empty arrays to prevent errors
+    flashcards.value = [{text: 'Error loading cards', image: null}];
+    backFlashcards.value = [{text: 'Error loading cards', image: null}];
   } finally {
     loading.value = false;
   }
@@ -367,27 +386,12 @@ const submitAnswer = async () => {
         }
       }
     } else {
-      // Fallback to simple evaluation if API call fails
-      const isCorrect = userAnswer.value.trim().toLowerCase() === 
-        quizAnswers.value[currentIndex.value].toLowerCase();
-
-      if (isCorrect) {
+      // Simple feedback if API call fails
+      if (userAnswer.value.toLowerCase() === backFlashcards.value[currentIndex.value].text.toLowerCase()) {
         feedback.value = '🎉 Correct! Well done!';
       } else {
         feedback.value = '❌ Not quite right.';
       }
-    }
-  } catch (err) {
-    console.error('Error evaluating answer:', err);
-    
-    // Fallback evaluation
-    const isCorrect = userAnswer.value.trim().toLowerCase() === 
-      quizAnswers.value[currentIndex.value].toLowerCase();
-
-    if (isCorrect) {
-      feedback.value = '🎉 Correct! Well done!';
-    } else {
-      feedback.value = '❌ Not quite right.';
     }
   } finally {
     answerSubmitted.value = true;

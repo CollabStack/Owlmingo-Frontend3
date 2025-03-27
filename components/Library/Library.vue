@@ -414,6 +414,7 @@ const itemTagColor = ref('#4CAF50');
 const deletingSummaryId = ref(null);
 const deletingFlashcardId = ref(null);
 
+// Update the onMounted hook to use caching
 onMounted(async () => {
   const savedTags = localStorage.getItem('tags');
   if (savedTags) {
@@ -424,8 +425,8 @@ onMounted(async () => {
   isLoadingFlashcards.value = true;
   
   try {
-    // Fetch flashcard decks from API
-    const flashcardResult = await flashcardStore.getDecks();
+    // Use the cached data if available (forceRefresh=false)
+    const flashcardResult = await flashcardStore.getDecks(false);
     if (flashcardResult.success) {
       // Map the API response to match the format expected by FlashcardsSection
       flashcards.value = flashcardResult.data.map(deck => ({
@@ -866,7 +867,8 @@ const refreshSummaries = async () => {
 const refreshFlashcards = async () => {
   isLoadingFlashcards.value = true;
   try {
-    const flashcardResult = await flashcardStore.getDecks(true); // Force refresh
+    // Force a refresh from the API by passing true
+    const flashcardResult = await flashcardStore.getDecks(true);
     if (flashcardResult.success) {
       flashcards.value = flashcardResult.data.map(deck => ({
         id: deck.globalId || deck._id,

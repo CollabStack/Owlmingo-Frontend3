@@ -11,6 +11,9 @@ export const useFlashcardStore = defineStore('flashcardStore', {
     loading: false,
     currentCard: null,
     sessions: [],
+    // Add new state properties for caching
+    lastFetchTime: null,
+    cacheDuration: 5 * 60 * 1000, // 5 minutes cache by default
   }),
   
   actions: {
@@ -79,6 +82,10 @@ export const useFlashcardStore = defineStore('flashcardStore', {
         const response = await $UserPrivateAxios.post('/flashcards/generate', requestData);
         
         this.currentDeck = response.data.data;
+        
+        // After generating new flashcards, invalidate the cache
+        this.lastFetchTime = null;
+        
         return { authenticated: true, success: true, data: response.data.data };
       } catch (error) {
         console.error('Flashcard generation error:', error);
@@ -101,13 +108,31 @@ export const useFlashcardStore = defineStore('flashcardStore', {
     /**
      * Get all flashcard decks for the current user
      * @param {Object} params - Query parameters for filtering, sorting, etc.
+     * @param {Boolean} forceRefresh - Whether to force a refresh from API
      */
-    async getDecks(params = {}) {
+    async getDecks(forceRefresh = false, params = {}) {
       const authStore = userAuth();
       const { $UserPrivateAxios } = useNuxtApp();
       
       if (!authStore.isLoggedIn) {
         return { authenticated: false };
+      }
+      
+      // Check if we have cached data and it's still valid
+      const now = Date.now();
+      const isCacheValid = this.lastFetchTime && 
+                          (now - this.lastFetchTime) < this.cacheDuration;
+      
+      // Return cached data if it exists and is still valid, unless forceRefresh is true
+      if (!forceRefresh && isCacheValid && this.decks.length > 0) {
+        console.log('Using cached flashcard data');
+        return { 
+          authenticated: true, 
+          success: true, 
+          data: this.decks, 
+          count: this.decks.length,
+          cached: true
+        };
       }
       
       this.loading = true;
@@ -116,11 +141,16 @@ export const useFlashcardStore = defineStore('flashcardStore', {
         // Remove duplicate 'auth/' from URL path
         const response = await $UserPrivateAxios.get('/flashcards', { params });
         this.decks = response.data.data.flashCards;
+        
+        // Update the last fetch time
+        this.lastFetchTime = Date.now();
+        
         return { 
           authenticated: true, 
           success: true, 
           data: this.decks, 
-          count: response.data.data.count 
+          count: response.data.data.count,
+          cached: false
         };
       } catch (error) {
         console.error('Error fetching flashcard decks:', error);
@@ -218,6 +248,9 @@ export const useFlashcardStore = defineStore('flashcardStore', {
         if (this.currentDeck && this.currentDeck.globalId === globalId) {
           this.currentDeck = null;
         }
+        
+        // Invalidate cache after deleting
+        this.lastFetchTime = null;
         
         return { authenticated: true, success: true };
       } catch (error) {
@@ -383,7 +416,7 @@ export const useFlashcardStore = defineStore('flashcardStore', {
         return { 
           authenticated: true, 
           success: false, 
-          error: 'Side must be either "front" or "back"' 
+          error: `Side must be either "front" or "back", received "${side}"` 
         };
       }
       
@@ -393,6 +426,9 @@ export const useFlashcardStore = defineStore('flashcardStore', {
         const formData = new FormData();
         formData.append('file', imageFile);
         
+        // Debug log the upload request
+        console.log(`Uploading image for card ${cardId}, side: ${side}, file type: ${imageFile.type}, file size: ${imageFile.size} bytes`);
+        
         // Remove duplicate 'auth/' from URL path
         const response = await $UserPrivateAxios.post(
           `/flashcards/${globalId}/cards/${cardId}/images/${side}`,
@@ -400,14 +436,22 @@ export const useFlashcardStore = defineStore('flashcardStore', {
           { headers: { 'Content-Type': 'multipart/form-data' } }
         );
         
+        // Debug log the response
+        console.log('Image upload response:', response.data);
+        
         // Update current deck if applicable
-        if (this.currentDeck && this.currentDeck.globalId === globalId) {
+        if (this.currentDeck && (this.currentDeck._id === globalId || this.currentDeck.globalId === globalId)) {
           this.currentDeck = response.data.data;
         }
         
         return { authenticated: true, success: true, data: response.data.data };
       } catch (error) {
         console.error(`Error uploading ${side} image for card ${cardId}:`, error);
+        // Enhanced error logging
+        if (error.response) {
+          console.error('Response status:', error.response.status);
+          console.error('Response data:', error.response.data);
+        }
         this.error = error.response?.data?.message || `Failed to upload ${side} image`;
         return { authenticated: true, success: false, error: this.error };
       } finally {
@@ -577,6 +621,13 @@ export const useFlashcardStore = defineStore('flashcardStore', {
         this.error = error.response?.data?.message || 'Failed to fetch shared flashcard';
         return { success: false, error: this.error };
       }
+    },
+    
+    /**
+     * Invalidate cache to force refresh on next fetch
+     */
+    invalidateCache() {
+      this.lastFetchTime = null;
     },
     
     clearCurrentDeck() {

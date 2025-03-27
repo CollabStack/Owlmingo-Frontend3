@@ -31,6 +31,7 @@
             bg-color="white"
             hide-details
             clearable
+            :disabled="loading"
           ></v-text-field>
           <p class="text-caption text-grey-darken-2 outfit outfit-regular mt-2 d-flex align-center">
             <v-icon size="small" color="grey-darken-1" class="me-1">mdi-information-outline</v-icon>
@@ -39,7 +40,14 @@
         </v-card-text>
       </v-card>
     </v-container>
-    <v-container v-motion-slide-visible-bottom>
+    <v-container v-if="loading" v-motion-slide-visible-bottom>
+      <v-skeleton-loader
+        v-if="loading"
+        type="card, card, card"
+        class="mb-4"
+      ></v-skeleton-loader>
+    </v-container>
+    <v-container v-else-if="flashcards.length" v-motion-slide-visible-bottom>
       <draggable 
         v-model="flashcards" 
         tag="div" 
@@ -127,8 +135,14 @@
                         accept="image/*"
                         hidden
                       />
+                      <!-- Show loading indicator when uploading -->
+                      <div v-if="imageLoadingStates[index]?.front" class="upload-loading-container">
+                        <v-progress-circular indeterminate color="primary" size="30"></v-progress-circular>
+                        <span class="upload-loading-text outfit outfit-medium mt-2">Uploading...</span>
+                      </div>
+                      <!-- Show image if available -->
                       <v-img 
-                        v-if="flashcard.frontImage" 
+                        v-else-if="flashcard.frontImage" 
                         :src="flashcard.frontImage" 
                         contain 
                         height="120"
@@ -136,6 +150,7 @@
                         class="image-preview"
                         @click.stop="previewImage(flashcard.frontImage)"
                       />
+                      <!-- Default upload placeholder -->
                       <div v-else class="upload-placeholder">
                         <v-icon size="36" color="primary" class="upload-icon">mdi-image-plus</v-icon>
                         <span class="upload-text outfit outfit-medium">Add Image</span>
@@ -183,8 +198,14 @@
                         accept="image/*"
                         hidden
                       />
+                      <!-- Show loading indicator when uploading -->
+                      <div v-if="imageLoadingStates[index]?.back" class="upload-loading-container">
+                        <v-progress-circular indeterminate color="primary" size="30"></v-progress-circular>
+                        <span class="upload-loading-text outfit outfit-medium mt-2">Uploading...</span>
+                      </div>
+                      <!-- Show image if available -->
                       <v-img 
-                        v-if="flashcard.backImage" 
+                        v-else-if="flashcard.backImage" 
                         :src="flashcard.backImage" 
                         contain 
                         height="120"
@@ -192,6 +213,7 @@
                         class="image-preview"
                         @click.stop="previewImage(flashcard.backImage)"
                       />
+                      <!-- Default upload placeholder -->
                       <div v-else class="upload-placeholder">
                         <v-icon size="36" color="primary" class="upload-icon">mdi-image-plus</v-icon>
                         <span class="upload-text outfit outfit-medium">Add Image</span>
@@ -243,7 +265,7 @@
         </v-btn>
       </v-card>
     </v-container>
-    <v-container class="text-center pb-10" v-if="flashcards.length" v-motion-slide-visible-bottom>
+    <v-container class="text-center pb-10" v-if="flashcards.length && !loading" v-motion-slide-visible-bottom>
       <v-btn 
         color="primary" 
         class="animated-btn outfit outfit-medium px-6 py-2" 
@@ -314,6 +336,9 @@ const saving = ref(false);
 const editMode = ref(false);
 const globalId = ref(null);
 
+// Add a new ref to track loading state for individual images
+const imageLoadingStates = ref({});
+
 // Check if we're editing an existing deck or creating a new one
 onMounted(async () => {
   // Check if we have a deck ID in the query parameters
@@ -377,7 +402,10 @@ const loadFlashcardDeck = async (id) => {
     // Start with an empty card
     addFlashcard();
   } finally {
-    loading.value = false;
+    // Add a small delay to make the transition smoother
+    setTimeout(() => {
+      loading.value = false;
+    }, 300);
   }
 };
 
@@ -478,26 +506,61 @@ const onImageChange = async (event, index, side) => {
     return;
   }
   
+  // For debugging
+  console.log(`Uploading image for side: ${side}, file type: ${file.type}, size: ${file.size} bytes`);
+  
+  // Set loading state for specific image
+  if (!imageLoadingStates.value[index]) {
+    imageLoadingStates.value[index] = {};
+  }
+  imageLoadingStates.value[index][side] = true;
+  
   try {
     if (editMode.value && flashcards.value[index]._id) {
       // If we're editing an existing card, upload the image directly to the API
-      loading.value = true;
+      // Note: No need to set the global loading.value = true here anymore
+      
+      // Upload the image directly with the correct side parameter
       const result = await flashcardStore.uploadCardImage(
         globalId.value,
         flashcards.value[index]._id,
         file,
-        side === 'frontImage' ? 'front' : 'back'
+        side // Use 'front' or 'back' directly as passed from the template
       );
       
       if (result.success) {
         // Update the card image with the URL from the API
         if (result.data && result.data.cards) {
           const updatedCard = result.data.cards.find(c => c._id === flashcards.value[index]._id);
+          console.log("Found updated card:", updatedCard);
+          
           if (updatedCard) {
-            flashcards.value[index][side] = side === 'frontImage' 
-              ? updatedCard.frontImage 
-              : updatedCard.backImage;
+            // In our local state, we use sideImage (frontImage or backImage)
+            const imageField = `${side}Image`;
+            
+            // Make sure we're getting the correct property from the API response
+            // Some APIs might return frontImage/backImage, others might return front_image/back_image
+            // or just have the URLs directly on the side properties
+            let imageUrl = null;
+            if (updatedCard[imageField]) {
+              imageUrl = updatedCard[imageField];
+            } else if (updatedCard[`${side}_image`]) {
+              imageUrl = updatedCard[`${side}_image`];
+            } else if (updatedCard[side]) {
+              imageUrl = updatedCard[side];
+            }
+            
+            if (imageUrl) {
+              flashcards.value[index][imageField] = imageUrl;
+              console.log(`Updated ${imageField} with URL:`, imageUrl);
+            } else {
+              console.warn(`Could not find image URL for ${side} in the response:`, updatedCard);
+            }
+          } else {
+            console.error("Could not find card with ID", flashcards.value[index]._id, "in response");
           }
+        } else {
+          console.error("Unexpected response format:", result.data);
         }
         
         showMessage('Image uploaded successfully');
@@ -508,7 +571,10 @@ const onImageChange = async (event, index, side) => {
       // For new cards or offline mode, use local storage
       const reader = new FileReader();
       reader.onload = (e) => {
-        flashcards.value[index][side] = e.target.result;
+        // Set the correct image property based on side
+        const imageField = `${side}Image`;
+        flashcards.value[index][imageField] = e.target.result;
+        
         if (!editMode.value) {
           saveFlashcards();
         }
@@ -520,7 +586,10 @@ const onImageChange = async (event, index, side) => {
     console.error('Error uploading image:', err);
     showMessage(`Error uploading image: ${err.message || 'Unknown error'}`);
   } finally {
-    loading.value = false;
+    // Clear loading state for specific image
+    if (imageLoadingStates.value[index]) {
+      imageLoadingStates.value[index][side] = false;
+    }
   }
 };
 
@@ -1044,7 +1113,47 @@ const showMessage = (message) => {
   opacity: 0;
   transform: translateY(30px);
 }
+
+/* Fade in animation for content after loading */
+.fade-in {
+  animation: fadeIn 0.5s ease;
+}
+
+@keyframes fadeIn {
+  from { opacity: 0; }
+  to { opacity: 1; }
+}
+
+/* Responsive skeleton adjustments */
+@media (max-width: 600px) {
+  .skeleton-image-container {
+    margin-right: 0;
+    margin-bottom: 12px;
+    width: 100%;
+    display: flex;
+    justify-content: center;
+  }
+  
+  .skeleton-image {
+    width: 100%;
+    max-width: 200px;
+  }
+}
+
+/* Add styling for the loading container */
+.upload-loading-container {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  width: 100%;
+  height: 100%;
+  min-height: 120px;
+}
+
+.upload-loading-text {
+  font-size: 0.9rem;
+  color: rgba(123, 131, 224, 0.8);
+  margin-top: 8px;
+}
 </style>
-
-
-

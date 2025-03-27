@@ -6,7 +6,7 @@
       <div class="exam-mode">
         <!-- Header with cleaner styling -->
         <div class="text-center mb-8">
-          <h2 class="text-h5 outfit outfit-semibold mb-2 gradient-text-alt">Exam Mode</h2>
+          <h2 class="text-h5 outfit outfit-semibold mb-2" style="background: linear-gradient(135deg, purple, purple); -webkit-background-clip: text; background-clip: text; -webkit-text-fill-color: transparent;">Exam Mode</h2>
           <p class="text-body-2 text-grey-darken-1 outfit outfit-regular">
             Test your knowledge by answering the questions
           </p>
@@ -23,8 +23,37 @@
           :key="'question-' + currentIndex"
         >
           <div class="card-face exam-question-face">
+            <!-- Show image if available - directly without container -->
+            <v-img 
+              v-if="flashcards?.[currentIndex]?.image" 
+              :src="flashcards[currentIndex].image" 
+              alt="Question Image" 
+              class="card-image mb-4"
+              :aspect-ratio="16/9"
+              eager
+              max-height="200"
+              width="95%"
+            >
+              <!-- Loading overlay -->
+              <template v-slot:placeholder>
+                <div class="d-flex align-center justify-center fill-height">
+                  <v-progress-circular 
+                    indeterminate 
+                    color="primary"
+                    size="30"
+                  ></v-progress-circular>
+                </div>
+              </template>
+              
+              <!-- Error handling -->
+              <template v-slot:error>
+                <div class="d-flex align-center justify-center fill-height">
+                  <v-icon color="error">mdi-image-off</v-icon>
+                </div>
+              </template>
+            </v-img>
             <div class="card-content outfit outfit-medium">
-              {{ flashcards[currentIndex] }}
+              {{ flashcards?.[currentIndex]?.text || 'Loading...' }}
             </div>
           </div>
         </v-card>
@@ -326,7 +355,7 @@ const localUserAnswer = computed({
 
 /* Exam flashcard styling */
 .flashcard-exam {
-  height: 280px;
+  height: 320px; /* Increased from 280px */
   transition: all 0.4s cubic-bezier(0.34, 1.56, 0.64, 1);
   border-radius: 16px;
   max-width: 650px;
@@ -589,7 +618,7 @@ const localUserAnswer = computed({
 /* Responsive design for mobile */
 @media (max-width: 960px) {
   .flashcard-exam {
-    height: 250px;
+    height: 290px; /* Increased from 250px */
   }
   
   .exam-question-face .card-content {
@@ -599,7 +628,7 @@ const localUserAnswer = computed({
 
 @media (max-width: 600px) {
   .flashcard-exam {
-    height: 230px;
+    height: 270px; /* Increased from 230px */
   }
   
   .exam-question-face .card-content {
@@ -618,5 +647,18 @@ const localUserAnswer = computed({
   .exam-nav-btn {
     width: 100%;
   }
+}
+
+/* Updated image styling - direct styling without container */
+.card-image {
+  border-radius: 8px;
+  box-shadow: 0 2px 8px rgba(123, 131, 224, 0.15);
+  transition: transform 0.3s ease;
+  align-self: center; /* Center the image */
+  object-fit: contain; /* Ensure image maintains proportions */
+}
+
+.exam-question-face:hover .card-image {
+  transform: scale(1.03);
 }
 </style>

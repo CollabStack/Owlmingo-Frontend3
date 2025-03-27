@@ -11,7 +11,7 @@
                             :key="index"
                             :to="item.route"
                             class="custom-tab"
-                            :class="{ 'active-tab': activeTab === item.route }"
+                            :class="{ 'active-tab': isActiveRoute(item.route) }"
                             @click="setActive(item.route)"
                         >
                             {{ item.label }}
@@ -69,7 +69,7 @@
 </template>
 
 <script setup lang="ts">
-import { ref, watch } from 'vue';
+import { ref, watch, computed } from 'vue';
 import { useRoute, useRouter } from 'vue-router';
 import { userAuth } from '~/store/userAuth';
 
@@ -94,21 +94,45 @@ const isLoggedIn = computed(() => {
     return authStore.isLoggedIn;
 });
 
+/* ========== METHODS ==========*/
+// Function to check if a route is active (including nested routes)
+function isActiveRoute(tabRoute: string): boolean {
+    if (tabRoute === '/') {
+        // For home route, only match exact path
+        return route.path === '/';
+    }
+    // For other routes, check if the current path starts with this route
+    return route.path.startsWith(tabRoute);
+}
+
+function setActive(tab: string) {
+    activeTab.value = tab;
+    router.push(tab);
+}
+
 /* ========== WATCH ==========*/
 watch(() => route.path, (newPath) => {
-    activeTab.value = newPath;
+    // Update activeTab based on the route path
+    for (const tab of tabs) {
+        if (isActiveRoute(tab.route)) {
+            activeTab.value = tab.route;
+            break;
+        }
+    }
 });
 
 /* ========== MOUNTED ==========*/
 onMounted(() => {
     authStore.initializeSession();
+    
+    // Set the initial active tab based on the current route
+    for (const tab of tabs) {
+        if (isActiveRoute(tab.route)) {
+            activeTab.value = tab.route;
+            break;
+        }
+    }
 });
-/* ========== METHODS ==========*/
-function setActive(tab: string) {
-  if (activeTab.value === tab) return; // Prevent redundant navigation
-  activeTab.value = tab;
-  router.push(tab);
-}
 
 function logout() {
   authStore.logout();
@@ -117,7 +141,6 @@ function logout() {
         window.location.reload();
     });
 }
-
 </script>
 
 <style scoped>
