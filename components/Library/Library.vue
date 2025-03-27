@@ -26,6 +26,7 @@
 
     <QuizzesSection 
       :quizzes="quizzes"
+      :loading="isLoadingQuizzes"
       @edit-quiz="editQuiz"
       @start-quiz="startQuiz"
       @open-quiz-dialog="quizDialog = true"
@@ -345,12 +346,14 @@ import SummariesSection from './SummariesSection.vue';
 import { useSummaryStore } from '~/store/summaryStore';
 import { useFlashcardStore } from '~/store/flashcardStore';
 import { useRouter } from 'vue-router';
+
 import Swal from 'sweetalert2';
 
 // Router and stores
 const router = useRouter();
 const summaryStore = useSummaryStore();
 const flashcardStore = useFlashcardStore();
+
 
 // Tags management
 const tags = ref([]);
@@ -375,6 +378,7 @@ const summaryDialog = ref(false);
 const tagsDialog = ref(false);
 const deleteSummaryDialog = ref(false);
 const deleteFlashcardDialog = ref(false);
+
 
 // Content data
 const flashcards = ref([]);
@@ -415,12 +419,41 @@ const deletingSummaryId = ref(null);
 const deletingFlashcardId = ref(null);
 
 // Update the onMounted hook to use caching
-onMounted(async () => {
-  const savedTags = localStorage.getItem('tags');
-  if (savedTags) {
-    tags.value = JSON.parse(savedTags);
+=======
+// Sample data (Replace this with your actual data from API or store)
+const flashcards = ref([
+  {
+    id: 1,
+    title: "Biology Terms",
+    subtitle: "Science",
+    description: "Key biology terms and definitions covering cell biology and genetics",
+    cardCount: 15,
+    lastUpdated: "2 days ago",
+    tags: [{ name: "Biology", color: "#4CAF50" }]
+  },
+  {
+    id: 2,
+    title: "Spanish Vocabulary",
+    subtitle: "Language",
+    description: "Common Spanish words and phrases for beginners",
+    cardCount: 30,
+    lastUpdated: "5 days ago",
+    tags: [{ name: "Spanish", color: "#FFC107" }]
   }
+]);
+
+const summaryStore = useSummaryStore();
+const router = useRouter();
+const isLoadingSummaries = ref(false);
+const summaries = ref([]);
+
+const quizStore = useQuizStore();
+const isLoadingQuizzes = ref(false);
+const quizzes = ref([]);
+
+
   
+
   // Always show loading state initially for flashcards
   isLoadingFlashcards.value = true;
   
@@ -452,20 +485,39 @@ onMounted(async () => {
 
   // Load sample quiz data and apply saved tags
   applySavedTags(quizzes.value, 'quiz_tags');
+
   
   // Always show loading state initially for summaries
   isLoadingSummaries.value = true;
+  isLoadingQuizzes.value = true;
   
   try {
-    // Pass false to use cache if available
+    // Fetch quizzes from API
+    const quizResult = await quizStore.fetchQuizSessions();
+    if (quizResult.success) {
+      quizzes.value = quizStore.quizzes;
+      
+      // Ensure each quiz has an id property for compatibility with existing code
+      quizzes.value.forEach(quiz => {
+        if (!quiz.id && quiz.quizId) {
+          quiz.id = quiz.quizId;
+        }
+      });
+      
+      // Apply saved tags to API-fetched quizzes
+      applySavedTags(quizzes.value, 'quiz_tags');
+    }
+  } catch (error) {
+    console.error('Error loading quizzes:', error);
+  } finally {
+    isLoadingQuizzes.value = false;
+  }
+  
+  try {
     const result = await summaryStore.fetchSummaries(false);
     if (result.success) {
       summaries.value = result.data;
-      
-      // Apply saved tags to API-fetched summaries
       applySavedTags(summaries.value, 'summary_tags');
-    } else if (!result.authenticated) {
-      console.log('Authentication required to fetch summaries');
     }
   } catch (error) {
     console.error('Error loading summaries:', error);
@@ -557,12 +609,14 @@ const viewFlashcard = (id) => {
 // Quiz action handlers
 const editQuiz = (id) => {
   console.log(`Editing quiz with ID: ${id}`);
-  // Implement navigation to edit quiz page
+  // Navigate to the quiz edit page for the first question
+  // You can later enhance this to navigate to a question selection screen
+  router.push(`/quiz/edit/${id}/question/0`);
 };
 
 const startQuiz = (id) => {
   console.log(`Starting quiz with ID: ${id}`);
-  // Implement navigation to quiz start page
+  router.push(`/quiz/do-quiz?id=${id}`);
 };
 
 // Summary action handlers
@@ -600,7 +654,8 @@ const openTagsDialog = (type, id) => {
   if (type === 'flashcard') {
     item = flashcards.value.find(card => card.id === id);
   } else if (type === 'quiz') {
-    item = quizzes.value.find(quiz => quiz.id === id);
+    // Check both id and quizId for compatibility
+    item = quizzes.value.find(quiz => quiz.id === id || quiz.quizId === id);
   } else if (type === 'summary') {
     item = summaries.value.find(summary => summary.id === id);
   }
@@ -688,7 +743,11 @@ const createAndAddTag = () => {
 const removeTagFromItem = ({ id, tagIndex }) => {
   // Find the item type and remove the tag
   const findAndRemoveTag = (items, type) => {
-    const itemIndex = items.findIndex(item => item.id === id);
+    // For quizzes, check both id and quizId
+    const itemIndex = type === 'quiz' 
+      ? items.findIndex(item => item.id === id || item.quizId === id)
+      : items.findIndex(item => item.id === id);
+      
     if (itemIndex !== -1 && items[itemIndex].tags && items[itemIndex].tags[tagIndex]) {
       items[itemIndex].tags.splice(tagIndex, 1);
       
@@ -725,7 +784,11 @@ const saveQuizTags = () => {
   const tagMap = {};
   quizzes.value.forEach(quiz => {
     if (quiz.tags && quiz.tags.length > 0) {
-      tagMap[quiz.id] = quiz.tags;
+      // Use quizId if available, otherwise fall back to id
+      const idToUse = quiz.quizId || quiz.id;
+      if (idToUse) {
+        tagMap[idToUse] = quiz.tags;
+      }
     }
   });
   localStorage.setItem('quiz_tags', JSON.stringify(tagMap));
@@ -747,8 +810,10 @@ const applySavedTags = (items, storageKey) => {
     if (savedTags) {
       const tagMap = JSON.parse(savedTags);
       items.forEach(item => {
-        if (tagMap[item.id]) {
-          item.tags = tagMap[item.id];
+        // For quizzes, check the quizId first, then fallback to id
+        const idToCheck = (storageKey === 'quiz_tags' && item.quizId) ? item.quizId : item.id;
+        if (tagMap[idToCheck]) {
+          item.tags = tagMap[idToCheck];
         }
       });
     }

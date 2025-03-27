@@ -13,29 +13,33 @@
       </v-btn>
     </div>
 
-    <!-- Quiz Content -->
     <div>
-      <v-row v-if="quizzes.length > 0">
+      <v-skeleton-loader
+        v-if="loading"
+        type="card, card, card"
+        class="mb-4"
+      ></v-skeleton-loader>
+
+      <v-row v-else-if="quizzes.length > 0">
         <v-col cols="12" sm="6" md="4" v-for="(quiz, index) in quizzes" :key="index">
           <Card_Display
             type="quiz"
-            :title="quiz.title"
-            :description="quiz.description"
-            :subtitle="quiz.subtitle"
-            :item-count="quiz.questionCount"
-            :last-updated="quiz.lastUpdated"
-            :tags="quiz.tags"
+            :title="quiz.title || 'Untitled Quiz'"
+            :description="getQuizDescription(quiz)"
+            :subtitle="getQuizStatus(quiz)"
+            :item-count="quiz.totalQuestions || 0"
+            :last-updated="formatDate(quiz.createdAt)"
+            :tags="quiz.tags || []"
             :index="index"
-            :id="quiz.id"
-            @edit="$emit('edit-quiz', quiz.id)"
-            @action="$emit('start-quiz', quiz.id)"
-            @editTags="$emit('open-tags-dialog', 'quiz', quiz.id)"
+            :id="quiz.quizId || quiz.id" 
+            @edit="$emit('edit-quiz', quiz.quizId || quiz.id)"
+            @action="$emit('start-quiz', quiz.quizId || quiz.id)"
+            @editTags="$emit('open-tags-dialog', 'quiz', quiz.quizId || quiz.id)"
             @removeTag="$emit('remove-tag-from-item', $event)"
           />
         </v-col>
       </v-row>
 
-      <!-- Empty State -->
       <v-card v-else class="pa-8 text-center rounded-lg empty-state">
         <v-icon size="64" color="purple" class="mb-4">mdi-help-circle-outline</v-icon>
         <h3 class="text-h5 outfit outfit-semibold mb-3">No quizzes yet</h3>
@@ -75,6 +79,10 @@ defineProps({
   quizzes: {
     type: Array,
     required: true
+  },
+  loading: {
+    type: Boolean,
+    default: false
   }
 });
 
@@ -85,4 +93,32 @@ defineEmits([
   'open-tags-dialog',
   'remove-tag-from-item'
 ]);
+
+const formatDate = (dateString) => {
+  if (!dateString) return 'Unknown date';
+  const date = new Date(dateString);
+  return date.toLocaleDateString('en-US', {
+    year: 'numeric',
+    month: 'short',
+    day: 'numeric'
+  });
+};
+
+const getQuizDescription = (quiz) => {
+  if (quiz.description) return quiz.description;
+  let description = `Quiz with ${quiz.totalQuestions || 0} questions`;
+  if (quiz.status === 'completed') {
+    description += `, Score: ${quiz.score || 0}%`;
+  }
+  return description;
+};
+
+const getQuizStatus = (quiz) => {
+  switch(quiz.status) {
+    case 'completed': return 'Completed';
+    case 'in_progress': return 'In Progress';
+    case 'not_started': return 'Not Started';
+    default: return quiz.subtitle || 'Quiz';
+  }
+};
 </script>

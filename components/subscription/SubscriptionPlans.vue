@@ -1,28 +1,10 @@
 <template>
   <v-container class="text-center">
-    <div v-motion :initial="{ opacity: 0, y: 30 }" :enter="{ opacity: 1, y: 0, transition: { duration: 600 } }">
+    <div v-motion :initial="{ opacity: 0, y: 30 }" :enter="{ opacity: 1, y: 0, transition: { duration: 600 } }" class="mb-10">
       <h2 class="text-h5 font-weight-bold gradient-text-alt outfit outfit-bold">{{ title }}</h2>
       <p class="text-body-2 text-grey-darken-1 outfit outfit-regular mb-5">
         {{ description }}
       </p>
-    </div>
-
-    <!-- School & Work Toggle with animation -->
-    <div v-motion :initial="{ opacity: 0, scale: 0.95 }" :enter="{ opacity: 1, scale: 1, transition: { delay: 200, duration: 500 } }">
-      <v-btn-toggle v-model="selectedTab" class="mt-3 bg-grey-lighten-3 rounded-pill pa-1 toggle-container" density="compact" mandatory>
-        <v-btn value="school" class="rounded-pill toggle-btn" :class="{
-            'bg-secondary text-white toggle-btn-active': selectedTab === 'school',
-            'bg-transparent text-black': selectedTab !== 'school'
-        }" size="small">
-          School
-        </v-btn>
-        <v-btn value="work" class="rounded-pill toggle-btn" :class="{
-            'bg-secondary text-white toggle-btn-active': selectedTab === 'work',
-            'bg-transparent text-black': selectedTab !== 'work'
-        }" size="small">
-          Work
-        </v-btn>
-      </v-btn-toggle>
     </div>
 
     <v-row class="mt-6 justify-center">
@@ -53,30 +35,6 @@
               </p>
             </div>
 
-            <!-- v-btn-toggle with smooth animation -->
-            <transition name="fade" mode="out-in">
-              <v-btn-toggle
-                v-if="selectedTab === 'work'"
-                v-model="selectedTypes[plan.name]"
-                class="mt-2 bg-grey-lighten-3 rounded-pill pa-1 inner-toggle-container"
-                density="compact"
-                mandatory
-              >
-                <v-btn class="rounded-pill toggle-btn" size="small" value="annual" :class="{
-                  'bg-grey-lighten-2 text-black toggle-btn-active': selectedTypes[plan.name] === 'annual',
-                  'bg-transparent text-black': selectedTypes[plan.name] !== 'annual'
-                }">
-                  Annual
-                </v-btn>
-                <v-btn class="rounded-pill toggle-btn" size="small" value="month" :class="{
-                  'bg-grey-lighten-2 text-black toggle-btn-active': selectedTypes[plan.name] === 'month',
-                  'bg-transparent text-black': selectedTypes[plan.name] !== 'month'
-                }">
-                  Month
-                </v-btn>
-              </v-btn-toggle>
-            </transition>
-
             <!-- Features List with animation -->
             <v-list class="text-left feature-list">
               <v-list-item 
@@ -97,15 +55,9 @@
                 </v-list-item-content>
               </v-list-item>
             </v-list>
+            <div  class="mb-10">
 
-            <!-- For School Tab: See Work Plans Link -->
-            <p v-if="selectedTab === 'school'" class="text-h7 mb-1 outfit outfit-regular">
-              See our
-              <a href="#" @click.prevent="selectedTab = 'work'" class="text-decoration-none link-hover" style="color: blue;">
-                work plans
-              </a>
-              for responses and other features for teachers and professionals.
-            </p>
+            </div>
 
             <!-- Subscribe Button with animation like home page -->
             <v-btn 
@@ -430,3 +382,4 @@ watch(selectedTab, (newValue) => {
   transform: translateY(10px);
 }
 </style>
+
