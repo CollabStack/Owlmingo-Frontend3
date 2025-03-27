@@ -1,85 +1,119 @@
 <template>
-    <v-container class="mb-16">
-        <v-row align="center" justify="space-between" class="mt-4">
-            <!-- Title and Subtitle -->
-            <v-col cols="3">
-                <p class="text-h5 font-weight-bold outfit">Completed</p>
-                <p class="text-body-2 text-grey-darken-2">The quizzes completed by you</p>
-            </v-col>
+    <v-container class="py-8">
+        <div v-motion :initial="{ opacity: 0, y: 20 }" :enter="{ opacity: 1, y: 0, transition: { duration: 600 } }">
+            <v-row align="center" justify="space-between" class="mb-6">
+                <!-- Title and Subtitle -->
+                <v-col cols="12" md="7">
+                    <h1 class="text-h4 outfit outfit-bold text-primary mb-2">Quiz History</h1>
+                    <p class="text-subtitle-1 outfit outfit-regular text-grey-darken-1">
+                        Review all quizzes you've completed to track your progress
+                    </p>
+                </v-col>
 
-            <!-- Buttons -->
-            <v-col cols="auto">
-                <v-btn variant="outlined" color="blue" class="rounded-xl" @click="quizPage">Generate Quiz</v-btn>
-            </v-col>
-        </v-row>
+                <!-- Action Button -->
+                <v-col cols="12" md="5" class="d-flex justify-md-end mt-4 mt-md-0">
+                    <v-btn 
+                        color="primary" 
+                        variant="flat" 
+                        class="rounded-xl animated-btn outfit outfit-medium"
+                        prepend-icon="mdi-plus" 
+                        @click="quizPage"
+                    >
+                        Create New Quiz
+                    </v-btn>
+                </v-col>
+            </v-row>
+        </div>
 
         <!-- Loading State -->
         <div v-if="loading" class="text-center py-16">
             <v-progress-circular indeterminate color="primary" size="64"></v-progress-circular>
-            <p class="text-h6 mt-6">Loading your quiz history...</p>
+            <p class="text-h6 mt-6 outfit outfit-medium">Loading your quiz history...</p>
         </div>
 
         <!-- Error State -->
         <div v-else-if="error" class="text-center py-16">
             <v-icon color="error" size="64">mdi-alert-circle</v-icon>
-            <h2 class="text-h5 mt-4">{{ error }}</h2>
-            <v-btn color="primary" class="mt-6" @click="fetchQuizHistory">Try Again</v-btn>
+            <h2 class="text-h5 mt-4 outfit outfit-medium">{{ error }}</h2>
+            <v-btn color="primary" class="mt-6 rounded-xl animated-btn" @click="fetchQuizHistory">Try Again</v-btn>
         </div>
 
         <!-- No Quizzes State -->
-        <div v-else-if="quizzes.length === 0" class="text-center py-16">
-            <v-icon color="info" size="64">mdi-information-outline</v-icon>
-            <h2 class="text-h5 mt-4">No Quiz History Found</h2>
-            <p class="text-body-1 mt-2">You haven't completed any quizzes yet</p>
-            <v-btn color="primary" class="mt-6" @click="quizPage">Create Your First Quiz</v-btn>
+        <div v-else-if="quizzes.length === 0" class="text-center py-16" v-motion :initial="{ opacity: 0, y: 20 }" :enter="{ opacity: 1, y: 0 }">
+            <v-img src="/images/empty-history.png" alt="No Quiz History" max-height="200" class="mb-6 mx-auto" contain></v-img>
+            <h2 class="text-h5 outfit outfit-semibold mb-3">No Quiz History Found</h2>
+            <p class="text-body-1 text-grey-darken-1 mb-6 max-w-md mx-auto">
+                You haven't completed any quizzes yet. Create your first quiz to start tracking your progress.
+            </p>
+            <v-btn color="primary" variant="flat" class="rounded-xl animated-btn outfit outfit-medium" prepend-icon="mdi-plus" @click="quizPage">
+                Create Your First Quiz
+            </v-btn>
         </div>
 
-        <template v-else>
-            <!-- Table Header -->
-            <v-card class="mt-4 rounded-lg pa-4" elevation="0" color="grey-lighten-4">
-                <v-row no-gutters class="px-4">
-                    <v-col cols="3">
-                        <h2 class="text-body-1 font-weight-medium text-grey-darken-2">Lessons</h2>
-                    </v-col>
-                    <v-col cols="3">
-                        <h2 class="text-body-1 font-weight-medium text-grey-darken-2 ml-14">Date</h2>
-                    </v-col>
-                    <v-col cols="3">
-                        <h2 class="text-body-1 font-weight-medium text-grey-darken-2 text-right mr-2">Score</h2>
-                    </v-col>
-                    <v-col cols="3" class="text-right">
-                        <h2 class="text-body-1 font-weight-medium text-grey-darken-2 mr-3">Actions</h2>
-                    </v-col>
-                </v-row>
-            </v-card>
+        <div v-else v-motion :initial="{ opacity: 0, y: 20 }" :enter="{ opacity: 1, y: 0, transition: { delay: 200 } }">
+            <!-- Search and Filter (Optional) -->
+            <div class="d-flex flex-wrap align-center mb-4">
+                <div class="text-body-1 outfit outfit-medium text-grey-darken-2">
+                    {{ quizzes.length }} {{ quizzes.length === 1 ? 'Quiz' : 'Quizzes' }} Completed
+                </div>
+                <v-spacer></v-spacer>
+            </div>
 
-            <!-- Table Content -->
-            <v-card 
-                v-for="quiz in quizzes" 
-                :key="quiz.quizId" 
-                class="mt-2 rounded-lg pa-4" 
-                elevation="0" 
-                color="grey-lighten-4"
-            >
-                <v-row no-gutters class="px-4 align-center">
-                    <v-col cols="3">
-                        <p class="text-body-2 font-weight-medium">{{ quiz.title || 'Untitled Quiz' }}</p>
-                    </v-col>
-                    <v-col cols="3">
-                        <p class="text-body-2 text-grey-darken-2">{{ formatDate(quiz.completedAt || quiz.createdAt) }}</p>
-                    </v-col>
-                    <v-col cols="3">
-                        <p class="text-body-2 font-weight-medium text-right">
-                            {{ quiz.correctAnswers || 0 }}/{{ quiz.totalQuestions || 0 }} 
-                            ({{ calculatePercentage(quiz.correctAnswers, quiz.totalQuestions) }}%)
-                        </p>
-                    </v-col>
-                    <v-col cols="3" class="text-right">
-                        <v-btn variant="outlined" color="blue" class="rounded-lg" @click="viewQuizResults(quiz.quizId)">View</v-btn>
-                    </v-col>
-                </v-row>
-            </v-card>
-        </template>
+            <!-- Quiz History Cards -->
+            <div class="history-list">
+                <v-card
+                    v-for="(quiz, index) in quizzes"
+                    :key="quiz.quizId"
+                    class="history-card mb-4 rounded-xl"
+                    elevation="0"
+                    variant="outlined"
+                    v-motion
+                    :initial="{ opacity: 0, y: 20 }"
+                    :enter="{ opacity: 1, y: 0, transition: { delay: 100 * index, duration: 500 } }"
+                >
+                    <div class="d-flex flex-column flex-md-row align-center pa-4">
+                        <!-- Quiz Info -->
+                        <div class="flex-grow-1">
+                            <div class="d-flex align-center">
+                                <v-icon color="primary" size="24" class="mr-2">mdi-file-document-outline</v-icon>
+                                <h3 class="text-h6 outfit outfit-medium text-truncate">{{ quiz.title || 'Untitled Quiz' }}</h3>
+                            </div>
+                            <p class="text-body-2 text-grey-darken-2 mt-1">
+                                Completed {{ formatDate(quiz.completedAt || quiz.createdAt) }}
+                            </p>
+                        </div>
+
+                        <!-- Quiz Score -->
+                        <div class="d-flex align-center mt-4 mt-md-0 ml-md-4">
+                            <div class="score-chip mr-4" :class="getScoreColorClass(calculatePercentage(quiz.correctAnswers, quiz.totalQuestions))">
+                                <span class="text-h6 outfit outfit-bold">{{ calculatePercentage(quiz.correctAnswers, quiz.totalQuestions) }}%</span>
+                            </div>
+                            <div class="mr-4 text-right">
+                                <div class="text-body-2 outfit outfit-medium">Score</div>
+                                <div class="text-body-2">{{ quiz.correctAnswers || 0 }}/{{ quiz.totalQuestions || 0 }}</div>
+                            </div>
+                            <v-btn
+                                variant="outlined"
+                                color="primary"
+                                class="rounded-xl animated-btn outfit outfit-medium ml-auto"
+                                @click="viewQuizResults(quiz.quizId)"
+                            >
+                                View Results
+                            </v-btn>
+                            <v-btn 
+                                color="secondary"
+                                variant="outlined"
+                                class="rounded-xl animated-btn outfit outfit-medium mr-2"
+                                prepend-icon="mdi-pencil"
+                                @click="reviewQuiz"
+                            >
+                                Review Quiz
+                            </v-btn>
+                        </div>
+                    </div>
+                </v-card>
+            </div>
+        </div>
     </v-container>
 </template>
 
@@ -106,16 +140,28 @@ const quizzes = ref<Quiz[]>([]);
 const loading = ref(true);
 const error = ref<string | null>(null);
 
-// Format date to readable string
+// Enhanced date formatter with more readable relative times
 const formatDate = (dateString: string): string => {
     if (!dateString) return 'N/A';
+    
     const date = new Date(dateString);
+    const now = new Date();
+    const diffTime = Math.abs(now.getTime() - date.getTime());
+    const diffDays = Math.floor(diffTime / (1000 * 60 * 60 * 24));
+    const diffHours = Math.floor(diffTime / (1000 * 60 * 60));
+    const diffMinutes = Math.floor(diffTime / (1000 * 60));
+    
+    // Show relative time for recent quizzes
+    if (diffMinutes < 5) return 'Just now';
+    if (diffMinutes < 60) return `${diffMinutes} minute${diffMinutes !== 1 ? 's' : ''} ago`;
+    if (diffHours < 24) return `${diffHours} hour${diffHours !== 1 ? 's' : ''} ago`;
+    if (diffDays < 7) return `${diffDays} day${diffDays !== 1 ? 's' : ''} ago`;
+    
+    // Use formatted date for older quizzes
     return date.toLocaleDateString('en-US', {
-        year: 'numeric', 
-        month: 'long', 
-        day: 'numeric',
-        hour: '2-digit',
-        minute: '2-digit'
+        year: 'numeric',
+        month: 'short',
+        day: 'numeric'
     });
 };
 
@@ -123,6 +169,14 @@ const formatDate = (dateString: string): string => {
 const calculatePercentage = (correct: number, total: number): number => {
     if (!total) return 0;
     return Math.round((correct / total) * 100);
+};
+
+// Helper to get appropriate color class based on score
+const getScoreColorClass = (score: number): string => {
+    if (score >= 80) return 'score-excellent';
+    if (score >= 60) return 'score-good';
+    if (score >= 40) return 'score-average';
+    return 'score-needs-work';
 };
 
 // Fetch quiz history from API and local store
@@ -266,6 +320,18 @@ const viewQuizResults = (quizId: string) => {
     router.push(`/quiz/results-quiz?id=${quizId}`);
 };
 
+const reviewQuiz = () => {
+    const lastQuizId = localStorage.getItem('lastQuizId');
+    if (lastQuizId) {
+        router.push({
+            path: '/library/review-quiz',
+            query: { id: lastQuizId }
+        });
+    } else {
+        router.push('/library/review-quiz');
+    }
+};
+
 // Fetch quiz history on component mount
 onMounted(() => {
     fetchQuizHistory();
@@ -275,7 +341,101 @@ onMounted(() => {
 <style scoped>
 @import url('https://fonts.googleapis.com/css2?family=Outfit:wght@100..900&display=swap');
 
+/* Outfit font classes */
 .outfit {
-    font-family: "Outfit", sans-serif;
+  font-family: "Outfit", sans-serif;
+  font-optical-sizing: auto;
+  font-style: normal;
+}
+
+.outfit-regular {
+  font-weight: 400;
+}
+
+.outfit-medium {
+  font-weight: 500;
+}
+
+.outfit-semibold {
+  font-weight: 600;
+}
+
+.outfit-bold {
+  font-weight: 700;
+}
+
+/* Card styling */
+.history-card {
+  transition: all 0.3s ease;
+  border: 1px solid #e0e0e0;
+}
+
+.history-card:hover {
+  transform: translateY(-3px);
+  box-shadow: 0 6px 15px rgba(0, 0, 0, 0.08) !important;
+  border-color: #9D7BFC50;
+}
+
+/* Score chip styling */
+.score-chip {
+  width: 70px;
+  height: 70px;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: white;
+}
+
+.score-excellent {
+  background-color: #4CAF50;
+  box-shadow: 0 3px 8px rgba(76, 175, 80, 0.3);
+}
+
+.score-good {
+  background-color: #8BC34A;
+  box-shadow: 0 3px 8px rgba(139, 195, 74, 0.3);
+}
+
+.score-average {
+  background-color: #FFC107;
+  box-shadow: 0 3px 8px rgba(255, 193, 7, 0.3);
+}
+
+.score-needs-work {
+  background-color: #F44336;
+  box-shadow: 0 3px 8px rgba(244, 67, 54, 0.3);
+}
+
+/* Animated button */
+.animated-btn {
+  transition: all 0.3s ease;
+  position: relative;
+  overflow: hidden;
+}
+
+.animated-btn::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: -100%;
+  width: 100%;
+  height: 100%;
+  background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.2), transparent);
+  transition: all 0.6s ease;
+}
+
+.animated-btn:hover::before {
+  left: 100%;
+}
+
+.animated-btn:hover {
+  transform: translateY(-3px);
+  box-shadow: 0 5px 15px rgba(0, 0, 0, 0.1);
+}
+
+/* Limit width for better readability */
+.max-w-md {
+  max-width: 500px;
 }
 </style>

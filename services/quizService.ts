@@ -97,15 +97,17 @@ async function generateQuizFromFile(fileId) {
 }
 
 /**
- * Generate a quiz based on the uploaded file
+ * Generate a quiz based on the uploaded file or processed text
  * @param {Object} params - Parameters for generating the quiz
  * @param {Blob} [params.documentBlob] - Document file blob
  * @param {File} [params.imageFile] - Image file
+ * @param {string} [params.textFileId] - ID of processed text
  * @returns {Promise<Object>} - Result of the quiz generation
  */
 export const generateQuiz = async ({
   documentBlob = null,
-  imageFile = null
+  imageFile = null,
+  textFileId = null
 }) => {
   const authStore = userAuth();
   const quizStore = useQuizStore();
@@ -124,7 +126,11 @@ export const generateQuiz = async ({
     // Process different types of content
     let quizResponse = null;
     
-    if (documentBlob) {
+    if (textFileId) {
+      // Use already processed text file ID directly
+      console.log('Using processed text file ID for quiz generation:', textFileId);
+      quizResponse = await generateQuizFromFile(textFileId);
+    } else if (documentBlob) {
       // Process the document to get fileId
       const ocrResponse = await processFile(documentBlob);
       console.log('OCR Document Response:', ocrResponse);

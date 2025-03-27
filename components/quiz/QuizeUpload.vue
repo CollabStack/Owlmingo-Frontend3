@@ -417,19 +417,81 @@ const handleGenerateQuiz = async () => {
           showSnackbar('Failed to prepare PDF for processing');
         }
       } else {
-        // Handle non-PDF documents directly
         console.log("Processing as non-PDF document");
         await generateQuiz({ documentBlob: documentFile.value });
       }
     } else if (imageFile.value) {
       console.log(`Processing image file: ${imageFile.value.name}, type: ${imageFile.value.type}`);
       await generateQuiz({ imageFile: imageFile.value });
+    } else if (textContent.value.trim()) {
+      // Process text content directly
+      console.log("Processing text content, length:", textContent.value.length);
+      await processTextAndGenerateQuiz(textContent.value);
     } else {
-      showSnackbar('Please select a file to generate a quiz');
+      showSnackbar('Please provide content to generate a quiz');
     }
   } catch (error) {
     console.error('Error in handleGenerateQuiz:', error);
     showSnackbar(error.message || 'Failed to process your request');
+  }
+};
+
+// New function to process text and generate quiz
+const processTextAndGenerateQuiz = async (text) => {
+  const authStore = userAuth();
+  
+  // Get fresh token before API request
+  const isValid = await authStore.checkTokenExpired();
+  if (!isValid) {
+    throw new Error('Authentication expired');
+  }
+  
+  let token = authStore.getToken();
+  if (!token) {
+    throw new Error('Authentication required');
+  }
+  
+  // Process text directly using the text processing endpoint
+  // Fixed URL path to include 'user' in the path structure
+  const processTextUrl = 'http://api.owlmingo.space/api/v1/user/auth/process-text';
+  console.log(`Processing text with endpoint: ${processTextUrl}`);
+  
+  const processResponse = await fetch(processTextUrl, {
+    method: 'POST',
+    headers: {
+      'Authorization': `Bearer ${token}`,
+      'Content-Type': 'application/json'
+    },
+    body: JSON.stringify({ text }),
+    credentials: 'include'
+  });
+  
+  if (!processResponse.ok) {
+    if (processResponse.status === 401) {
+      authStore.logout();
+      throw new Error('Authentication expired');
+    }
+    
+    const contentType = processResponse.headers.get('content-type');
+    if (contentType && contentType.includes('application/json')) {
+      const errorData = await processResponse.json();
+      throw new Error(errorData.message || 'Failed to process text');
+    } else {
+      throw new Error(`Server returned error (${processResponse.status})`);
+    }
+  }
+  
+  const textProcessResult = await processResponse.json();
+  console.log('Text processing result:', textProcessResult);
+  
+  if (textProcessResult.status === 'success' && textProcessResult.data && textProcessResult.data.id) {
+    const fileId = textProcessResult.data.id;
+    console.log('Text processed successfully, file ID:', fileId);
+    
+    // Now generate quiz with the processed text file ID
+    await generateQuiz({ textFileId: fileId });
+  } else {
+    throw new Error('Text processing did not return a valid file ID');
   }
 };
 </script>

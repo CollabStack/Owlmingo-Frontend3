@@ -11,7 +11,7 @@
                             :key="index"
                             :to="item.route"
                             class="custom-tab"
-                            :class="{ 'active-tab': activeTab === item.route }"
+                            :class="{ 'active-tab': isActiveRoute(item.route) }"
                             @click="setActive(item.route)"
                         >
                             {{ item.label }}
@@ -69,7 +69,7 @@
 </template>
 
 <script setup lang="ts">
-import { ref, watch } from 'vue';
+import { ref, watch, nextTick, onMounted, computed } from 'vue';
 import { useRoute, useRouter } from 'vue-router';
 import { userAuth } from '~/store/userAuth';
 
@@ -82,7 +82,7 @@ const tabs = [
     { label: 'Library', route: '/library' },
     { label: 'Flashcard', route: '/flashcard' },
     { label: 'Quiz', route: '/quiz' },
-    { label: 'Summary', route: '/summary' }, // Add this line
+    { label: 'Summary', route: '/summary' },
     { label: 'About', route: '/about' },
     { label: 'ColorView', route: '/color'},
 ];
@@ -97,17 +97,54 @@ const isLoggedIn = computed(() => {
 /* ========== WATCH ==========*/
 watch(() => route.path, (newPath) => {
     activeTab.value = newPath;
+    // Force component update in case route has changed without tab interaction
+    nextTick();
 });
 
 /* ========== MOUNTED ==========*/
 onMounted(() => {
     authStore.initializeSession();
+    // Set active tab based on current route
+    activeTab.value = route.path;
 });
 /* ========== METHODS ==========*/
 function setActive(tab: string) {
   if (activeTab.value === tab) return; // Prevent redundant navigation
   activeTab.value = tab;
   router.push(tab);
+}
+
+// Enhanced route matching function with cleaner organization
+function isActiveRoute(routePath: string) {
+  // 1. Special case for home route
+  if (routePath === '/' && (route.path === '/' || route.path === '')) {
+    return true;
+  }
+  
+  // 2. Check for exact match
+  if (route.path === routePath) {
+    return true;
+  }
+  
+  // 3. Specific parent/child route matching with optimized checks
+  if (routePath === '/quiz' && route.path.startsWith('/quiz/')) {
+    // Show Quiz tab as active when on any quiz subpage
+    return true;
+  }
+  
+  if (routePath === '/library' && route.path.startsWith('/library/')) {
+    // Show Library tab as active when on any library subpage
+    return true;
+  }
+  
+  // 4. Generic child path matching for any other sections
+  // (Only applies to routes not covered by cases above)
+  if (routePath !== '/' && 
+      route.path.startsWith(routePath + '/')) {
+    return true;
+  }
+  
+  return false;
 }
 
 function logout() {
@@ -125,27 +162,58 @@ function logout() {
     text-transform: none;
     font-size: 15px;
     font-weight: 400;
+    transition: all 0.3s ease;
+    position: relative;
+    opacity: 0.85;
+    height: 64px;
+    padding: 0 16px;
 }
 
-/* Active tab styling updated for consistency */
+.custom-tab:hover {
+    opacity: 1;
+}
+
+/* Simplified active tab styling to reduce conflicts with Vuetify */
 .active-tab {
-    color: var(--v-primary);
-    font-weight: bold;
-    border-bottom: 2px solid;
+    color: #9D7BFC !important; /* Primary purple color */
+    font-weight: 600;
+    opacity: 1;
 }
 
+/* Fix underline position for better alignment */
+.active-tab::after {
+    content: '';
+    position: absolute;
+    bottom: 0;
+    left: 0;
+    width: 100%;
+    height: 2px;
+    background-color: #9D7BFC;
+    transition: transform 0.3s ease;
+}
+
+/* Avoid using ::after for non-active tabs to prevent style conflicts */
+.tab-items {
+    padding: 0;
+    height: 64px;
+}
+
+/* Glassmorphism effect for navbar */
 .app-bar {
-    /* background-color: var(--v-theme-primary); */
-    box-shadow: none;
-    border-bottom: 1px solid #e0e0e0;
+    box-shadow: 0 1px 3px rgba(0, 0, 0, 0.08) !important;
+    border-bottom: 1px solid rgba(157, 123, 252, 0.1);
+    background-color: rgba(255, 255, 255, 0.95) !important;
+    backdrop-filter: blur(10px);
+    -webkit-backdrop-filter: blur(10px);
 }
 
 .logo {
     max-width: 100px;
+    transition: transform 0.3s ease;
 }
 
-.tab-items {
-    padding: 0;
+.logo:hover {
+    transform: scale(1.05);
 }
 
 .gap-x-20 {

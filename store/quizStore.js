@@ -353,8 +353,12 @@ export const useQuizStore = defineStore('quizStore', {
     
     /**
      * Fetch quiz sessions from the API and update history
+     * @param {boolean} force - Force refresh even if data exists
+     * @param {Object} options - Query options
+     * @param {string} [options.status] - Filter by status ("not_started", "in_progress", "completed")  
+     * @param {string} [options.sort] - Sort field and direction (default is "-startedAt") 
      */
-    async fetchQuizSessions() {
+    async fetchQuizSessions(force = false, options = {}) {
       const authStore = userAuth();
       const { $UserPrivateAxios } = useNuxtApp();
       
@@ -362,34 +366,57 @@ export const useQuizStore = defineStore('quizStore', {
         return { authenticated: false };
       }
       
+      // Return cached data if not forcing refresh and we have data
+      if (!force && this.quizzes.length > 0) {
+        return { authenticated: true, success: true, data: this.quizzes };
+      }
+      
       this.isLoading = true;
       
       try {
-        const endpoint = 'http://api.owlmingo.space/api/v1/user/auth/quiz/sessions';
+        // Build endpoint URL with query parameters
+        let endpoint = 'http://api.owlmingo.space/api/v1/user/auth/quiz/sessions';
+        
+        // Add query parameters if provided
+        const queryParams = new URLSearchParams();
+        if (options.status) queryParams.append('status', options.status);
+        if (options.sort) queryParams.append('sort', options.sort);
+        
+        // Append query string if there are parameters
+        const queryString = queryParams.toString();
+        if (queryString) {
+          endpoint += `?${queryString}`;
+        }
         
         const response = await $UserPrivateAxios.get(endpoint);
         
+        // Process response data
         if (response.data && response.data.sessions) {
           const apiSessions = response.data.sessions.map(session => ({
             quizId: session._id,
-            title: session.source?.fileName || 'Quiz',
-            createdAt: session.createdAt,
+            id: session._id, // For compatibility with existing code
+            title: session.source?.fileName || 'Untitled Quiz',
+            createdAt: session.startedAt || session.createdAt,
             completedAt: session.status === 'completed' ? session.updatedAt : null,
             correctAnswers: session.quiz?.correctCount || 0,
             totalQuestions: session.quiz?.totalQuestions || 0,
             score: session.quiz?.score || 0,
-            status: session.status,
+            status: session.status || 'not_started',
             source: session.source,
             timeSpent: session.timeSpent
           }));
           
+          // Merge with existing quizzes, preserving local data like tags
           const localQuizzes = [...this.quizzes];
           apiSessions.forEach(apiSession => {
             const existingIndex = localQuizzes.findIndex(q => q.quizId === apiSession.quizId);
             if (existingIndex >= 0) {
+              // Preserve local data like tags
+              const existingTags = localQuizzes[existingIndex].tags || [];
               localQuizzes[existingIndex] = {
                 ...localQuizzes[existingIndex],
-                ...apiSession
+                ...apiSession,
+                tags: existingTags
               };
             } else {
               localQuizzes.unshift(apiSession);
@@ -399,7 +426,12 @@ export const useQuizStore = defineStore('quizStore', {
           this.quizzes = localQuizzes;
           this.saveHistoryToLocalStorage();
           
-          return { authenticated: true, success: true, data: this.quizzes };
+          return { 
+            authenticated: true, 
+            success: true, 
+            data: this.quizzes, 
+            count: response.data.count || apiSessions.length 
+          };
         }
         
         return { authenticated: true, success: true, data: this.quizzes };

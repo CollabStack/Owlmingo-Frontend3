@@ -2,15 +2,40 @@
   <section class="mb-8">
     <div class="d-flex align-center justify-space-between mb-4">
       <h2 class="text-h5 outfit outfit-semibold">My Quizzes</h2>
-      <v-btn 
-        color="purple" 
-        class="rounded-lg action-btn outfit outfit-medium"
-        prepend-icon="mdi-plus"
-        @click="$emit('open-quiz-dialog')"
-        size="small"
-      >
-        Create
-      </v-btn>
+      
+      <div class="d-flex align-center">
+        <v-tooltip v-if="lastRefreshed" location="bottom">
+          <template v-slot:activator="{ props }">
+            <span class="text-caption text-grey me-3" v-bind="props">
+              <v-icon size="small" class="me-1">mdi-clock-outline</v-icon>
+              {{ formatRefreshTime(lastRefreshed) }}
+            </span>
+          </template>
+          <span>Last updated: {{ formatFullDateTime(lastRefreshed) }}</span>
+        </v-tooltip>
+        
+        <v-btn
+          icon
+          variant="text"
+          color="grey"
+          class="me-2"
+          @click="$emit('refresh-quizzes')"
+          :loading="loading"
+          :disabled="loading"
+        >
+          <v-icon>mdi-refresh</v-icon>
+        </v-btn>
+        
+        <v-btn 
+          color="purple" 
+          class="rounded-lg action-btn outfit outfit-medium"
+          prepend-icon="mdi-plus"
+          @click="$emit('open-quiz-dialog')"
+          size="small"
+        >
+          Create
+        </v-btn>
+      </div>
     </div>
 
     <div>
@@ -21,14 +46,14 @@
       ></v-skeleton-loader>
 
       <v-row v-else-if="quizzes.length > 0">
-        <v-col cols="12" sm="6" md="4" v-for="(quiz, index) in quizzes" :key="index">
+        <v-col cols="12" sm="6" md="4" v-for="(quiz, index) in quizzes" :key="quiz.quizId || quiz.id || index">
           <Card_Display
             type="quiz"
             :title="quiz.title || 'Untitled Quiz'"
             :description="getQuizDescription(quiz)"
             :subtitle="getQuizStatus(quiz)"
             :item-count="quiz.totalQuestions || 0"
-            :last-updated="formatDate(quiz.createdAt)"
+            :last-updated="formatDate(quiz.completedAt || quiz.createdAt)"
             :tags="quiz.tags || []"
             :index="index"
             :id="quiz.quizId || quiz.id" 
@@ -75,7 +100,7 @@
 <script setup>
 import Card_Display from './Card_Display.vue';
 
-defineProps({
+const props = defineProps({
   quizzes: {
     type: Array,
     required: true
@@ -83,6 +108,10 @@ defineProps({
   loading: {
     type: Boolean,
     default: false
+  },
+  lastRefreshed: {
+    type: Date,
+    default: null
   }
 });
 
@@ -91,12 +120,26 @@ defineEmits([
   'start-quiz',
   'open-quiz-dialog',
   'open-tags-dialog',
-  'remove-tag-from-item'
+  'remove-tag-from-item',
+  'refresh-quizzes'
 ]);
 
 const formatDate = (dateString) => {
   if (!dateString) return 'Unknown date';
   const date = new Date(dateString);
+  const now = new Date();
+  const diffTime = Math.abs(now.getTime() - date.getTime());
+  const diffDays = Math.floor(diffTime / (1000 * 60 * 60 * 24));
+  const diffHours = Math.floor(diffTime / (1000 * 60 * 60));
+  const diffMinutes = Math.floor(diffTime / (1000 * 60));
+  
+  // Show relative time for recent quizzes
+  if (diffMinutes < 5) return 'Just now';
+  if (diffMinutes < 60) return `${diffMinutes} minute${diffMinutes !== 1 ? 's' : ''} ago`;
+  if (diffHours < 24) return `${diffHours} hour${diffHours !== 1 ? 's' : ''} ago`;
+  if (diffDays < 7) return `${diffDays} day${diffDays !== 1 ? 's' : ''} ago`;
+  
+  // Use formatted date for older quizzes
   return date.toLocaleDateString('en-US', {
     year: 'numeric',
     month: 'short',
@@ -104,11 +147,43 @@ const formatDate = (dateString) => {
   });
 };
 
+const formatRefreshTime = (date) => {
+  if (!date) return '';
+  const now = new Date();
+  const diffTime = Math.abs(now.getTime() - date.getTime());
+  const diffMinutes = Math.floor(diffTime / (1000 * 60));
+  
+  if (diffMinutes < 1) return 'Just now';
+  if (diffMinutes < 60) return `${diffMinutes}m ago`;
+  
+  const diffHours = Math.floor(diffTime / (1000 * 60 * 60));
+  if (diffHours < 24) return `${diffHours}h ago`;
+  
+  return date.toLocaleDateString();
+};
+
+const formatFullDateTime = (date) => {
+  if (!date) return '';
+  return date.toLocaleString('en-US', {
+    year: 'numeric',
+    month: 'short',
+    day: 'numeric',
+    hour: '2-digit',
+    minute: '2-digit'
+  });
+};
+
 const getQuizDescription = (quiz) => {
   if (quiz.description) return quiz.description;
+  
+  // Calculate score percentage for consistency with history-quiz.vue
+  const scorePercentage = quiz.score || (quiz.totalQuestions > 0 
+    ? Math.round((quiz.correctAnswers / quiz.totalQuestions) * 100) 
+    : 0);
+  
   let description = `Quiz with ${quiz.totalQuestions || 0} questions`;
   if (quiz.status === 'completed') {
-    description += `, Score: ${quiz.score || 0}%`;
+    description += `, Score: ${scorePercentage}%`;
   }
   return description;
 };

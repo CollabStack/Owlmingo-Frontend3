@@ -24,11 +24,13 @@
     <QuizzesSection 
       :quizzes="quizzes"
       :loading="isLoadingQuizzes"
+      :last-refreshed="lastRefreshedQuizzes"
       @edit-quiz="editQuiz"
       @start-quiz="startQuiz"
       @open-quiz-dialog="quizDialog = true"
       @open-tags-dialog="openTagsDialog"
       @remove-tag-from-item="removeTagFromItem"
+      @refresh-quizzes="refreshQuizzes"
     />
 
     <v-divider class="mb-8"></v-divider>
@@ -395,6 +397,32 @@ const summaries = ref([]);
 const quizStore = useQuizStore();
 const isLoadingQuizzes = ref(false);
 const quizzes = ref([]);
+const lastRefreshedQuizzes = ref(null);
+
+const fetchQuizzes = async (force = false) => {
+  isLoadingQuizzes.value = true;
+  try {
+    // Pass query options to fetchQuizSessions
+    const quizResult = await quizStore.fetchQuizSessions(force, {
+      sort: "-startedAt" // Sort by newest first
+    });
+    
+    if (quizResult.success) {
+      quizzes.value = quizStore.quizzes;
+      lastRefreshedQuizzes.value = new Date();
+      // Apply saved tags to API-fetched quizzes
+      applySavedTags(quizzes.value, 'quiz_tags');
+    }
+  } catch (error) {
+    console.error('Error fetching quizzes:', error);
+  } finally {
+    isLoadingQuizzes.value = false;
+  }
+};
+
+const refreshQuizzes = () => {
+  fetchQuizzes(true);
+};
 
 onMounted(async () => {
   const savedTags = localStorage.getItem('tags');
@@ -411,20 +439,7 @@ onMounted(async () => {
   
   try {
     // Fetch quizzes from API
-    const quizResult = await quizStore.fetchQuizSessions();
-    if (quizResult.success) {
-      quizzes.value = quizStore.quizzes;
-      
-      // Ensure each quiz has an id property for compatibility with existing code
-      quizzes.value.forEach(quiz => {
-        if (!quiz.id && quiz.quizId) {
-          quiz.id = quiz.quizId;
-        }
-      });
-      
-      // Apply saved tags to API-fetched quizzes
-      applySavedTags(quizzes.value, 'quiz_tags');
-    }
+    await fetchQuizzes();
   } catch (error) {
     console.error('Error loading quizzes:', error);
   } finally {

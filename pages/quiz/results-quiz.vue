@@ -1,100 +1,107 @@
 <template>
-  <v-container class="d-flex justify-center">
-    <v-card class="pa-5 rounded-lg" style="max-width: 900px; width: 100%;">
-      <v-card-title class="text-h6 d-flex justify-space-between align-center w-100 outfit">
-        Quiz Results
-        <v-btn class="ml-auto text-blue rounded-xl" @click="backQuiz" variant="outlined"
-          :class="{'hovered-btn': isHovered}" 
-          @mouseenter="isHovered = true" 
-          @mouseleave="isHovered = false"
-        >
-          Close
-        </v-btn>
-      </v-card-title>
+  <v-container class="py-8">
+    <div v-if="loading" class="text-center py-16">
+      <v-progress-circular indeterminate color="primary" size="64"></v-progress-circular>
+      <p class="text-h6 mt-6 outfit outfit-medium">Loading your results...</p>
+    </div>
 
-      <div v-if="loading" class="text-center py-16">
-        <v-progress-circular indeterminate color="primary" size="64"></v-progress-circular>
-        <p class="text-h6 mt-6">Loading results...</p>
-      </div>
+    <div v-else-if="error" class="text-center py-16">
+      <v-icon color="error" size="64">mdi-alert-circle</v-icon>
+      <h2 class="text-h5 mt-4 outfit outfit-medium">{{ error }}</h2>
+      <v-btn color="primary" class="mt-6 rounded-xl" @click="fetchQuizData">Try Again</v-btn>
+    </div>
 
-      <div v-else-if="error" class="text-center py-16">
-        <v-icon color="error" size="64">mdi-alert-circle</v-icon>
-        <h2 class="text-h5 mt-4">{{ error }}</h2>
-        <v-btn color="primary" class="mt-6" @click="fetchQuizData">Try Again</v-btn>
-      </div>
-
-      <template v-else>
-        <v-card-subtitle class="text-body-1">
-          Score: {{ correctAnswers }} / {{ totalQuestions }} ({{ calculateScorePercentage }}%)
-        </v-card-subtitle>
-
-        <v-divider class="mb-4 mt-4"></v-divider>
-
-        <v-row>
-          <v-col cols="12">
-            <v-card outlined v-for="(question, qIndex) in questions" :key="qIndex" class="mb-4">
-              <v-card-title
-                :class="{ 'incorrect-title': !isQuestionCorrect(question), 'correct-title': isQuestionCorrect(question) }"
-              >
-                <v-icon v-if="!isQuestionCorrect(question)" color="red" class="mr-2">
-                  mdi-alert-circle
-                </v-icon>
-                <v-icon v-else color="green">mdi-check-circle</v-icon>
-                <span class="ml-2">Question {{ qIndex + 1 }}: {{ question.question }} ({{ isQuestionCorrect(question) ? 'Correct' : 'Incorrect' }})</span>
-              </v-card-title>
-              <v-divider></v-divider>
-
-              <v-list>
-                <v-list-item
-                  v-for="(option, index) in question.options" 
-                  :key="index"
-                  class="answer-option"
-                  :class="getOptionClass(question, option)"
-                >
-                  <v-list-item-content>
-                    <v-list-item-title class="d-flex align-center">
-                      <span class="option-letter mr-2">{{ String.fromCharCode(65 + index) }}</span>
-                      {{ option.text }}
-                      <v-icon v-if="isSelectedOption(question, option) && option.isCorrect" 
-                        color="success" class="ml-2">mdi-check-circle</v-icon>
-                      <v-icon v-else-if="isSelectedOption(question, option) && !option.isCorrect" 
-                        color="error" class="ml-2">mdi-close-circle</v-icon>
-                      <v-icon v-else-if="!isSelectedOption(question, option) && option.isCorrect" 
-                        color="success" class="ml-2">mdi-check</v-icon>
-                    </v-list-item-title>
-                  </v-list-item-content>
-                </v-list-item>
-              </v-list>
-
-              <v-card-text v-if="question.explanation" class="pt-2 pb-4 explanation-text">
-                <strong>Explanation:</strong> {{ question.explanation }}
-              </v-card-text>
-            </v-card>
-          </v-col>
-        </v-row>
-
-        <div class="d-flex justify-center mt-6">
-          <v-btn
-            color="grey-darken-1"
-            variant="outlined"
-            rounded="xl"
-            class="mx-2"
-            @click="tryAgain"
-          >
+    <template v-else>
+      <v-card class="mb-6 rounded-xl pa-6" elevation="1">
+        <div class="d-flex flex-column flex-md-row align-md-center justify-space-between">
+          <div>
+            <h1 class="text-h4 outfit outfit-bold text-primary mb-2">Quiz Results</h1>
+            <p class="text-subtitle-1 outfit outfit-regular text-grey-darken-1 mb-2">
+              You've completed the quiz. Here's how you did:
+            </p>
+          </div>
+          <div class="score-summary text-center mt-4 mt-md-0 rounded-xl pa-4">
+            <span class="text-h6 outfit outfit-medium">Your Score</span>
+            <div class="text-h3 outfit outfit-bold" 
+                :class="calculateScorePercentage >= 70 ? 'text-success' : calculateScorePercentage >= 40 ? 'text-warning' : 'text-error'">
+              {{ calculateScorePercentage }}%
+            </div>
+            <p class="text-body-1 outfit outfit-regular">
+              {{ correctAnswers }} correct out of {{ totalQuestions }} questions
+            </p>
+          </div>
+        </div>
+        <div class="d-flex flex-wrap justify-end mt-4">
+          <v-btn class="mx-2 mb-2 rounded-xl outfit outfit-medium animated-btn" variant="outlined" color="grey-darken-1" prepend-icon="mdi-arrow-left" @click="backQuiz">
+            Back to History
+          </v-btn>
+          <v-btn class="mx-2 mb-2 rounded-xl outfit outfit-medium animated-btn" variant="outlined" color="primary" prepend-icon="mdi-refresh" @click="tryAgain">
             Try Again
           </v-btn>
-          <v-btn
-            color="primary"
-            variant="flat"
-            rounded="xl"
-            class="mx-2"
-            @click="backToHome"
-          >
+          <v-btn class="mx-2 mb-2 rounded-xl outfit outfit-medium animated-btn" variant="flat" color="primary" prepend-icon="mdi-plus" @click="backToHome">
             New Quiz
           </v-btn>
         </div>
-      </template>
-    </v-card>
+      </v-card>
+
+      <h2 class="text-h5 outfit outfit-semibold mb-4 ml-2">Question Review</h2>
+      <div>
+        <v-card v-for="(question, qIndex) in questions" :key="qIndex" class="mb-6 rounded-xl question-card" :class="isQuestionCorrect(question) ? 'question-correct' : 'question-incorrect'" elevation="1">
+          <v-card-item class="question-header pa-4">
+            <div class="d-flex align-center">
+              <div class="question-indicator mr-4" :class="isQuestionCorrect(question) ? 'bg-success' : 'bg-error'">
+                <v-icon color="white" size="24">
+                  {{ isQuestionCorrect(question) ? 'mdi-check' : 'mdi-close' }}
+                </v-icon>
+              </div>
+              <div>
+                <div class="text-overline text-grey-darken-1">Question {{ qIndex + 1 }} of {{ totalQuestions }}</div>
+                <div class="text-h6 outfit outfit-medium">{{ question.question }}</div>
+              </div>
+            </div>
+          </v-card-item>
+          <v-divider></v-divider>
+          
+          <!-- Add user selection summary -->
+          <div class="px-4 pt-3 pb-1 selection-summary" :class="isQuestionCorrect(question) ? 'bg-success-light' : 'bg-error-light'">
+            <div class="d-flex align-center">
+              <v-icon :color="isQuestionCorrect(question) ? 'success' : 'error'" class="mr-2">
+                {{ isQuestionCorrect(question) ? 'mdi-check-circle' : 'mdi-alert-circle' }}
+              </v-icon>
+              <span class="text-subtitle-2 outfit outfit-medium">
+                {{ isQuestionCorrect(question) ? 'You answered correctly!' : 'Your answer was incorrect.' }}
+              </span>
+            </div>
+          </div>
+          
+          <v-card-text class="pa-4">
+            <div v-for="(option, index) in question.options" :key="index" class="option-item mb-3 pa-3 rounded-lg d-flex align-center" :class="getOptionClass(question, option)">
+              <div class="option-letter mr-3" :class="{'selected-letter': isSelectedOption(question, option)}">
+                {{ String.fromCharCode(65 + index) }}
+              </div>
+              <div class="flex-grow-1">{{ option.text }}</div>
+              <div class="ml-2 d-flex align-center">
+                <v-icon v-if="isSelectedOption(question, option) && option.isCorrect" color="success" class="mr-2">mdi-check-circle</v-icon>
+                <v-icon v-else-if="isSelectedOption(question, option) && !option.isCorrect" color="error" class="mr-2">mdi-close-circle</v-icon>
+                <v-icon v-else-if="!isSelectedOption(question, option) && option.isCorrect" color="success" class="mr-2">mdi-check</v-icon>
+                
+                <div v-if="isSelectedOption(question, option)" class="selected-badge">
+                  Your answer
+                </div>
+                <div v-else-if="option.isCorrect" class="correct-badge">
+                  Correct answer
+                </div>
+              </div>
+            </div>
+            
+            <div v-if="question.explanation" class="explanation-text mt-4 pa-4 rounded-lg">
+              <div class="text-subtitle-2 outfit outfit-semibold mb-1">Explanation:</div>
+              <div class="text-body-2">{{ question.explanation }}</div>
+            </div>
+          </v-card-text>
+        </v-card>
+      </div>
+    </template>
   </v-container>
 </template>
 
@@ -261,9 +268,18 @@ const calculateScorePercentage = computed(() => totalQuestions.value ? Math.roun
 const isQuestionCorrect = (question) => question.isCorrect;
 
 const getOptionClass = (question, option) => {
-  if (isSelectedOption(question, option)) return option.isCorrect ? 'correct-answer' : 'wrong-answer';
-  if (!isQuestionCorrect(question) && option.isCorrect) return 'correct-answer';
-  return 'neutral-answer';
+  // User selected this option
+  if (isSelectedOption(question, option)) {
+    return option.isCorrect ? 'option-correct' : 'option-incorrect';
+  }
+  
+  // User didn't select this option, but it's the correct answer
+  if (option.isCorrect) {
+    return 'option-correct-unselected';
+  }
+  
+  // This is just a wrong option, not selected by user
+  return 'option-neutral';
 };
 
 const backQuiz = () => router.push('/quiz/history-quiz');
@@ -358,5 +374,185 @@ onMounted(() => {
   padding: 12px;
   margin: 8px 16px;
   border-radius: 0 4px 4px 0;
+}
+
+.score-summary {
+  background-color: #F3F4FF;
+  min-width: 200px;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.05);
+}
+
+.question-card {
+  overflow: hidden;
+  transition: all 0.3s ease;
+}
+
+.question-card:hover {
+  transform: translateY(-3px);
+  box-shadow: 0 8px 16px rgba(0, 0, 0, 0.1) !important;
+}
+
+.question-header {
+  background-color: rgba(0, 0, 0, 0.02);
+}
+
+.question-indicator {
+  width: 40px;
+  height: 40px;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.bg-success {
+  background-color: #4CAF50;
+}
+
+.bg-error {
+  background-color: #F44336;
+}
+
+.option-item {
+  border: 2px solid transparent;
+  transition: all 0.2s ease;
+}
+
+.option-letter {
+  min-width: 32px;
+  min-height: 32px;
+  border-radius: 50%;
+  background-color: #f0f0f0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-weight: 600;
+}
+
+.option-correct {
+  border: 2px solid #4CAF50;
+  background-color: rgba(76, 175, 80, 0.15);
+  position: relative;
+}
+
+.option-incorrect {
+  border: 2px solid #F44336;
+  background-color: rgba(244, 67, 54, 0.15);
+  position: relative;
+}
+
+.option-correct-unselected {
+  border: 2px solid #4CAF50;
+  background-color: rgba(76, 175, 80, 0.05);
+}
+
+.option-neutral {
+  background-color: #f5f5f5;
+  border: 2px solid #e0e0e0;
+}
+
+/* Styling for selected answer indicators */
+.selected-letter {
+  background-color: #9D7BFC;
+  color: white;
+  font-weight: 700;
+  box-shadow: 0 2px 5px rgba(0, 0, 0, 0.2);
+  transform: scale(1.1);
+}
+
+.selected-badge {
+  background-color: #9D7BFC;
+  color: white;
+  padding: 2px 8px;
+  border-radius: 12px;
+  font-size: 0.75rem;
+  font-weight: 600;
+}
+
+/* Make sure all answer options have hover effect */
+.option-item:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 3px 8px rgba(0, 0, 0, 0.05);
+}
+
+.explanation-text {
+  background-color: #f8f9fa;
+  border-left: 4px solid #9D7BFC;
+}
+
+.animated-btn {
+  transition: all 0.3s ease;
+  position: relative;
+  overflow: hidden;
+}
+
+.animated-btn::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: -100%;
+  width: 100%;
+  height: 100%;
+  background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.2), transparent);
+  transition: all 0.6s ease;
+}
+
+.animated-btn:hover::before {
+  left: 100%;
+}
+
+.animated-btn:hover {
+  transform: translateY(-3px);
+  box-shadow: 0 5px 15px rgba(0, 0, 0, 0.1);
+}
+
+/* Selection summary styling */
+.selection-summary {
+  border-radius: 0;
+}
+
+.bg-success-light {
+  background-color: rgba(76, 175, 80, 0.08);
+}
+
+.bg-error-light {
+  background-color: rgba(244, 67, 54, 0.08);
+}
+
+/* Enhanced badges for selected and correct answers */
+.selected-badge {
+  background-color: #9D7BFC;
+  color: white;
+  padding: 3px 8px;
+  border-radius: 12px;
+  font-size: 0.75rem;
+  font-weight: 600;
+  display: flex;
+  align-items: center;
+}
+
+.correct-badge {
+  background-color: #4CAF50;
+  color: white;
+  padding: 3px 8px;
+  border-radius: 12px;
+  font-size: 0.75rem;
+  font-weight: 600;
+  display: flex;
+  align-items: center;
+  opacity: 0.7;
+}
+
+/* Even stronger highlighting for selected options */
+.option-correct::before,
+.option-incorrect::before {
+  content: '';
+  position: absolute;
+  left: -8px;
+  top: 0;
+  bottom: 0;
+  width: 4px;
+  background-color: #9D7BFC;
+  border-radius: 4px;
 }
 </style>
