@@ -418,8 +418,10 @@ const generateFlashcard = async () => {
             // Use id from OCR response instead of global_id
             // Check for both fields to ensure compatibility
             fileOcrId = ocrResponse.data.id || ocrResponse.data._id || ocrResponse.data.global_id;
-            console.log('OCR Response data:', ocrResponse.data);
-            console.log('Using file OCR ID:', fileOcrId);
+            if (process.env.NODE_ENV !== 'production') {
+              console.log('OCR Response data:', ocrResponse.data);
+              console.log('Using file OCR ID:', fileOcrId);
+            }
           } else {
             throw new Error(ocrResponse.message || 'Failed to process document');
           }
