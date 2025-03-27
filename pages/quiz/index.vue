@@ -1,5 +1,5 @@
 <template>
-  <<QuizeUpload />
+  <QuizeUpload />
   <div class="mt-8 mx-16 mb-8">
     <SectionDivider />
   </div>  
