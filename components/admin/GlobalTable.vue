@@ -31,7 +31,7 @@
               <td class="text-right">
                 <v-tooltip bottom v-if="showActivate && item.active === 1">
                   <template v-slot:activator="{ on, attrs }">
-                    <v-icon @click="onDeactivateClick(item.global_id)" class="mx-1" color="green" v-bind="attrs" v-on="on">
+                    <v-icon @click="onDeactivateClick(item.global_id)" class="mx-1" color="green" v-bind="attrs" v-on="on || {}">
                       mdi-account-check
                     </v-icon>
                   </template>
@@ -40,7 +40,7 @@
 
                 <v-tooltip bottom v-if="showDeactivate && item.active === 0">
                   <template v-slot:activator="{ on, attrs }">
-                    <v-icon @click="onActivateClick(item.global_id)" class="mx-1" color="red" v-bind="attrs" v-on="on">
+                    <v-icon @click="onActivateClick(item.global_id)" class="mx-1" color="red" v-bind="attrs" v-on="on || {}">
                       mdi-account-off
                     </v-icon>
                   </template>
@@ -49,7 +49,7 @@
 
                 <v-tooltip bottom v-if="showEdit">
                   <template v-slot:activator="{ on, attrs }">
-                    <v-icon @click="onEditClick(item.global_id)" class="mx-1" color="primary" v-bind="attrs" v-on="on">
+                    <v-icon @click="onEditClick(item.global_id)" class="mx-1" color="primary" v-bind="attrs" v-on="on || {}">
                       mdi-pencil
                     </v-icon>
                   </template>

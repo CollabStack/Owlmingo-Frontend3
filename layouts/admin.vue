@@ -8,7 +8,23 @@
           <span class="ml-2 white--text">Owlmingo</span>
         </div>
       </v-container>
+      <v-divider></v-divider>
+      <div class="d-flex align-center ma-4">
+        <v-avatar class="cursor-pointer" size="40">
+          <v-img
+            src="/female_profile.jpg"
+            alt="Profile"
+            contain
+            class="rounded-full"
+          />
+        </v-avatar>
+        <p class="pl-2 white--text">
+          {{ user?.username || 'Hello Admin'}}
+        </p>
+      </div>
+      <v-divider></v-divider>
 
+      <!-- Navigation Items -->
       <v-list>
         <v-list-item 
           v-for="item in items" 
@@ -37,15 +53,17 @@
     <!-- Page Content -->
     <v-main>
       <transition name="fade" mode="out-in">
-        <NuxtPage />
+        <div>
+          <NuxtPage />
+        </div>
       </transition>
     </v-main>
   </v-app>
 </template>
 
 <script setup>
-import { ref } from 'vue';
-// import { useAuthStore } from '~/store/auth'; // Uncomment if using Pinia
+import { ref, onMounted } from 'vue';
+import { userAuth } from '~/store/userAuth';
 
 // Sidebar State
 const drawer = ref(false);
@@ -54,31 +72,25 @@ const drawer = ref(false);
 const items = ref([
   { title: 'Dashboard', link_nav: '/admin', icon: 'mdi-view-dashboard' },
   { title: 'Plan', link_nav: '/admin/plan', icon: 'mdi-note-text-outline' }
-  // Add more menu items as needed
 ]);
+
+// Reactive user object
+const user = ref(null);
 
 // Logout Method
 const logout = async () => {
-  // const authStore = useAuthStore(); // Uncomment if using Pinia
-  try {
-    // await authStore.logout(); // Uncomment if using Pinia
-    console.log('User logged out'); // Replace with actual logout logic
-    window.location.href = '/login'; // Redirect after logout
-  } catch (e) {
-    console.error('Logout Error:', e);
-  }
+  const authStore = userAuth(); 
+  await authStore.logout(); 
+  window.location.href = '/'; 
 };
+
+onMounted(() => {
+  const authStore = userAuth();
+  user.value = authStore.getUser(); // Set the user on mount
+});
 </script>
 
 <style scoped>
-/* Smooth Fade Transition */
-.fade-enter-active, .fade-leave-active {
-  transition: opacity 0.5s ease-in-out;
-}
-.fade-enter, .fade-leave-to {
-  opacity: 0;
-}
-
 /* White Text */
 .white--text {
   color: white !important;
