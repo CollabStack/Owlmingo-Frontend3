@@ -114,13 +114,13 @@
             isLoading.value = true;
             await authStore.login(email.value, password.value);
             
-            Swal.fire({
-                icon: 'success',
-                title: 'Login Successful',
-                text: 'Welcome back!',
-                timer: 2000,
-                showConfirmButton: false
-            });
+            // Swal.fire({
+            //     icon: 'success',
+            //     title: 'Login Successful',
+            //     text: 'Welcome back!',
+            //     timer: 2000,
+            //     showConfirmButton: false
+            // });
             
             navigateTo("/");
         } catch (error) {
@@ -144,12 +144,12 @@
     };
 
     const gotoForgotPassword = () => {
-        console.log('Navigate to forgot password');
+        // console.log('Navigate to forgot password');
         navigateTo('/auth/forgot-password');
     };
 
     const gotoSignUp = () => {
-        console.log('Navigate to sign up');
+        // console.log('Navigate to sign up');
         navigateTo('/auth/sign-up');
     };
     

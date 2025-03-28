@@ -225,17 +225,17 @@ const submitEdit = async () => {
     }
 
     const responseData = await response.json();
-    console.log('Update response:', responseData);
+    // console.log('Update response:', responseData);
     
-    Swal.fire({
-      icon: 'success',
-      title: 'Success!',
-      text: 'Question updated successfully!',
-      timer: 2000,
-      showConfirmButton: false,
-      timerProgressBar: true,
-      iconColor: '#4caf50'
-    });
+    // Swal.fire({
+    //   icon: 'success',
+    //   title: 'Success!',
+    //   text: 'Question updated successfully!',
+    //   timer: 2000,
+    //   showConfirmButton: false,
+    //   timerProgressBar: true,
+    //   iconColor: '#4caf50'
+    // });
 
     // Go back to the quiz review
     setTimeout(() => {

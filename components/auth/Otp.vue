@@ -127,7 +127,7 @@ const otpError = ref('');
 const verificationType = ref('email');
 
 const gotoSignUp = () => {
-    console.log('Redirecting to signup');
+    // console.log('Redirecting to signup');
     navigateTo('/auth/sign-up');
 }
 
@@ -147,25 +147,25 @@ onMounted(() => {
     if (verificationType.value === 'reset-password') {
         if (localStorage.getItem('resetPasswordEmail')) {
             email.value = localStorage.getItem('resetPasswordEmail');
-            console.log('Retrieved reset password email from localStorage:', email.value);
+            // console.log('Retrieved reset password email from localStorage:', email.value);
         } else if (props.email) {
             email.value = props.email;
-            console.log('Using reset password email from props:', email.value);
+            // console.log('Using reset password email from props:', email.value);
         } else if (route.query.email) {
             email.value = route.query.email;
-            console.log('Using reset password email from query:', email.value);
+            // console.log('Using reset password email from query:', email.value);
         }
     } else {
         // For email verification after signup
         if (localStorage.getItem('signupEmail')) {
             email.value = localStorage.getItem('signupEmail');
-            console.log('Retrieved signup email from localStorage:', email.value);
+            // console.log('Retrieved signup email from localStorage:', email.value);
         } else if (props.email) {
             email.value = props.email;
-            console.log('Using signup email from props:', email.value);
+            // console.log('Using signup email from props:', email.value);
         } else if (route.query.email) {
             email.value = route.query.email;
-            console.log('Using signup email from query:', email.value);
+            // console.log('Using signup email from query:', email.value);
         }
     }
     
@@ -196,8 +196,8 @@ onMounted(() => {
 });
 
 const startResendTimer = () => {
-    // Set a 60-second countdown for resend
-    resendTimeLeft.value = 60;
+    // Set a 3-minute countdown for resend
+    resendTimeLeft.value = 180;
     clearInterval(resendTimer.value);
     
     resendTimer.value = setInterval(() => {
@@ -242,15 +242,15 @@ const resendOtp = async () => {
         otpError.value = '';
         remainingAttempts.value = null;
         
-        Swal.fire({
-            icon: 'success',
-            title: 'OTP Resent',
-            text: 'A new verification code has been sent to your email.',
-            timer: 2000,
-            showConfirmButton: false
-        });
+        // Swal.fire({
+        //     icon: 'success',
+        //     title: 'OTP Resent',
+        //     text: 'A new verification code has been sent to your email.',
+        //     timer: 2000,
+        //     showConfirmButton: false
+        // });
     } catch (error) {
-        console.error('Failed to resend OTP:', error);
+        // console.error('Failed to resend OTP:', error);
         
         // Handle specific error scenarios
         let errorMessage = error.message || 'An error occurred while resending the verification code.';
@@ -289,13 +289,13 @@ const verifyOtp = async () => {
             // Just store the OTP and proceed to reset password page
             authStore.storePasswordResetOTP(otp.value);
             
-            Swal.fire({
-                title: 'Success',
-                text: 'Proceed to set your new password.',
-                icon: 'success',
-                timer: 2000,
-                showConfirmButton: false
-            });
+            // Swal.fire({
+            //     title: 'Success',
+            //     text: 'Proceed to set your new password.',
+            //     icon: 'success',
+            //     timer: 2000,
+            //     showConfirmButton: false
+            // });
             
             // Navigate to the NewPassword page after storing OTP
             setTimeout(() => {
@@ -311,13 +311,13 @@ const verifyOtp = async () => {
             // If successful, clear stored email
             localStorage.removeItem('signupEmail');
             
-            Swal.fire({
-                title: 'Success',
-                text: 'Your account has been successfully verified',
-                icon: 'success',
-                timer: 2000,
-                showConfirmButton: false
-            });
+            // Swal.fire({
+            //     title: 'Success',
+            //     text: 'Your account has been successfully verified',
+            //     icon: 'success',
+            //     timer: 2000,
+            //     showConfirmButton: false
+            // });
             
             // Navigate after the alert for email verification
             setTimeout(() => {
@@ -325,7 +325,7 @@ const verifyOtp = async () => {
             }, 2000);
         }
     } catch (error) {
-        console.error('OTP verification failed:', error);
+        // console.error('OTP verification failed:', error);
         
         // Extract remaining attempts from error message if available
         if (error.message && error.message.includes('attempts remaining')) {

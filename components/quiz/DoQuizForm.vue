@@ -217,19 +217,19 @@ const selectOption = async (option) => {
   selectedOptionHistory.value[activeQuestionIndex.value] = option.id;
   
   try {
-    console.log(`Submitting answer: question ${activeQuestionIndex.value}, option ${option.id}`);
+    // console.log(`Submitting answer: question ${activeQuestionIndex.value}, option ${option.id}`);
     
     // Submit the answer through the parent component
     const result = await emit('submit-answer', activeQuestionIndex.value, option.id);
     
     // Log the result for debugging
-    console.log('Answer submission result from parent:', result);
+    // console.log('Answer submission result from parent:', result);
     
     // If no explicit result is returned (emit doesn't return the handler result),
     // we'll rely on the parent to update the quiz data prop
     
   } catch (error) {
-    console.error('Error during answer submission:', error);
+    // console.error('Error during answer submission:', error);
   }
 };
 

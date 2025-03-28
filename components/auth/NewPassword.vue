@@ -173,15 +173,15 @@ const isValidPassword = computed(() => {
 });
 
 onMounted(() => {
-    console.log('NewPassword component mounted');
+    // console.log('NewPassword component mounted');
     
     // Get email from query parameter or localStorage
     if (route.query.email) {
         email.value = route.query.email;
-        console.log('Retrieved email from query parameter:', email.value);
+        // console.log('Retrieved email from query parameter:', email.value);
     } else if (localStorage.getItem('resetPasswordEmail')) {
         email.value = localStorage.getItem('resetPasswordEmail');
-        console.log('Retrieved email from localStorage:', email.value);
+        // console.log('Retrieved email from localStorage:', email.value);
     } else {
         // If no email is found, redirect back to forgot password
         Swal.fire({
@@ -215,7 +215,7 @@ onMounted(() => {
 });
 
 const gotoSignUp = () => {
-    console.log('Redirecting to signup');
+    // console.log('Redirecting to signup');
     navigateTo('/auth/sign-up');  
 };
 
@@ -274,20 +274,20 @@ const resetPassword = async () => {
         await authStore.resetPassword(email.value, password.value);
         
         // Show success message
-        Swal.fire({
-            title: 'Success',
-            text: 'Your password has been successfully reset. Please log in with your new password.',
-            icon: 'success',
-            timer: 2000,
-            showConfirmButton: false
-        });
+        // Swal.fire({
+        //     title: 'Success',
+        //     text: 'Your password has been successfully reset. Please log in with your new password.',
+        //     icon: 'success',
+        //     timer: 2000,
+        //     showConfirmButton: false
+        // });
         
         // Navigate to login page after password reset
         setTimeout(() => {
             navigateTo("/");
         }, 2000);
     } catch (error) {
-        console.error('Password reset failed:', error);
+        // console.error('Password reset failed:', error);
         
         // Show error message
         Swal.fire({

@@ -176,35 +176,6 @@
             style="text-decoration: none;"> AI Flashcard Generator</nuxt-link></p>
       </v-window-item>
 
-      <!-- Video Upload -->
-      <!-- <v-window-item value="video">
-        <FileUploader
-          icon="mdi-video"
-          placeholder="Drag a video file here to upload"
-          acceptedFileTypes="video/*"
-          buttonText="Browse Videos"
-          buttonIcon="mdi-video-plus"
-          :maxFileSize="100"
-          fileTypeErrorMessage="Invalid file type! Only video files are allowed."
-          @file-selected="handleFileSelected('video', $event)"
-          @file-removed="handleFileRemoved('video')"
-          @error="showSnackbar"
-        />
-        <div class="button-container" style="margin: 12px 0;">
-          <v-btn color="royal_blue" min-width="92" variant="outlined"
-            class="custom-btn text-none animated-btn outfit outfit-medium" 
-            @click="generateSumary"
-            :disabled="!videoFile" 
-            rounded="xl">
-            <span class="d-flex align-center">
-              Generate Quiz
-              <v-icon class="ms-2 btn-icon">mdi-lightning-bolt</v-icon>
-            </span>
-          </v-btn>
-        </div>
-        <p class="mt-2 animated-link">Looking for flashcards instead? Try the <nuxt-link to="/flashcard"
-            style="text-decoration: none;"> AI Flashcard Generator</nuxt-link></p>
-      </v-window-item> -->
     </v-window>
 
     <!-- Loading Overlay -->
@@ -256,7 +227,7 @@ onMounted(async () => {
     // Check token validity silently, don't redirect here
     const isValid = await authStore.checkTokenExpired();
     if (!isValid) {
-      console.warn('Token validation failed in component');
+      // console.warn('Token validation failed in component');
       // Don't redirect - let middleware handle it
     }
   } catch (error) {
@@ -325,12 +296,12 @@ const handleFileSelected = async (type, file) => {
 // Extract PDF processing logic to a separate function
 const processPdfFile = async (file) => {
   try {
-    console.log('Processing PDF file:', file.name);
+    // console.log('Processing PDF file:', file.name);
     const arrayBuffer = await file.arrayBuffer();
     const pdfDoc = await PDFDocument.load(arrayBuffer);
     
     const pages = pdfDoc.getPageCount();
-    console.log(`PDF has ${pages} pages`);
+    // console.log(`PDF has ${pages} pages`);
     totalPages.value = pages;
     
     // Select all pages by default
@@ -408,7 +379,7 @@ const handleGenerateQuiz = async () => {
       console.log(`Processing document file: ${documentFile.value.name}, type: ${documentFile.value.type}`);
       
       if (isPdfFile.value && pdfSelector.value) {
-        console.log("Processing as PDF with page selection");
+        // console.log("Processing as PDF with page selection");
         const mergedPdfBlob = await pdfSelector.value.getMergedPdf();
         if (mergedPdfBlob) {
           console.log(`Got merged PDF blob, size: ${mergedPdfBlob.size} bytes`);
@@ -418,7 +389,7 @@ const handleGenerateQuiz = async () => {
         }
       } else {
         // Handle non-PDF documents directly
-        console.log("Processing as non-PDF document");
+        // console.log("Processing as non-PDF document");
         await generateQuiz({ documentBlob: documentFile.value });
       }
     } else if (imageFile.value) {
@@ -431,7 +402,7 @@ const handleGenerateQuiz = async () => {
       showSnackbar('Please select a file or enter text to generate a quiz');
     }
   } catch (error) {
-    console.error('Error in handleGenerateQuiz:', error);
+    // console.error('Error in handleGenerateQuiz:', error);
     showSnackbar(error.message || 'Failed to process your request');
   }
 };
