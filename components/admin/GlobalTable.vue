@@ -1,5 +1,5 @@
 <template>
-  <v-container fluid class="fill-height d-flex flex-column" style="height: 100vh;">
+  <v-container fluid class="fill-height d-flex flex-column ma-0 pa-2" style="height: 100vh;">
     <v-sheet class="flex-grow-1 d-flex flex-column" style="width: 100%;">
       <v-card elevation="2" class="rounded-xl flex-grow-1 d-flex flex-column" color="primary" variant="outlined" style="width: 100%;">
         <v-card-title class="d-flex justify-space-between align-center">
@@ -10,7 +10,7 @@
 
         <v-table
           class="flex-grow-1 ma-0 pa-0"
-          style="overflow: auto; min-height: calc(100vh - 255px); max-height: calc(100vh - 255px); width: 100%;"
+          style="overflow: auto; min-height: calc(100vh - 255px); max-height: calc(100vh - 240px); width: 100%;"
           fixed-header
         >
           <thead>
