@@ -7,12 +7,12 @@ const authStore = userAuth();
 const email = ref('');
 
 const gotoSignIn = () => {
-    console.log('Back to Sign In');
+    // console.log('Back to Sign In');
     navigateTo('/auth/login');
 }
 
 const gotoSignUp = () => {
-    console.log('gotoSignUp');
+    // console.log('gotoSignUp');
     navigateTo('/auth/sign-up');
 }
 
@@ -29,13 +29,13 @@ const forgotPassword = async () => {
     try {
         await authStore.ForgotPassword(email.value);
         
-        Swal.fire({
-            title: 'Email Sent',
-            text: 'A verification code has been sent to your email',
-            icon: 'success',
-            timer: 2000,
-            showConfirmButton: false
-        });
+        // Swal.fire({
+        //     title: 'Email Sent',
+        //     text: 'A verification code has been sent to your email',
+        //     icon: 'success',
+        //     timer: 2000,
+        //     showConfirmButton: false
+        // });
         
         // Pass the reset-password type to OTP component
         navigateTo({
@@ -43,7 +43,7 @@ const forgotPassword = async () => {
             query: { type: 'reset-password' }
         });
     } catch (error) {
-        console.error('Forgot password error:', error);
+        // console.error('Forgot password error:', error);
         
         Swal.fire({
             icon: 'error',

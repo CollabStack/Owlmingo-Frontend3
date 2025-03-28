@@ -99,13 +99,13 @@ const signUp = async () => {
        // Store email in localStorage for OTP verification
        localStorage.setItem('signupEmail', email.value);
        
-       Swal.fire({
-        title: 'Success',
-        text: 'You have been successfully signed up',
-        icon: 'success',
-        timer: 2000,
-        showConfirmButton: false
-        });
+    //    Swal.fire({
+    //     title: 'Success',
+    //     text: 'You have been successfully signed up',
+    //     icon: 'success',
+    //     timer: 2000,
+    //     showConfirmButton: false
+    //     });
         navigateTo("/auth/otp");
    } catch (error) {
        Swal.fire({
