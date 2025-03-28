@@ -1,5 +1,5 @@
 <template>
-  <v-container fluid class="fill-height d-flex flex-column">
+  <v-container fluid class="fill-height d-flex flex-column" style="height: 100vh;">
     <v-sheet class="flex-grow-1 d-flex flex-column" style="width: 100%;">
       <v-card elevation="2" class="rounded-xl flex-grow-1 d-flex flex-column" color="primary" variant="outlined" style="width: 100%;">
         <v-card-title class="d-flex justify-space-between align-center">
@@ -8,10 +8,14 @@
           <v-btn v-if="showAdd" @click="onAddClick" icon="mdi-plus" color="primary"></v-btn>
         </v-card-title>
 
-        <v-table class="flex-grow-1 ma-0 pa-0" style="overflow: auto; max-height: calc(100vh - 240px); width: 100%;" fixed-header>
+        <v-table
+          class="flex-grow-1 ma-0 pa-0"
+          style="overflow: auto; min-height: calc(100vh - 255px); max-height: calc(100vh - 255px); width: 100%;"
+          fixed-header
+        >
           <thead>
             <tr>
-              <th class="text-left">#</th> <!-- New Index Column -->
+              <th class="text-left">#</th>
               <th v-for="header in computedHeaders" :key="header.value" class="text-left">
                 {{ header.text }}
               </th>
@@ -19,8 +23,8 @@
             </tr>
           </thead>
           <tbody>
-            <tr v-for="(item, index) in items" :key="item.id">
-              <td>{{ index + 1 }}</td> <!-- Auto-Numbering Column -->
+            <tr v-for="(item, index) in paginatedItems" :key="item.id">
+              <td>{{ (currentPage - 1) * itemsPerPage + index + 1 }}</td>
               <td v-for="header in computedHeaders" :key="header.value">
                 {{ item[header.value] }}
               </td>
@@ -55,15 +59,19 @@
             </tr>
           </tbody>
         </v-table>
-        <v-container>
+
+        <!-- Pagination Controls -->
+        <v-container class="mt-auto">
           <v-row no-gutters>
             <v-col cols="12" sm="4">
+
             </v-col>
 
-            <v-col cols="12" sm="4">
+            <v-col cols="12" sm="4" class="d-flex justify-center">
               <v-pagination
                 v-if="items.length > 0"
-                :length="Math.ceil(items.length / 10)"
+                v-model="currentPage"
+                :length="totalPages"
                 :total-visible="7"
                 color="primary"
                 class="mx-auto"
@@ -83,7 +91,7 @@
 </template>
 
 <script setup>
-import { computed, defineProps, defineEmits } from "vue";
+import { computed, defineProps, defineEmits, ref } from "vue";
 
 const props = defineProps({
   title: String,
@@ -95,12 +103,28 @@ const props = defineProps({
   showDeactivate: { type: Boolean, default: false },
 });
 
+// Emits for button actions
 const emit = defineEmits(["add-click", "edit-click", "activate-click", "deactivate-click"]);
 
+// Pagination states
+const itemsPerPage = 25;
+const currentPage = ref(1);
+
+// Compute total pages
+const totalPages = computed(() => Math.ceil(props.items.length / itemsPerPage));
+
+// Compute paginated items
+const paginatedItems = computed(() => {
+  const start = (currentPage.value - 1) * itemsPerPage;
+  return props.items.slice(start, start + itemsPerPage);
+});
+
+// Format headers
 const computedHeaders = computed(() => {
   return props.headers.map((h) => (typeof h === "string" ? { text: h, value: h } : h));
 });
 
+// Action handlers
 const onAddClick = () => emit("add-click");
 const onEditClick = (id) => emit("edit-click", id);
 const onActivateClick = (id) => emit("activate-click", id);
