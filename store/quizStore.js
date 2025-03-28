@@ -64,7 +64,8 @@ export const useQuizStore = defineStore('quizStore', {
       this.error = null;
       
       try {
-        const endpoint = 'http://api.owlmingo.space/api/v1/user/auth/quiz/generate';
+        // Use the consistent base URL
+        const endpoint = `${this.apiBaseUrl}/user/auth/quiz/generate`;
         const payload = { fileOcrId: fileId };
 
         const response = await $UserPrivateAxios.post(endpoint, payload, {
@@ -365,7 +366,7 @@ export const useQuizStore = defineStore('quizStore', {
       this.isLoading = true;
       
       try {
-        const endpoint = 'http://api.owlmingo.space/api/v1/user/auth/quiz/sessions';
+        const endpoint = 'https://api.owlmingo.space/api/v1/user/auth/quiz/sessions';
         
         const response = await $UserPrivateAxios.get(endpoint);
         

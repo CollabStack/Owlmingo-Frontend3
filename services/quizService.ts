@@ -4,6 +4,9 @@ import { userAuth } from '~/store/userAuth';
 import Swal from 'sweetalert2';
 import { useQuizStore } from '~/store/quizStore';
 
+// Define a consistent base URL for all API calls
+const API_BASE_URL = 'https://owlmingo-16f448c07f1f.herokuapp.com/api/v1';
+
 // Reactive state
 const isLoading = ref(false);
 const quizData = ref(null);
@@ -43,7 +46,8 @@ const checkAuth = () => {
 async function generateQuizFromFile(fileId) {
   const authStore = userAuth();
   
-  const url = 'http://api.owlmingo.space/api/v1/user/auth/quiz/generate';
+  // Use the consistent base URL
+  const url = `${API_BASE_URL}/user/auth/quiz/generate`;
   
   console.log(`Quiz Generation - Starting quiz generation for file: ${fileId}`);
   
@@ -103,9 +107,9 @@ async function generateQuizFromFile(fileId) {
  */
 async function processText(content: string) {
   const authStore = userAuth();
-  const config = useRuntimeConfig();
   
-  const url = `${config.public.USER_PRIVATE_API}process-text`;
+  // Use the consistent base URL
+  const url = `${API_BASE_URL}/user/auth/process-text`;
   
   console.log('Text Processing - Starting text processing');
   
@@ -312,8 +316,7 @@ export const fetchQuizById = async (quizId) => {
       throw new Error('Authentication expired');
     }
 
-    const baseUrl = 'https://owlmingo-16f448c07f1f.herokuapp.com/api/v1';
-    const url = `${baseUrl}/user/auth/quiz/${quizId}/review`;
+    const url = `${API_BASE_URL}/user/auth/quiz/${quizId}/review`;
     
     console.log(`Quiz - Fetching quiz with ID: ${quizId}`);
     
@@ -387,7 +390,6 @@ export const submitQuizAnswer = async (quizId, questionIndex, optionId) => {
   if (!checkAuth()) return { success: false, reason: 'auth' };
 
   try {
-    const baseUrl = 'https://owlmingo-16f448c07f1f.herokuapp.com/api/v1';
     let token = authStore.getToken();
     if (!token) {
       throw new Error('Authentication required');
@@ -411,23 +413,23 @@ export const submitQuizAnswer = async (quizId, questionIndex, optionId) => {
     // Try multiple endpoints with multiple payload formats to maximize chances of success
     const endpoints = [
       // Standard RESTful pattern 
-      `${baseUrl}/quizzes/${quizId}/questions/${questionIndex}/answer`,
+      `${API_BASE_URL}/quizzes/${quizId}/questions/${questionIndex}/answer`,
       
       // Alternative pattern with singular quiz
-      `${baseUrl}/quiz/${quizId}/questions/${questionIndex}/answer`,
+      `${API_BASE_URL}/quiz/${quizId}/questions/${questionIndex}/answer`,
       
       // Auth prefixed versions
-      `${baseUrl}/user/auth/quizzes/${quizId}/questions/${questionIndex}/answer`,
-      `${baseUrl}/user/auth/quiz/${quizId}/questions/${questionIndex}/answer`,
+      `${API_BASE_URL}/user/auth/quizzes/${quizId}/questions/${questionIndex}/answer`,
+      `${API_BASE_URL}/user/auth/quiz/${quizId}/questions/${questionIndex}/answer`,
       
       // Original patterns we've tried
-      `${baseUrl}/user/auth/quiz/${quizId}/answer`,
-      `${baseUrl}/quiz/${quizId}/answer`,
+      `${API_BASE_URL}/user/auth/quiz/${quizId}/answer`,
+      `${API_BASE_URL}/quiz/${quizId}/answer`,
       
       // Generic endpoints
-      `${baseUrl}/user/auth/quiz-answer`,
-      `${baseUrl}/quiz-answer`,
-      `${baseUrl}/quiz/answer`,
+      `${API_BASE_URL}/user/auth/quiz-answer`,
+      `${API_BASE_URL}/quiz-answer`,
+      `${API_BASE_URL}/quiz/answer`,
     ];
     
     // Different payload formats to try
