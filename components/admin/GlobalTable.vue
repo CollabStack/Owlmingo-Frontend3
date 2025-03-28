@@ -78,7 +78,7 @@
               ></v-pagination>
             </v-col>
 
-            <v-col cols="12" sm="4" class="d-flex justify-end align-center">
+            <v-col v-if="currentPage === totalPages" cols="12" sm="4" class="d-flex justify-end align-center">
               <v-btn variant="tonal" @click="onLoadMoreClick" color="primary" class="ml-4">
                 Load More
               </v-btn>  
