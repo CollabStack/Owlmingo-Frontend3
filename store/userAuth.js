@@ -12,25 +12,30 @@ export const userAuth = defineStore('userAuth', {
     actions: {
         // User management methods
         setUser(user) {
-            this.user = user;
+            this.user = { ...user }; // Ensure reactivity
+            localStorage.setItem('user', JSON.stringify(user)); // Persist
         },
+        
         
         // Add initialization method
         init() {
-            if (this.tokenInitialized) return; // Prevent multiple initializations
+            if (this.tokenInitialized) return;
             
             const token = this.getToken();
+            const storedUser = localStorage.getItem('user');
+            
             if (token) {
                 this.token = token;
                 this.isLoggedIn = true;
                 this.tokenInitialized = true;
-                
-                // Add a timeout to allow component mount before refresh
-                setTimeout(() => {
-                    this.refreshToken();
-                }, 300);
+                this.user = storedUser ? JSON.parse(storedUser) : null; // Restore user
             }
+            
+            setTimeout(() => {
+                this.refreshToken();
+            }, 300);
         },
+        
 
         setToken(token) {
             this.token = token;
@@ -51,6 +56,10 @@ export const userAuth = defineStore('userAuth', {
         },
         
         getUser() {
+            if (!this.user) {
+                const storedUser = localStorage.getItem('user');
+                this.user = storedUser ? JSON.parse(storedUser) : null;
+            }
             return this.user;
         },
         
@@ -325,28 +334,30 @@ export const userAuth = defineStore('userAuth', {
             throw error;
             }
         },
+
         async refreshToken() {
             try {
                 const {$UserPrivateAxios} = useNuxtApp();
                 const response = await $UserPrivateAxios.post('/refresh-token');
-                
-                if (!response.data || !response.data.data || !response.data.data.token) {
-                    console.error('Invalid refresh token response', response);
+
+                if (!response.data?.data?.token || !response.data?.data?.user) {
+                    console.error("Invalid refresh token response", response);
                     return;
                 }
-                
+        
                 const token = response.data.data.token;
+                const user = response.data.data.user;
+                
                 this.setToken(token);
+                this.setUser(user); // Update user data
                                 
                 return token;
             } catch (error) {
                 console.error("Refresh Token Error:", error);
-                // Don't logout on refresh failures - just try again later
-                setTimeout(() => {
-                    this.refreshToken();
-                }, 60 * 1000);
+                setTimeout(() => this.refreshToken(), 60 * 1000);
             }
-        },
+        }
+        ,
         
         async checkTokenExpired() {
             let token = this.getToken();
