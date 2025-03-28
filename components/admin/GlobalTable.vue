@@ -4,26 +4,27 @@
       <v-card elevation="2" class="rounded-xl flex-grow-1 d-flex flex-column" color="primary" variant="outlined" style="width: 100%;">
         <v-card-title class="d-flex justify-space-between align-center">
           <div class="white--text">{{ title }}</div>
-          <!--  Add Button -->
+          <!-- Add Button -->
           <v-btn v-if="showAdd" @click="onAddClick" icon="mdi-plus" color="primary"></v-btn>
-
         </v-card-title>
 
-        <v-table class="flex-grow-1" style="overflow: auto; max-height: calc(100vh - 150px); width: 100%;" fixed-header>
+        <v-table class="flex-grow-1 ma-0 pa-0" style="overflow: auto; max-height: calc(100vh - 240px); width: 100%;" fixed-header>
           <thead>
             <tr>
+              <th class="text-left">#</th> <!-- New Index Column -->
               <th v-for="header in computedHeaders" :key="header.value" class="text-left">
                 {{ header.text }}
               </th>
-              <th class="text-left">Actions</th>
+              <th class="text-right">Actions</th>
             </tr>
           </thead>
           <tbody>
-            <tr v-for="item in items" :key="item.id">
+            <tr v-for="(item, index) in items" :key="item.id">
+              <td>{{ index + 1 }}</td> <!-- Auto-Numbering Column -->
               <td v-for="header in computedHeaders" :key="header.value">
                 {{ item[header.value] }}
               </td>
-              <td>
+              <td class="text-right">
                 <v-tooltip bottom v-if="showActivate && item.active === 1">
                   <template v-slot:activator="{ on, attrs }">
                     <v-icon @click="onDeactivateClick(item.global_id)" class="mx-1" color="green" v-bind="attrs" v-on="on">
@@ -54,6 +55,28 @@
             </tr>
           </tbody>
         </v-table>
+        <v-container>
+          <v-row no-gutters>
+            <v-col cols="12" sm="4">
+            </v-col>
+
+            <v-col cols="12" sm="4">
+              <v-pagination
+                v-if="items.length > 0"
+                :length="Math.ceil(items.length / 10)"
+                :total-visible="7"
+                color="primary"
+                class="mx-auto"
+              ></v-pagination>
+            </v-col>
+
+            <v-col cols="12" sm="4" class="d-flex justify-end align-center">
+              <v-btn variant="tonal" @click="onLoadMoreClick" color="primary" class="ml-4">
+                Load More
+              </v-btn>  
+            </v-col>
+          </v-row>
+        </v-container>
       </v-card>
     </v-sheet>
   </v-container>
@@ -82,4 +105,5 @@ const onAddClick = () => emit("add-click");
 const onEditClick = (id) => emit("edit-click", id);
 const onActivateClick = (id) => emit("activate-click", id);
 const onDeactivateClick = (id) => emit("deactivate-click", id);
+const onLoadMoreClick = () => emit("load-more-click");
 </script>
