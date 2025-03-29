@@ -343,10 +343,15 @@ export const userAuth = defineStore('userAuth', {
                 console.log("================ Refresh token ===================");
                 console.log(response.data);
                 console.log("===================================================");
-                if (!response.data?.data?.token || !response.data?.data?.user) {
-                    console.error("Invalid refresh token response", response);
+                // if (!response.data?.data?.token || !response.data?.data?.user) {
+                //     console.error("Invalid refresh token response", response);
+                //     return;
+                // }
+                if(response.data.success === false) {
+                    console.error("Refresh token failed:", response.data.message);
                     return;
                 }
+
         
                 const token = response.data.data.token;
                 const user = response.data.data.user;
