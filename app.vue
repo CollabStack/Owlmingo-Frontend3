@@ -44,7 +44,8 @@ onBeforeMount( async () => {
         const response = await userAuthStore.telegramOAuth(userData);
         console.log("Telegram Auth Response Page:", response);
         if (response.status === 200) {
-          navigateTo("/");
+          // navigateTo("/");
+          window.location.href = "/";
         }
       }
     } catch (error) {
@@ -61,7 +62,9 @@ onBeforeMount( async () => {
     const token = hash.replace("#token=", "");
     try {
       userAuthStore.setToken(token);
-      navigateTo("/");
+      // navigateTo("/");
+      window.location.href = "/";
+
     } catch (error) {
       console.error("Error decoding SSO Result:", error);
       Swal.fire({
