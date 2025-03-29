@@ -340,6 +340,9 @@ export const userAuth = defineStore('userAuth', {
                 const {$UserPrivateAxios} = useNuxtApp();
                 const response = await $UserPrivateAxios.post('/refresh-token');
 
+                console.log("================ Refresh token ===================");
+                console.log(response.data);
+                console.log("===================================================");
                 if (!response.data?.data?.token || !response.data?.data?.user) {
                     console.error("Invalid refresh token response", response);
                     return;
