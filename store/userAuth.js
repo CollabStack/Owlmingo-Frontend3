@@ -362,6 +362,7 @@ export const userAuth = defineStore('userAuth', {
                 return token;
             } catch (error) {
                 console.error("Refresh Token Error:", error);
+                this.logout(); // Logout on error
                 setTimeout(() => this.refreshToken(), 60 * 1000);
             }
         }
