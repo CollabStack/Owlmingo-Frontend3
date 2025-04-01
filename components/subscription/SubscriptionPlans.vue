@@ -92,19 +92,43 @@
               </v-list>
 
               <!-- Subscribe Button with animation -->
-              <v-btn
-                block
-                :color="plan.plan === 'Annually' ? 'secondary' : 'gold'"
-                class="mt-4 rounded-lg animated-btn outfit outfit-medium"
-                rounded
-                :variant="getButtonVariant(plan.plan)"
-                @click="$emit('subscribe', { plan, type: selectedTab, billing: selectedTab === 'work' ? selectedTypes[plan.name] : plan.name.toLowerCase() })"
+              <v-dialog
+                transition="dialog-bottom-transition"
+                width="auto"
               >
-                <span class="d-flex align-center">
-                  {{ buttonText }}
-                  <v-icon class="ms-2 btn-icon">mdi-check-circle</v-icon>
-                </span>
-              </v-btn>
+                <template v-slot:activator="{ props: activatorProps }">
+                  <v-btn
+                    v-bind="activatorProps"
+                    block
+                    :color="plan.plan === 'Annually' ? 'secondary' : 'gold'"
+                    class="mt-4 rounded-lg animated-btn outfit outfit-medium"
+                    rounded
+                    :variant="getButtonVariant(plan.plan)"
+                    @click="subscribe(plan)"
+                  >
+                    <span class="d-flex align-center">
+                      {{ buttonText }}
+                      <v-icon class="ms-2 btn-icon">mdi-check-circle</v-icon>
+                    </span>
+                  </v-btn>
+                </template>
+
+                <template v-slot:default="{ isActive }">
+                  <v-card class="pt-5 px-5" min-width="500px">
+                    <PayPalButton/>
+                    <v-card-actions>
+                      <v-btn
+                        block 
+                        class="mt-4 mb-4 rounded-lg animated-btn outfit outfit-medium"
+                        variant="outlined"
+                        @click="isActive.value = false"
+                      >
+                        Close
+                      </v-btn>
+                    </v-card-actions>
+                  </v-card>
+                </template>
+              </v-dialog>
             </v-card>
           </div>
         </v-col>
@@ -119,7 +143,7 @@
         :initial="{ opacity: 0 }"
         :enter="{ opacity: 1, transition: { delay: 800, duration: 500 } }"
       >
-        Visit our <a href="#" class="text-decoration-none link-hover" style="color: blue;" @click="$emit('linkClick')">plans page</a> to compare all features.
+        Visit our <router-link to="/pricing" class="text-decoration-none link-hover" style="color: blue;">pricing page</router-link> to compare all features.
       </p>
     </template>
   </v-container>
@@ -155,7 +179,6 @@ const props = defineProps({
   }
 });
 
-const emit = defineEmits(['subscribe', 'tabChange', 'linkClick']);
 
 const plans = ref([]);
 const loading = ref(true);
@@ -170,6 +193,12 @@ onMounted(async () => {
 
 const getButtonVariant = (planName) => {
   return planName === "Annually" ? "flat" : "outlined";
+};
+
+const subscribe = (plan) => {
+  // Handle subscription logic here
+  console.log("Subscribing to plan:", plan);
+  // You can redirect to a payment page or show a modal here
 };
 </script>
 

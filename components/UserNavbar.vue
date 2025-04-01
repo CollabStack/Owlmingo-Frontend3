@@ -98,8 +98,8 @@ const tabs = [
         route: '/summary',
         childRoutes: ['/summary/'] // All paths starting with /summary/ are related
     },
+    { label: 'Pricing', route: '/pricing'},
     { label: 'About', route: '/about' },
-    { label: 'ColorView', route: '/color'},
 ];
 const activeTab = ref(route.path);
 const authStore = userAuth();

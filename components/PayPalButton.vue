@@ -14,10 +14,38 @@
     console.log("PayPal Button Axios:", $UserPrivateAxios);
 
     if (window.paypal) {
+        // window.paypal.Buttons({
+        // createOrder: async () => {
+        //     try {
+        //     const res = await $UserPrivateAxios.post('/create-order');
+        //     console.log("PayPal Order Created:", res);
+        //     return res.data.data.result.id;
+        //     } catch (error) {
+        //     console.error("Error creating PayPal order:", error);
+        //     }
+        // },
+        // onApprove: async (data) => {
+        //     try {
+        //     const res = await $UserPrivateAxios.post('/capture-order', {
+        //         orderID: data.orderID
+        //     });
+        //     console.log("Payment Captured:", res.data);
+        //     } catch (error) {
+        //     console.error("Error capturing PayPal order:", error);
+        //     }
+        // }
+        // }).render('#paypal-button-container');
         window.paypal.Buttons({
         createOrder: async () => {
             try {
-            const res = await $UserPrivateAxios.post('/create-order');
+            // Pass additional parameters as needed
+            const orderData = {
+                amount: "20.00",
+                userId: "123",   // Replace with the actual user id
+                planId: "premium", // Replace with the actual plan id
+                price: "20.00"
+            };
+            const res = await $UserPrivateAxios.post('/create-order', orderData);
             console.log("PayPal Order Created:", res);
             return res.data.data.result.id;
             } catch (error) {
@@ -35,6 +63,7 @@
             }
         }
         }).render('#paypal-button-container');
+
     } else {
         console.error("PayPal SDK not loaded.");
     }
