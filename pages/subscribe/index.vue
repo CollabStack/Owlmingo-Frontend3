@@ -1,9 +1,6 @@
 <template>
-  <SubscriptionPlans 
-    @subscribe="handleSubscription"
-    @tabChange="handleTabChange"
-    @linkClick="navigateToPlansPage"
-  />
+  <!-- @subscribe="handleSubscription" -->
+  <SubscriptionPlans />
 </template>
 
 <script setup>

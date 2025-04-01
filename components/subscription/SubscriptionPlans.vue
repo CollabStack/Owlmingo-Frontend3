@@ -8,7 +8,8 @@
     </div>
 
     <v-row class="mt-6 justify-center">
-      <v-col cols="12" md="5" v-for="(plan, index) in activePlans" :key="index">
+
+      <v-col cols="12" md="5" v-for="(plan, index) in plans" :key="index">
         <div 
           v-motion 
           :initial="{ opacity: 0, y: 50 }" 
@@ -16,29 +17,25 @@
         >
           <v-card class="pa-6 text-left rounded-lg plan-card" elevation="2">
             <p class="text-h4 font-weight-bold mb-1 outfit outfit-bold" :class="plan.colorClass">
-              {{ plan.name }}
+              {{ plan.plan }}
             </p>
 
             <!-- Price & Billing Info with animation -->
             <div class="price-container">
               <p class="text-h4 font-weight-bold mb-1 outfit outfit-bold animated-price">
-                <template v-if="selectedTab === 'school'">
-                  {{ plan.price }} <span class="text-h6">/ month</span>
-                </template>
-                <template v-else>
-                  {{ selectedTypes[plan.name] === 'month' ? plan.monthlyPrice : plan.annualPrice }}
-                  <span class="text-h6">/ month</span>
-                </template>
+                <!-- <template>
+                </template> -->
+                ${{ plan.price }}<span class="text-h6">/ month</span>
               </p>
               <p class="text-h7 text-grey-darken-1 mb-1 outfit outfit-regular">
-                {{ selectedTab === 'school' ? plan.billing : selectedTypes[plan.name] === 'month' ? plan.monthlyBilling : plan.annualBilling }}
+                {{ plan.is_annual === true ? 'Billed annually ($' + plan.total_price + ' total)' : 'Billed monthly' }}
               </p>
             </div>
 
             <!-- Features List with animation -->
             <v-list class="text-left feature-list">
               <v-list-item 
-                v-for="(feature, i) in plan.features" 
+                v-for="(feature, i) in plan.description" 
                 :key="i" 
                 class="align-start feature-item"
                 v-motion
@@ -47,7 +44,7 @@
               >
                 <template #prepend>
                   <div class="checkmark-container">
-                    <v-icon :color="plan.iconColor" class="checkmark-icon">mdi-check-circle</v-icon>
+                    <v-icon :color="plan.plan === 'Annually' ? 'secondary' : 'gold'" class="checkmark-icon">mdi-check-circle</v-icon>
                   </div>
                 </template>
                 <v-list-item-content>
@@ -60,12 +57,13 @@
             </div>
 
             <!-- Subscribe Button with animation like home page -->
+            <!-- :color="plan"  -->
             <v-btn 
               block 
-              :color="plan.buttonColor" 
+              :color="plan.plan === 'Annually' ? 'secondary' : 'gold'" 
               class="mt-4 rounded-lg animated-btn outfit outfit-medium"
               rounded 
-              :variant="getButtonVariant(plan.name)"
+              :variant="getButtonVariant(plan.plan)"
               @click="$emit('subscribe', { plan, type: selectedTab, billing: selectedTab === 'work' ? selectedTypes[plan.name] : plan.name.toLowerCase() })"
             >
               <span class="d-flex align-center">
@@ -85,7 +83,10 @@
 </template>
 
 <script setup>
-import { ref, computed, watch } from "vue";
+import { ref, computed, watch, onMounted } from "vue";
+import { planStore } from "~/store/plan"; // Assuming you have a plan store to fetch plans
+
+const usePlanStore = planStore();
 
 const props = defineProps({
   title: {
@@ -112,101 +113,64 @@ const props = defineProps({
 
 const emit = defineEmits(['subscribe', 'tabChange', 'linkClick']);
 
-const selectedTab = ref(props.initialTab);
+const plans = ref([]);
 
-// Stores selection state for Professional & Business plans separately
-const selectedTypes = ref({
-  Professional: "annual",
-  Business: "annual",
+onMounted(async () => {
+  // Initialize plans based on the initial tab
+  // activePlans.value = plans[selectedTab.value];
+  const response = await usePlanStore.getPlans();
+  console.info("Plans Response:", response);
+  plans.value = response;
+  console.log("Plans:", plans.value);
+
 });
 
-const plans = {
-  school: [
-    {
-      name: "Annual",
-      price: "$5",
-      billing: "Billed annually ($60 total)",
-      features: [
-        "Unlimited quizzes and questions",
-        "Unlimited AI-assessed answers",
-        "200 pages per document upload",
-        "150,000 characters per text upload"
-      ],
-      colorClass: "secondary",
-      iconColor: "secondary",
-      buttonColor: "secondary",
-    },
-    {
-      name: "Monthly",
-      price: "$12",
-      billing: "Billed monthly",
-      features: [
-        "Unlimited quizzes and questions",
-        "Unlimited AI-assessed answers",
-        "200 pages per document upload",
-        "150,000 characters per text upload"
-      ],
-      colorClass: "gold",
-      iconColor: "gold",
-      buttonColor: "gold",
-    },
-  ],
-  work: [
-    {
-      name: "Professional",
-      annualPrice: "$19",
-      monthlyPrice: "$29",
-      annualBilling: "Billed annually ($228 total)",
-      monthlyBilling: "Billed monthly",
-      features: [
-        "Unlimited quizzes and questions",
-        "Unlimited AI-assessed answers",
-        "200 pages per document upload",
-        "150,000 characters per text upload",
-        "500 responses per month",
-        "Revisely Branding on Quizzes"
-      ],
-      colorClass: "secondary",
-      iconColor: "secondary",
-      buttonColor: "secondary",
-    },
-    {
-      name: "Business",
-      annualPrice: "$49",
-      monthlyPrice: "$69",
-      annualBilling: "Billed annually ($588 total)",
-      monthlyBilling: "Billed monthly",
-      features: [
-        "Unlimited quizzes and questions",
-        "Unlimited AI-assessed answers",
-        "200 pages per document upload",
-        "150,000 characters per text upload",
-        "Unlimited responses",
-        "No Revisely branding"
-      ],
-      colorClass: "gold",
-      iconColor: "gold",
-      buttonColor: "gold",
-    },
-  ],
-};
+// const plans = {
+//   school: [
+//     {
+//       name: "Annual",
+//       price: "$5",
+//       billing: "Billed annually ($60 total)",
+//       features: [
+//         "Unlimited quizzes and questions",
+//         "Unlimited AI-assessed answers",
+//         "200 pages per document upload",
+//         "150,000 characters per text upload"
+//       ],
+//       colorClass: "secondary",
+//       iconColor: "secondary",
+//       buttonColor: "secondary",
+//     },
+//     {
+//       name: "Monthly",
+//       price: "$12",
+//       billing: "Billed monthly",
+//       features: [
+//         "Unlimited quizzes and questions",
+//         "Unlimited AI-assessed answers",
+//         "200 pages per document upload",
+//         "150,000 characters per text upload"
+//       ],
+//       colorClass: "gold",
+//       iconColor: "gold",
+//       buttonColor: "gold",
+//     },
+//   ],
+ 
+// };
 
 // Reactive plans based on selected tab
 const activePlans = computed(() => plans[selectedTab.value]);
 
 // Determine button variant
 const getButtonVariant = (planName) => {
-  if (selectedTab.value === "school") {
-    return planName === "Annual" ? "flat" : "outlined";
-  } else {
-    return planName === "Professional" ? "outlined" : "flat";
-  }
+  
+  return planName === "Annually" ? "flat" : "outlined"; 
+  // else {
+  //   return planName === "Professional" ? "outlined" : "flat";
+  // }
 };
 
-// Emit tab changes
-watch(selectedTab, (newValue) => {
-  emit('tabChange', newValue);
-});
 </script>
 
 <style scoped>

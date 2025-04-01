@@ -3,11 +3,8 @@
   <div class="mt-8 mx-16 mb-8">
     <SectionDivider />
   </div>  
-  <SubscriptionPlans 
-    @subscribe="handleSubscription"
-    @tabChange="handleTabChange"
-    @linkClick="navigateToPlansPage"
-  />
+  <!-- @subscribe="handleSubscription" -->
+  <SubscriptionPlans />
 </template>
 
 <script setup>

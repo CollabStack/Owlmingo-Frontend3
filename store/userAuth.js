@@ -338,15 +338,14 @@ export const userAuth = defineStore('userAuth', {
         async refreshToken() {
             try {
                 const {$UserPrivateAxios} = useNuxtApp();
+                this.token = this.getToken(); // Ensure token is set before making the request
+                if (!this.token) {
+                    console.error("No token available for refresh.");
+                    return;
+                }
+
                 const response = await $UserPrivateAxios.post('/refresh-token');
 
-                console.log("================ Refresh token ===================");
-                console.log(response.data);
-                console.log("===================================================");
-                // if (!response.data?.data?.token || !response.data?.data?.user) {
-                //     console.error("Invalid refresh token response", response);
-                //     return;
-                // }
                 if(response.data.success === false) {
                     console.error("Refresh token failed:", response.data.message);
                     return;
