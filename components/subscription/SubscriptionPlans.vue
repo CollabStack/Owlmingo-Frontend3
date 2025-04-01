@@ -1,89 +1,132 @@
 <template>
   <v-container class="text-center">
-    <div v-motion :initial="{ opacity: 0, y: 30 }" :enter="{ opacity: 1, y: 0, transition: { duration: 600 } }" class="mb-10">
-      <h2 class="text-h5 font-weight-bold gradient-text-alt outfit outfit-bold">{{ title }}</h2>
-      <p class="text-body-2 text-grey-darken-1 outfit outfit-regular mb-5">
-        {{ description }}
-      </p>
+    <!-- Header: Title and Description -->
+    <div
+      v-motion
+      :initial="{ opacity: 0, y: 30 }"
+      :enter="{ opacity: 1, y: 0, transition: { duration: 600 } }"
+      class="mb-10"
+    >
+      <template v-if="loading">
+        <!-- Skeleton for title -->
+        <v-skeleton-loader type="heading" class="mx-auto" width="50%" />
+        <!-- Skeleton for description -->
+        <v-skeleton-loader type="text" class="mx-auto" width="70%" />
+      </template>
+      <template v-else>
+        <h2 class="text-h5 font-weight-bold gradient-text-alt outfit outfit-bold">
+          {{ title }}
+        </h2>
+        <p class="text-body-2 text-grey-darken-1 outfit outfit-regular mb-5">
+          {{ description }}
+        </p>
+      </template>
     </div>
 
     <v-row class="mt-6 justify-center">
-
-      <v-col cols="12" md="5" v-for="(plan, index) in plans" :key="index">
-        <div 
-          v-motion 
-          :initial="{ opacity: 0, y: 50 }" 
-          :enter="{ opacity: 1, y: 0, transition: { delay: 300 + (index * 150), duration: 700 } }"
-        >
+      <!-- Plan Cards -->
+      <template v-if="loading">
+        <!-- Render skeleton cards while loading -->
+        <v-col cols="12" md="5" v-for="n in 2" :key="n">
           <v-card class="pa-6 text-left rounded-lg plan-card" elevation="2">
-            <p class="text-h4 font-weight-bold mb-1 outfit outfit-bold" :class="plan.colorClass">
-              {{ plan.plan }}
-            </p>
-
-            <!-- Price & Billing Info with animation -->
-            <div class="price-container">
-              <p class="text-h4 font-weight-bold mb-1 outfit outfit-bold animated-price">
-                <!-- <template>
-                </template> -->
-                ${{ plan.price }}<span class="text-h6">/ month</span>
-              </p>
-              <p class="text-h7 text-grey-darken-1 mb-1 outfit outfit-regular">
-                {{ plan.is_annual === true ? 'Billed annually ($' + plan.total_price + ' total)' : 'Billed monthly' }}
-              </p>
-            </div>
-
-            <!-- Features List with animation -->
-            <v-list class="text-left feature-list">
-              <v-list-item 
-                v-for="(feature, i) in plan.description" 
-                :key="i" 
-                class="align-start feature-item"
-                v-motion
-                :initial="{ opacity: 0, x: -10 }"
-                :enter="{ opacity: 1, x: 0, transition: { delay: 400 + (i * 100), duration: 500 } }"
-              >
-                <template #prepend>
-                  <div class="checkmark-container">
-                    <v-icon :color="plan.plan === 'Annually' ? 'secondary' : 'gold'" class="checkmark-icon">mdi-check-circle</v-icon>
-                  </div>
-                </template>
-                <v-list-item-content>
-                  <v-list-item-title class="outfit outfit-regular">{{ feature }}</v-list-item-title>
-                </v-list-item-content>
-              </v-list-item>
-            </v-list>
-            <div  class="mb-10">
-
-            </div>
-
-            <!-- Subscribe Button with animation like home page -->
-            <!-- :color="plan"  -->
-            <v-btn 
-              block 
-              :color="plan.plan === 'Annually' ? 'secondary' : 'gold'" 
-              class="mt-4 rounded-lg animated-btn outfit outfit-medium"
-              rounded 
-              :variant="getButtonVariant(plan.plan)"
-              @click="$emit('subscribe', { plan, type: selectedTab, billing: selectedTab === 'work' ? selectedTypes[plan.name] : plan.name.toLowerCase() })"
-            >
-              <span class="d-flex align-center">
-                {{ buttonText }}
-                <v-icon class="ms-2 btn-icon">mdi-check-circle</v-icon>
-              </span>
-            </v-btn>
+            <v-skeleton-loader type="card" />
           </v-card>
-        </div>
-      </v-col>
+        </v-col>
+      </template>
+      <template v-else>
+        <v-col cols="12" md="5" v-for="(plan, index) in plans" :key="index">
+          <div
+            v-motion
+            :initial="{ opacity: 0, y: 50 }"
+            :enter="{
+              opacity: 1,
+              y: 0,
+              transition: { delay: 300 + (index * 150), duration: 700 }
+            }"
+          >
+            <v-card class="pa-6 text-left rounded-lg plan-card" elevation="2">
+              <p
+                class="text-h4 font-weight-bold mb-1 outfit outfit-bold"
+                :class="plan.colorClass"
+              >
+                {{ plan.plan }}
+              </p>
+
+              <!-- Price & Billing Info with animation -->
+              <div class="price-container">
+                <p class="text-h4 font-weight-bold mb-1 outfit outfit-bold animated-price">
+                  ${{ plan.price }}<span class="text-h6">/ month</span>
+                </p>
+                <p class="text-h7 text-grey-darken-1 mb-1 outfit outfit-regular">
+                  {{ plan.is_annual === true ? 'Billed annually ($' + plan.total_price + ' total)' : 'Billed monthly' }}
+                </p>
+              </div>
+
+              <!-- Features List with animation -->
+              <v-list class="text-left feature-list">
+                <v-list-item
+                  v-for="(feature, i) in plan.description"
+                  :key="i"
+                  class="align-start feature-item"
+                  v-motion
+                  :initial="{ opacity: 0, x: -10 }"
+                  :enter="{
+                    opacity: 1,
+                    x: 0,
+                    transition: { delay: 400 + (i * 100), duration: 500 }
+                  }"
+                >
+                  <template #prepend>
+                    <div class="checkmark-container">
+                      <v-icon :color="plan.plan === 'Annually' ? 'secondary' : 'gold'" class="checkmark-icon">
+                        mdi-check-circle
+                      </v-icon>
+                    </div>
+                  </template>
+                  <v-list-item-content>
+                    <v-list-item-title class="outfit outfit-regular">
+                      {{ feature }}
+                    </v-list-item-title>
+                  </v-list-item-content>
+                </v-list-item>
+              </v-list>
+
+              <!-- Subscribe Button with animation -->
+              <v-btn
+                block
+                :color="plan.plan === 'Annually' ? 'secondary' : 'gold'"
+                class="mt-4 rounded-lg animated-btn outfit outfit-medium"
+                rounded
+                :variant="getButtonVariant(plan.plan)"
+                @click="$emit('subscribe', { plan, type: selectedTab, billing: selectedTab === 'work' ? selectedTypes[plan.name] : plan.name.toLowerCase() })"
+              >
+                <span class="d-flex align-center">
+                  {{ buttonText }}
+                  <v-icon class="ms-2 btn-icon">mdi-check-circle</v-icon>
+                </span>
+              </v-btn>
+            </v-card>
+          </div>
+        </v-col>
+      </template>
     </v-row>
 
-    <p v-if="showFooterLink" class="mt-6 text-caption outfit outfit-regular" v-motion :initial="{ opacity: 0 }" :enter="{ opacity: 1, transition: { delay: 800, duration: 500 } }">
-      Visit our <a href="#" class="text-decoration-none link-hover" style="color: blue;" @click="$emit('linkClick')">plans page</a> to compare all features.
-    </p>
+    <!-- Footer Link: Only show after loading -->
+    <template v-if="!loading && showFooterLink">
+      <p
+        class="mt-6 text-caption outfit outfit-regular"
+        v-motion
+        :initial="{ opacity: 0 }"
+        :enter="{ opacity: 1, transition: { delay: 800, duration: 500 } }"
+      >
+        Visit our <a href="#" class="text-decoration-none link-hover" style="color: blue;" @click="$emit('linkClick')">plans page</a> to compare all features.
+      </p>
+    </template>
   </v-container>
 </template>
 
 <script setup>
-import { ref, computed, watch, onMounted } from "vue";
+import { ref, onMounted } from "vue";
 import { planStore } from "~/store/plan"; // Assuming you have a plan store to fetch plans
 
 const usePlanStore = planStore();
@@ -95,7 +138,8 @@ const props = defineProps({
   },
   description: {
     type: String,
-    default: "Unlock the full potential of the question generator with our subscription plans. From training materials to academic notes, our AI intelligently creates quizzes to reinforce learning or assess knowledge for students and professionals alike."
+    default:
+      "Unlock the full potential of the question generator with our subscription plans. From training materials to academic notes, our AI intelligently creates quizzes to reinforce learning or assess knowledge for students and professionals alike."
   },
   buttonText: {
     type: String,
@@ -114,63 +158,19 @@ const props = defineProps({
 const emit = defineEmits(['subscribe', 'tabChange', 'linkClick']);
 
 const plans = ref([]);
+const loading = ref(true);
 
 onMounted(async () => {
   // Initialize plans based on the initial tab
-  // activePlans.value = plans[selectedTab.value];
   const response = await usePlanStore.getPlans();
   console.info("Plans Response:", response);
   plans.value = response;
-  console.log("Plans:", plans.value);
-
+  loading.value = false;
 });
 
-// const plans = {
-//   school: [
-//     {
-//       name: "Annual",
-//       price: "$5",
-//       billing: "Billed annually ($60 total)",
-//       features: [
-//         "Unlimited quizzes and questions",
-//         "Unlimited AI-assessed answers",
-//         "200 pages per document upload",
-//         "150,000 characters per text upload"
-//       ],
-//       colorClass: "secondary",
-//       iconColor: "secondary",
-//       buttonColor: "secondary",
-//     },
-//     {
-//       name: "Monthly",
-//       price: "$12",
-//       billing: "Billed monthly",
-//       features: [
-//         "Unlimited quizzes and questions",
-//         "Unlimited AI-assessed answers",
-//         "200 pages per document upload",
-//         "150,000 characters per text upload"
-//       ],
-//       colorClass: "gold",
-//       iconColor: "gold",
-//       buttonColor: "gold",
-//     },
-//   ],
- 
-// };
-
-// Reactive plans based on selected tab
-const activePlans = computed(() => plans[selectedTab.value]);
-
-// Determine button variant
 const getButtonVariant = (planName) => {
-  
-  return planName === "Annually" ? "flat" : "outlined"; 
-  // else {
-  //   return planName === "Professional" ? "outlined" : "flat";
-  // }
+  return planName === "Annually" ? "flat" : "outlined";
 };
-
 </script>
 
 <style scoped>
@@ -346,4 +346,3 @@ const getButtonVariant = (planName) => {
   transform: translateY(10px);
 }
 </style>
-
