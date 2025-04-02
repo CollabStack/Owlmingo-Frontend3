@@ -7,6 +7,13 @@
   <script setup>
   import { onMounted } from 'vue';
   import { useNuxtApp } from '#app';
+
+  const props = defineProps({
+    plan: {
+      type: Object,
+      required: true
+    }
+  });
   
   onMounted(() => {
     const { $UserPrivateAxios } = useNuxtApp();
@@ -19,9 +26,8 @@
         createOrder: async () => {
           try {
             const orderData = {
-              amount: "20.00",     // Replace with dynamic values as needed
-              userId: "123",
-              planId: "premium",
+              amount: 20.00,     // Replace with dynamic values as needed
+              planId: plan.id,
               price: "20.00"
             };
             const res = await $UserPrivateAxios.post('/create-order', orderData);
@@ -51,5 +57,7 @@
       console.error("PayPal SDK not loaded.");
     }
   });
+
+
   </script>
   
