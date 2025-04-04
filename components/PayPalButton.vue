@@ -35,6 +35,7 @@ onMounted(() => {
         const res = await $UserPrivateAxios.post('/create-order', { planId: props.plan._id, amount: props.plan.total_price });
         console.log("============ Order Created ============");
         console.log('Order Created:', res);
+        console.log('Order Created:', res.data.id);
         console.log("============ Order Created ============");
         return res.data.id;
         // const order = await res.json();
