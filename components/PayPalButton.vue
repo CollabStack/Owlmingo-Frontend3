@@ -24,7 +24,7 @@ onMounted(() => {
   if (window.paypal) {
     window.paypal.Buttons({
       createOrder: async () => {
-        const res = await fetch('/api/paypal/create-order', {
+        const res = await fetch('https://owlmingo-16f448c07f1f.herokuapp.com/api/v1/user/auth/create-order', {
           method: 'POST',
           headers: {
             'Content-Type': 'application/json'
