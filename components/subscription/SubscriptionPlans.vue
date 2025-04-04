@@ -115,7 +115,7 @@
 
                 <template v-slot:default="{ isActive }">
                   <v-card class="pt-5 px-5" min-width="500px">
-                    <PaypalButton :plan="plan" />
+                    <PayPalButton :plan="plan" />
                     <v-card-actions>
                       <v-btn
                         block 
