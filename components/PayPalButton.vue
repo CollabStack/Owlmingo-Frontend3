@@ -36,7 +36,7 @@ onMounted(() => {
         console.log("============ Order Created ============");
         console.log('Order Created:', res);
         console.log("============ Order Created ============");
-
+        return res.data.id;
         // const order = await res.json();
         // console.log("============ Order Created ============");
         // console.log('Order Created:', order);
