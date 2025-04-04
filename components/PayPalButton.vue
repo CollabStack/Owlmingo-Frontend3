@@ -32,13 +32,16 @@ onMounted(() => {
         //   },
         //   body: JSON.stringify({ planId: props.plan._id, amount: props.plan.total_price })
         // });
-        const res = await $UserPrivateAxios.post('/create-order', { planId: props.plan._id, amount: props.plan.total_price });
+        const res = await $UserPrivateAxios.post('/create-orderz', { planId: props.plan._id, amount: props.plan.total_price });
+        console.log("============ Order Created ============");
+        console.log('Order Created:', res);
+        console.log("============ Order Created ============");
 
-        const order = await res.json();
-        console.log("============ Order Created ============");
-        console.log('Order Created:', order);
-        console.log("============ Order Created ============");
-        return order.id;
+        // const order = await res.json();
+        // console.log("============ Order Created ============");
+        // console.log('Order Created:', order);
+        // console.log("============ Order Created ============");
+        // return order.id;
       },
       onApprove: async (data) => {
         const res = await fetch('/api/paypal/capture-order', {
