@@ -17,9 +17,11 @@ const props = defineProps({
 
 onMounted(() => {
   const { $UserPrivateAxios } = useNuxtApp();
+  console.log("========================== PayPal Button ==========================");
   console.log("PayPal Button Mounted");
   console.log("PayPal Button Axios:", $UserPrivateAxios);
   console.log("Plan Data:", props.plan);
+  console.log("========================== PayPal Button ==========================");
 
   if (window.paypal) {
     window.paypal.Buttons({
