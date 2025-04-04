@@ -19,7 +19,7 @@
     const { $UserPrivateAxios } = useNuxtApp();
     console.log("PayPal Button Mounted");
     console.log("PayPal Button Axios:", $UserPrivateAxios);
-  
+    console.log("Plan Data:", plan);
     // Check that the PayPal SDK has been loaded
     if (window.paypal) {
       window.paypal.Buttons({
