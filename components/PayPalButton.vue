@@ -45,15 +45,19 @@ onMounted(() => {
         // return order.id;
       },
       onApprove: async (data) => {
-        const res = await fetch('/api/paypal/capture-order', {
-          method: 'POST',
-          body: JSON.stringify({ orderID: data.orderID }),
-          headers: {
-            'Content-Type': 'application/json'
-          }
-        });
-        const order = await res.json();
-        console.log('Order Captured:', order);
+        // const res = await fetch('/api/paypal/capture-order', {
+        //   method: 'POST',
+        //   body: JSON.stringify({ orderID: data.orderID }),
+        //   headers: {
+        //     'Content-Type': 'application/json'
+        //   }
+        // });
+        const res = await $UserPrivateAxios.post('/capture-order', { orderID: data.orderID });
+        console.log("============ Order Captured ============");
+        console.log('Order Captured:', res);
+        console.log("============ Order Captured ============");
+        // const order = await res.json();
+        // console.log('Order Captured:', order);
       }
     }).render('#paypal-button-container');
   }
