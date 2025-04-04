@@ -19,7 +19,7 @@
     const { $UserPrivateAxios } = useNuxtApp();
     console.log("PayPal Button Mounted");
     console.log("PayPal Button Axios:", $UserPrivateAxios);
-    console.log("Plan Data:", plan);
+    console.log("Plan Data:", props.plan);
     // Check that the PayPal SDK has been loaded
     if (window.paypal) {
       window.paypal.Buttons({
@@ -27,7 +27,7 @@
           try {
             const orderData = {
               amount: 20.00,     // Replace with dynamic values as needed
-              planId: plan.id,
+              planId: props.plan.id,
               price: "20.00"
             };
             const res = await $UserPrivateAxios.post('/create-order', orderData);
