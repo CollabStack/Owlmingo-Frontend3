@@ -9,9 +9,10 @@ import { onMounted } from 'vue';
 
 const props = defineProps({
   plan: {
-    type: Array,
+    type: Object,
     required: true
   }
+
 });
 
 onMounted(() => {
@@ -28,7 +29,7 @@ onMounted(() => {
           headers: {
             'Content-Type': 'application/json'
           },
-          // body: JSON.stringify({ price: props.price })
+          body: JSON.stringify({ planId: props.plan.id, amount: props.plan.total_price })
         });
         const order = await res.json();
         return order.id;
