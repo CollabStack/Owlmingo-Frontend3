@@ -7,6 +7,7 @@
 <script setup>
 import { onMounted } from 'vue';
 import { useNuxtApp } from '#app';
+import Swal from 'sweetalert2';
 
 const props = defineProps({
   plan: {
@@ -45,13 +46,6 @@ onMounted(() => {
         // return order.id;
       },
       onApprove: async (data) => {
-        // const res = await fetch('/api/paypal/capture-order', {
-        //   method: 'POST',
-        //   body: JSON.stringify({ orderID: data.orderID }),
-        //   headers: {
-        //     'Content-Type': 'application/json'
-        //   }
-        // });
         console.log("============ Order Approved ============");
         console.log('Order Approved:', data);
         console.log("============ Order Approved ============");
@@ -59,8 +53,23 @@ onMounted(() => {
         console.log("============ Order Captured ============");
         console.log('Order Captured:', res);
         console.log("============ Order Captured ============");
-        // const order = await res.json();
-        // console.log('Order Captured:', order);
+        if (res.status === 200){
+          console.log("============ Order Captured Success ============");
+          console.log('Order Captured Success:', res.data);
+          console.log("============ Order Captured Success ============");
+          Swal.fire({
+            icon: 'success',
+            title: 'Transaction Completed Successfully',
+            text: 'Thank you for your purchase!',
+            showConfirmButton: false,
+            timer: 2000
+          });
+          // Handle successful capture here, e.g., show a success message or redirect
+          // alert('Transaction completed by ' + res.data.payer.name.given_name);
+        } else {
+          console.error('Capture failed:', res);
+          alert('Transaction failed. Please try again.');
+        }
       }
     }).render('#paypal-button-container');
   }
