@@ -23,6 +23,8 @@ onMounted(() => {
   if (window.paypal) {
     window.paypal.Buttons({
       createOrder: async () => {
+        // const res = await $UserPrivateAxios.post('/create-order', { planId: props.plan._id, amount: props.plan.total_price });
+
         const res = await $UserPrivateAxios.post('/create-order', { planId: props.plan._id, amount: props.plan.total_price , duration: props.plan.duration });
         return res.data.id;
       },
