@@ -160,24 +160,7 @@ onMounted(async () => {
 
   // Open dialog only after login check
 const subscribe = async (plan) => {
-  if (useUserAuth.checkTokenExpired()) {
-    console.log("===========================================");
-    console.log("Plan ID: ", plan._id);
-    const subscription = await useSubscriptionStore.checkSubscription(plan._id);
-    console.log("===================== Subscription ======================");
-    console.log(subscription);
-    console.log("===========================================================");
-    if (subscription.status === 201){
-      Swal.fire({
-        icon             : "info",
-        title            : "Already Subscribed",
-        text             : "You are already subscribed to this plan.",
-        confirmButtonText: "OK"
-      });
-      return;
-    }
-    dialogs.value[plan._id] = true;
-  } else {
+  if(!usePlanStore.checkSubscription()){
     Swal.fire({
       icon             : "error",
       title            : "Login Required",
@@ -190,6 +173,22 @@ const subscribe = async (plan) => {
       }
     });
   }
+  console.log("===========================================");
+  console.log("Plan ID: ", plan._id);
+  const subscription = await useSubscriptionStore.checkSubscription(plan._id);
+  console.log("===================== Subscription ======================");
+  console.log(subscription);
+  console.log("===========================================================");
+  if (subscription.status === 201){
+    Swal.fire({
+      icon             : "info",
+      title            : "Already Subscribed",
+      text             : "You are already subscribed to this plan.",
+      confirmButtonText: "OK"
+    });
+    return;
+  }
+  dialogs.value[plan._id] = true;
 };
 
 const getButtonVariant = (planName) => {
