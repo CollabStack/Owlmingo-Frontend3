@@ -362,7 +362,7 @@ export const userAuth = defineStore('userAuth', {
             } catch (error) {
                 console.error("Refresh Token Error:", error);
                 this.logout(); // Logout on error
-                setTimeout(() => this.refreshToken(), 60 * 1000);
+                // setTimeout(() => this.refreshToken(), 60 * 1000);
             }
         }
         ,
@@ -387,6 +387,8 @@ export const userAuth = defineStore('userAuth', {
                     console.log('Token expired, getting new one');
                     token = await this.refreshToken();
                     return !!token;
+                    // this.logout();
+                    // return false;
                 } else if (payload.exp - currentTime < 900) { // 15 minutes
                     console.log('Token expiring soon, refreshing');
                     this.refreshToken(); // Don't await, let it refresh in background
