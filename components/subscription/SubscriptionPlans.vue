@@ -92,7 +92,7 @@
                     @click="subscribe(plan)"
                   >
                     <span class="d-flex align-center">
-                      {{ buttonText }}
+                      Unlock smarter studying 
                       <v-icon class="ms-2 btn-icon">mdi-check-circle</v-icon>
                     </span>
                   </v-btn>
