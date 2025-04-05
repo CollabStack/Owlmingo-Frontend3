@@ -160,7 +160,10 @@ onMounted(async () => {
 
   // Open dialog only after login check
 const subscribe = async (plan) => {
-  if(!useUserAuth.checkTokenExpired()){
+  if(useUserAuth.checkTokenExpired()){
+    console.log("===========================================");
+    console.log("User is logged in, opening dialog for plan: ", plan._id);
+    console.log("===========================================");
     Swal.fire({
       icon             : "error",
       title            : "Login Required",
