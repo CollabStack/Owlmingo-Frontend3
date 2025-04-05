@@ -17,6 +17,8 @@ const props = defineProps({
 
 });
 
+const emit = defineEmits(['paymentResponse']);
+
 onMounted(() => {
   console.log("===== PayPal Button Mounted =====");
   console.log('PayPal Button Mounted');
@@ -54,7 +56,7 @@ onMounted(() => {
         console.log('Order Captured:', res);
         console.log("============ Order Captured ============");
         if (res.status === 200){
-          this.$emit('paymentResponse', res.status);
+          this.emit('paymentResponse', res.status);
           console.log("============ Order Captured Success ============");
           console.log('Order Captured Success:', res.data);
           console.log("============ Order Captured Success ============");
