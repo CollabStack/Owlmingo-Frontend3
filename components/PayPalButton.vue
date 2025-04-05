@@ -56,7 +56,7 @@ onMounted(() => {
         console.log('Order Captured:', res);
         console.log("============ Order Captured ============");
         if (res.status === 200){
-          this.emit('paymentResponse', res.status);
+          emit('paymentResponse', res.status);
           console.log("============ Order Captured Success ============");
           console.log('Order Captured Success:', res.data);
           console.log("============ Order Captured Success ============");
