@@ -11,7 +11,9 @@ export const subscriptionStore = defineStore('subscriptionStore',{
         console.log("======================================");
         console.log("Checking subscription for plan ID:", planId);
         console.log("===================== Subscription ======================");
-        const response = await $UserPrivateAxios.post('check-subscription', {planId: planId});
+        const response = await $UserPrivateAxios.post('check-subscription', {planId});
+                        //  await $UserPrivateAxios.post('check-subscription', { planId: planId });
+
         console.log('Subscription check response:', response);
         return response;
       } catch (error) {
