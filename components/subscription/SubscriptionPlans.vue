@@ -161,6 +161,8 @@ onMounted(async () => {
   // Open dialog only after login check
 const subscribe = async (plan) => {
   if (useUserAuth.checkTokenExpired()) {
+    console.log("===========================================");
+    console.log("Plan ID: ", plan._id);
     const subscription = await useSubscriptionStore.checkSubscription(plan._id);
     console.log("===================== Subscription ======================");
     console.log(subscription);

@@ -9,7 +9,7 @@ export const subscriptionStore = defineStore('subscriptionStore',{
       const { $UserPrivateAxios } = useNuxtApp();
       try {
         console.log("===================== Subscription ======================");
-        const response = await $UserPrivateAxios.post('check-subscription', planId);
+        const response = await $UserPrivateAxios.post('check-subscription', {planId: planId});
         console.log('Subscription check response:', response);
         return response;
       } catch (error) {
