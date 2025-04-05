@@ -52,6 +52,9 @@ onMounted(() => {
         //     'Content-Type': 'application/json'
         //   }
         // });
+        console.log("============ Order Approved ============");
+        console.log('Order Approved:', data);
+        console.log("============ Order Approved ============");
         const res = await $UserPrivateAxios.post('/capture-order', { orderID: data.orderID });
         console.log("============ Order Captured ============");
         console.log('Order Captured:', res);
