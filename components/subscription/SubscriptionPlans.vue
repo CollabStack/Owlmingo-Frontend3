@@ -160,7 +160,7 @@ onMounted(async () => {
 
   // Open dialog only after login check
 const subscribe = async (plan) => {
-  if(!usePlanStore.checkSubscription()){
+  if(!useUserAuth.checkTokenExpired()){
     Swal.fire({
       icon             : "error",
       title            : "Login Required",
