@@ -115,7 +115,7 @@
 
                 <template v-slot:default="{ isActive }">
                   <v-card class="pt-5 px-5" min-width="500px">
-                    <PayPalButton :plan="plan" />
+                    <PayPalButton :plan="plan" @paymentResponse="handlePaymentResponse" />
                     <v-card-actions>
                       <v-btn
                         block 
@@ -152,6 +152,7 @@
 <script setup>
 import { ref, onMounted } from "vue";
 import { planStore } from "~/store/plan"; // Assuming you have a plan store to fetch plans
+import Swal from 'sweetalert2';
 
 const usePlanStore = planStore();
 
@@ -200,6 +201,26 @@ const subscribe = (plan) => {
   console.log("Subscribing to plan:", plan);
   // You can redirect to a payment page or show a modal here
 };
+
+const handlePaymentResponse = (status) => {
+  if (status === 200) {
+    Swal.fire({
+      icon: 'success',
+      title: 'Payment Successful!',
+      text: 'Thank you for your subscription!',
+      showConfirmButton: false,
+      timer: 2000
+    });
+  } else {
+    Swal.fire({
+      icon: 'error',
+      title: 'Payment Failed',
+      text: 'Something went wrong. Please try again.',
+      showConfirmButton: true
+    });
+  }
+};
+
 </script>
 
 <style scoped>
