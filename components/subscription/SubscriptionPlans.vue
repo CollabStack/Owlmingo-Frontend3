@@ -1,6 +1,6 @@
 <template>
   <v-container class="text-center">
-    <!-- Header: Title and Description -->
+    <!-- Header -->
     <div
       v-motion
       :initial="{ opacity: 0, y: 30 }"
@@ -8,9 +8,7 @@
       class="mb-10"
     >
       <template v-if="loading">
-        <!-- Skeleton for title -->
         <v-skeleton-loader type="heading" class="mx-auto" width="50%" />
-        <!-- Skeleton for description -->
         <v-skeleton-loader type="text" class="mx-auto" width="70%" />
       </template>
       <template v-else>
@@ -23,10 +21,9 @@
       </template>
     </div>
 
+    <!-- Plans -->
     <v-row class="mt-6 justify-center">
-      <!-- Plan Cards -->
       <template v-if="loading">
-        <!-- Render skeleton cards while loading -->
         <v-col cols="12" md="5" v-for="n in 2" :key="n">
           <v-card class="pa-6 text-left rounded-lg plan-card" elevation="2">
             <v-skeleton-loader type="card" />
@@ -38,31 +35,22 @@
           <div
             v-motion
             :initial="{ opacity: 0, y: 50 }"
-            :enter="{
-              opacity: 1,
-              y: 0,
-              transition: { delay: 300 + (index * 150), duration: 700 }
-            }"
+            :enter="{ opacity: 1, y: 0, transition: { delay: 300 + (index * 150), duration: 700 } }"
           >
             <v-card class="pa-6 text-left rounded-lg plan-card" elevation="2">
-              <p
-                class="text-h4 font-weight-bold mb-1 outfit outfit-bold"
-                :class="plan.colorClass"
-              >
+              <p class="text-h4 font-weight-bold mb-1 outfit outfit-bold" :class="plan.colorClass">
                 {{ plan.plan }}
               </p>
 
-              <!-- Price & Billing Info with animation -->
               <div class="price-container">
                 <p class="text-h4 font-weight-bold mb-1 outfit outfit-bold animated-price">
                   ${{ plan.price }}<span class="text-h6">/ month</span>
                 </p>
                 <p class="text-h7 text-grey-darken-1 mb-1 outfit outfit-regular">
-                  {{ plan.is_annual === true ? 'Billed annually ($' + plan.total_price + ' total)' : 'Billed monthly' }}
+                  {{ plan.is_annual ? 'Billed annually ($' + plan.total_price + ' total)' : 'Billed monthly' }}
                 </p>
               </div>
 
-              <!-- Features List with animation -->
               <v-list class="text-left feature-list">
                 <v-list-item
                   v-for="(feature, i) in plan.description"
@@ -70,11 +58,7 @@
                   class="align-start feature-item"
                   v-motion
                   :initial="{ opacity: 0, x: -10 }"
-                  :enter="{
-                    opacity: 1,
-                    x: 0,
-                    transition: { delay: 400 + (i * 100), duration: 500 }
-                  }"
+                  :enter="{ opacity: 1, x: 0, transition: { delay: 400 + (i * 100), duration: 500 } }"
                 >
                   <template #prepend>
                     <div class="checkmark-container">
@@ -91,8 +75,9 @@
                 </v-list-item>
               </v-list>
 
-              <!-- Subscribe Button with animation -->
+              <!-- Dialog -->
               <v-dialog
+                v-model="dialogs[plan._id]"
                 transition="dialog-bottom-transition"
                 width="auto"
               >
@@ -113,15 +98,15 @@
                   </v-btn>
                 </template>
 
-                <template v-slot:default="{ isActive }">
+                <template v-slot:default>
                   <v-card class="pt-5 px-5" min-width="500px">
                     <PayPalButton :plan="plan" @paymentResponse="handlePaymentResponse" />
                     <v-card-actions>
                       <v-btn
-                        block 
+                        block
                         class="mt-4 mb-4 rounded-lg animated-btn outfit outfit-medium"
                         variant="outlined"
-                        @click="isActive.value = false"
+                        @click="dialogs[plan._id] = false"
                       >
                         Close
                       </v-btn>
@@ -135,7 +120,7 @@
       </template>
     </v-row>
 
-    <!-- Footer Link: Only show after loading -->
+    <!-- Footer -->
     <template v-if="!loading && showFooterLink">
       <p
         class="mt-6 text-caption outfit outfit-regular"
@@ -151,43 +136,25 @@
 
 <script setup>
 import { ref, onMounted } from "vue";
-import { planStore } from "~/store/plan"; // Assuming you have a plan store to fetch plans
-import Swal from 'sweetalert2';
+import { planStore } from "~/store/plan";
+import Swal from "sweetalert2";
 
 const usePlanStore = planStore();
 
 const props = defineProps({
-  title: {
-    type: String,
-    default: "Subscribe to Generate Unlimited Quizzes"
-  },
-  description: {
-    type: String,
-    default:
-      "Unlock the full potential of the question generator with our subscription plans. From training materials to academic notes, our AI intelligently creates quizzes to reinforce learning or assess knowledge for students and professionals alike."
-  },
-  buttonText: {
-    type: String,
-    default: "Subscribe"
-  },
-  showFooterLink: {
-    type: Boolean,
-    default: true
-  },
-  initialTab: {
-    type: String,
-    default: "school"
-  }
+  title: String,
+  description: String,
+  buttonText: String,
+  showFooterLink: Boolean,
+  initialTab: String
 });
-
 
 const plans = ref([]);
 const loading = ref(true);
+const dialogs = ref({});
 
 onMounted(async () => {
-  // Initialize plans based on the initial tab
   const response = await usePlanStore.getPlans();
-  console.info("Plans Response:", response);
   plans.value = response;
   loading.value = false;
 });
@@ -197,30 +164,34 @@ const getButtonVariant = (planName) => {
 };
 
 const subscribe = (plan) => {
-  // Handle subscription logic here
-  console.log("Subscribing to plan:", plan);
-  // You can redirect to a payment page or show a modal here
+  dialogs.value[plan._id] = true;
 };
 
 const handlePaymentResponse = (status) => {
-  if (status === 200) {
-    Swal.fire({
-      icon: 'success',
-      title: 'Payment Successful!',
-      text: 'Thank you for your subscription!',
-      showConfirmButton: false,
-      timer: 2000
-    });
-  } else {
-    Swal.fire({
-      icon: 'error',
-      title: 'Payment Failed',
-      text: 'Something went wrong. Please try again.',
-      showConfirmButton: true
-    });
+  const openDialogPlan = Object.keys(dialogs.value).find(key => dialogs.value[key]);
+  if (openDialogPlan) {
+    dialogs.value[openDialogPlan] = false;
   }
-};
 
+  setTimeout(() => {
+    if (status === 200) {
+      Swal.fire({
+        icon: "success",
+        title: "Payment Successful!",
+        text: "Thank you for your subscription!",
+        showConfirmButton: false,
+        timer: 2000
+      });
+    } else {
+      Swal.fire({
+        icon: "error",
+        title: "Payment Failed",
+        text: "Something went wrong. Please try again.",
+        showConfirmButton: true
+      });
+    }
+  }, 350);
+};
 </script>
 
 <style scoped>

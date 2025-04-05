@@ -55,24 +55,7 @@ onMounted(() => {
         console.log("============ Order Captured ============");
         console.log('Order Captured:', res);
         console.log("============ Order Captured ============");
-        if (res.status === 200){
-          emit('paymentResponse', res.status);
-          console.log("============ Order Captured Success ============");
-          console.log('Order Captured Success:', res.data);
-          console.log("============ Order Captured Success ============");
-          Swal.fire({
-            icon: 'success',
-            title: 'Transaction Completed Successfully',
-            text: 'Thank you for your purchase!',
-            showConfirmButton: false,
-            timer: 2000
-          });
-          // Handle successful capture here, e.g., show a success message or redirect
-          // alert('Transaction completed by ' + res.data.payer.name.given_name);
-        } else {
-          console.error('Capture failed:', res);
-          alert('Transaction failed. Please try again.');
-        }
+        emit('paymentResponse', res.status);
       }
     }).render('#paypal-button-container');
   }
