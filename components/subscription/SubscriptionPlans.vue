@@ -160,10 +160,8 @@ onMounted(async () => {
 
   // Open dialog only after login check
 const subscribe = async (plan) => {
-  if(useUserAuth.checkTokenExpired()){
-    console.log("===========================================");
-    console.log("User is logged in, opening dialog for plan: ", plan._id);
-    console.log("===========================================");
+  const isToken = await useUserAuth.checkTokenExpired();
+  if(!isToken) {
     Swal.fire({
       icon             : "error",
       title            : "Login Required",
@@ -175,13 +173,11 @@ const subscribe = async (plan) => {
         router.push('/auth');
       }
     });
+    return ;
   }
-  console.log("===========================================");
-  console.log("Plan ID: ", plan._id);
+
   const subscription = await useSubscriptionStore.checkSubscription(plan._id);
-  console.log("===================== Subscription ======================");
-  console.log(subscription);
-  console.log("===========================================================");
+
   if (subscription.status === 201){
     Swal.fire({
       icon             : "info",
