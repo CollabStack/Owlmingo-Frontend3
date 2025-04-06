@@ -31,10 +31,23 @@
 
 <script setup lang="ts">
 import { ref } from 'vue'
+import { userAuth } from '~/store/userAuth'
+
+
+const userStore = userAuth();
 
 // Form state
 const fullName = ref('John Doe')
 const email = ref('john@example.com')
+
+onMounted(() => {
+    // Fetch user data from the store
+    const userData = userStore.getUser() as { username?: string; email?: string } | null;
+    if (userData) {
+        fullName.value = userData.username || '';
+        email.value = userData.email || '';
+    }
+});
 
 // Image state
 const defaultAvatar = '/female_profile.jpg'
