@@ -428,7 +428,17 @@ export const userAuth = defineStore('userAuth', {
               return response.data
             } catch (error) {
               console.error('Update Information error:', error)
-              throw error
+              throw error;
+            }
+        },
+
+        async changePassword({old_password, new_password}){
+            const {$UserPrivateAxios} = useNuxtApp();
+            try{
+                const response = await $UserPrivateAxios.put('/settings-change-password', {old_password, new_password});
+                return response.data;
+            } catch (error){
+                throw error;
             }
         },
           
