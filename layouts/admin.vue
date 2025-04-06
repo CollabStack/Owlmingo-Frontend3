@@ -46,7 +46,7 @@
     </v-navigation-drawer>
 
     <!-- Top Bar -->
-    <v-app-bar class="mx-2 rounded-b-xl" color="#4635B1" elevation="0" app>
+    <v-app-bar class="mx-2 rounded-b-xl" color="primary" elevation="0" app>
       <v-app-bar-nav-icon color="white" @click="drawer = !drawer"></v-app-bar-nav-icon>
     </v-app-bar>
 
@@ -63,11 +63,10 @@
 
 <script setup>
 import { ref, onMounted } from 'vue';
-import { userAuth } from '~/store/userAuth';
-
+import { adminAuth } from '~/store/adminAuth';
 // Sidebar State
 const drawer = ref(false);
-
+const adminStore = adminAuth();
 // Navigation Items
 const items = ref([
   { title: 'Dashboard', link_nav: '/admin', icon: 'mdi-view-dashboard' },
@@ -80,14 +79,12 @@ const user = ref(null);
 
 // Logout Method
 const logout = async () => {
-  const authStore = userAuth(); 
-  await authStore.logout(); 
-  window.location.href = '/'; 
+  await adminStore.logout(); 
+  window.location.href = '/admin/auth'; 
 };
 
 onMounted(() => {
-  const authStore = userAuth();
-  user.value = authStore.getUser(); // Set the user on mount
+  user.value = adminStore.getAdmin(); // Set the user on mount
 });
 </script>
 

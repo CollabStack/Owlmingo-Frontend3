@@ -72,3 +72,99 @@ export default defineNuxtPlugin((nuxtApp) => {
      applyThemeColors();
    });
 });
+
+
+
+
+// Great setup! 🎨 You're dynamically applying Vuetify theme colors as **CSS variables**, which is awesome because now you can use them **in both `<template>` and `<style>`** easily!
+
+// ---
+
+// ## ✅ 1. How to Use Theme Colors in `<template>`
+
+// Anywhere in your template, you can use Vuetify’s class utilities **or** directly reference the CSS variables.
+
+// ### ✅ Option A: Vuetify utility classes (recommended for buttons, text, etc.)
+// ```html
+// <v-btn color="primary">Primary Button</v-btn>
+// <v-alert type="error">This is an error alert</v-alert>
+// ```
+
+// Vuetify maps these to the theme colors like `primary`, `secondary`, `error`, etc.
+
+// ---
+
+// ### ✅ Option B: Use inline styles with your custom variables
+
+// ```html
+// <div style="background-color: var(--v-primary); color: var(--v-white);">
+//   Custom Styled Box
+// </div>
+// ```
+
+// ---
+
+// ## ✅ 2. How to Use Theme Colors in `<style>`
+
+// Now that you've added:
+
+// ```ts
+// document.documentElement.style.setProperty(`--v-${key}`, value);
+// ```
+
+// You can access any theme color like:
+
+// ```css
+// /* inside your component or global CSS */
+// .box {
+//   background-color: var(--v-cream);
+//   color: var(--v-onyx);
+//   border: 1px solid var(--v-maya_blue);
+// }
+// ```
+
+// ---
+
+// ### 🔥 Example Component Using Theme Colors
+
+// ```vue
+// <template>
+//   <v-card class="custom-card">
+//     <v-card-title>Welcome</v-card-title>
+//     <v-card-text>This card uses your Vuetify theme colors!</v-card-text>
+//   </v-card>
+// </template>
+
+// <style scoped>
+// .custom-card {
+//   background-color: var(--v-water);
+//   color: var(--v-onyx);
+//   border: 2px solid var(--v-primary);
+//   border-radius: 12px;
+//   padding: 16px;
+// }
+// </style>
+// ```
+
+// ---
+
+// ## 💡 Tip: Use Fallbacks in `var()`
+
+// To prevent errors when a variable isn't defined:
+// ```css
+// color: var(--v-royal_blue, #4667E5);
+// ```
+
+// ---
+
+// ## ✅ Summary
+
+// | Use Case        | How to Do It                        |
+// |----------------|-------------------------------------|
+// | Template        | `color="primary"` or `style="color: var(--v-primary)"` |
+// | Scoped Styles   | `color: var(--v-yourcolor)`         |
+// | Dynamic Themes  | Already handled via `watch()` logic in your plugin |
+
+// ---
+
+// Let me know if you want to create a dark/light mode toggle switch using this setup!

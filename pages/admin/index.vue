@@ -6,5 +6,9 @@
 
 definePageMeta({
   layout: 'admin',
+  middleware: 'admin-auth',
+  meta: {
+    requiresAuth: true,
+  },
 });
 </script>

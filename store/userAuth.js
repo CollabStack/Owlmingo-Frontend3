@@ -19,7 +19,7 @@ export const userAuth = defineStore('userAuth', {
         
         
         // Add initialization method
-        init() {
+        async init() {
             if (this.tokenInitialized) return;
             
             const token = this.getToken();
@@ -32,9 +32,11 @@ export const userAuth = defineStore('userAuth', {
                 // this.user = storedUser ? JSON.parse(storedUser) : null; // Restore user
             }
             
-            setTimeout(() => {
-                this.refreshToken();
-            }, 300);
+            // setTimeout(() => {
+            //     this.refreshToken();
+            // }, 300);
+            await this.refreshToken(); // Refresh token on initialization
+
         },
         
 
@@ -313,6 +315,7 @@ export const userAuth = defineStore('userAuth', {
             this.isLoggedIn = false;
             this.tokenInitialized = false;
             Cookies.remove('token', { path: '/' });
+            localStorage.removeItem('user');
         },
 
         async telegramOAuth(data) {
