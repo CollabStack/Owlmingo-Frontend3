@@ -404,7 +404,34 @@ export const userAuth = defineStore('userAuth', {
                 return false;
             }
         },
-        
+
+        async updateInformation({ username, file }) {
+            const { $UserPrivateAxios } = useNuxtApp()
+          
+            try {
+              const formData = new FormData()
+          
+              if (username) {
+                formData.append('username', username)
+              }
+          
+              if (file) {
+                formData.append('file', file)
+              }
+          
+              const response = await $UserPrivateAxios.put('/update-information', formData, {
+                headers: {
+                  'Content-Type': 'multipart/form-data'
+                }
+              })
+          
+              return response.data
+            } catch (error) {
+              console.error('Update Information error:', error)
+              throw error
+            }
+        },
+          
         initializeSession() {
             if (!this.token) {
                 this.logout();

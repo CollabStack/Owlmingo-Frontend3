@@ -54,7 +54,7 @@
                         <template #activator="{ props }" >
                             <v-avatar v-bind="props" class="cursor-pointer" size="40">
                                 <v-img
-                                    src="/female_profile.jpg"
+                                    :src="profile_url"
                                     alt="Profile"
                                     contain
                                     class="rounded-full"
@@ -121,6 +121,11 @@ const authStore = userAuth();
 /* ========== COMPUTED ==========*/
 const isLoggedIn = computed(() => {
     return authStore.isLoggedIn;
+});
+
+const profile_url = computed(() => {
+    const user = authStore.getUser() as { profile_url?: string } | null;
+    return user ? user.profile_url || '/female_profile.jpg' : '/female_profile.jpg';
 });
 
 const filteredTabs = computed(() => {
