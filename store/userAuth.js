@@ -14,6 +14,7 @@ export const userAuth = defineStore('userAuth', {
         setUser(user) {
             this.user = { ...user }; // Ensure reactivity
             localStorage.setItem('user', JSON.stringify(user)); // Persist
+            // console.log("User set:", this.user);
         },
         
         
@@ -28,7 +29,7 @@ export const userAuth = defineStore('userAuth', {
                 this.token = token;
                 this.isLoggedIn = true;
                 this.tokenInitialized = true;
-                this.user = storedUser ? JSON.parse(storedUser) : null; // Restore user
+                // this.user = storedUser ? JSON.parse(storedUser) : null; // Restore user
             }
             
             setTimeout(() => {

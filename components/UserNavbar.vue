@@ -5,8 +5,18 @@
                 <!-- Left: Navigation Tabs -->
                 <v-col class="d-none d-lg-flex align-center">
                     <v-tabs background-color="transparent" class="tab-items">
-                        <v-tab
+                        <!-- <v-tab
                             v-for="(item, index) in tabs"
+                            :key="index"
+                            :to="item.route"
+                            class="custom-tab"
+                            :class="{ 'active-tab': isActiveRoute(item.route) }"
+                            @click="setActive(item.route)"
+                        >
+                            {{ item.label }}
+                        </v-tab> -->
+                        <v-tab
+                            v-for="(item, index) in filteredTabs"
                             :key="index"
                             :to="item.route"
                             class="custom-tab"
@@ -53,8 +63,8 @@
                         </template>
                         <!-- Updated dropdown: vertical layout, floating -->
                         <div style="display: flex; flex-direction: column; gap: 10px; background: white; position: fixed; top: 0; left: 50%; transform: translateX(-50%); z-index: 1000; margin-top: 20px; margin-right: 200px; padding: 10px; border-radius: 10px; box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);">
-                            <v-btn to="/auth">Explore</v-btn>
-                            <v-btn to="/auth/sign-up">Upgrade Plan</v-btn>
+                            <v-btn to="/settings">Settings</v-btn>
+                            <v-btn to="/upgrade-plan">Upgrade Plan</v-btn>
                             <v-divider></v-divider>
                             <v-btn color="secondary" @click="logout">Sign Out</v-btn>
                         </div>
@@ -76,7 +86,11 @@ const route = useRoute();
 const router = useRouter();
 const tabs = [
     { label: 'Home', route: '/' },
-    { label: 'Library', route: '/library' },
+    { 
+        label: 'Library', 
+        route: '/library',        
+        requiresAuth: true
+    },
     { 
         label: 'Flashcard', 
         route: '/flashcard',
@@ -108,6 +122,13 @@ const authStore = userAuth();
 const isLoggedIn = computed(() => {
     return authStore.isLoggedIn;
 });
+
+const filteredTabs = computed(() => {
+    return tabs.filter(tab => {
+        return !tab.requiresAuth || isLoggedIn.value;
+    });
+});
+
 
 /* ========== METHODS ==========*/
 // Enhanced function to check if a route is active (including nested & related routes)
