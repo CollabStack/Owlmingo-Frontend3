@@ -441,6 +441,16 @@ export const userAuth = defineStore('userAuth', {
                 throw error;
             }
         },
+
+        async getCurrentPlan(){
+            const {$UserPrivateAxios} = useNuxtApp();
+            try{
+                const response = await $UserPrivateAxios.get('/get-current-plan');
+                return response.data;
+            } catch (error){
+                throw error;
+            }
+        },
           
         initializeSession() {
             if (!this.token) {
