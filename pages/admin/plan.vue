@@ -1,67 +1,93 @@
 <template>
-    <div >
-      <AdminGlobalTable
-        :title="'Desserts'"
-        :items="dessertsData"
-        :headers="headers"
-        :isLoading="false"
-        :showEdit="true"
-        :showActivate="true"
-        :showDeactivate="true"
-      >
-      </AdminGlobalTable>
-    </div>
-  </template>
+  <div>
+    <AdminGlobalTable
+      :title="'Plans'"
+      :items="dessertsData"
+      :headers="headers"
+      :isLoading="isLoading"
+      :showEdit="true"
+      :showActivate="true"
+      :showDeactivate="true"
+    >
+    </AdminGlobalTable>
+    <v-alert
+      v-if="error"
+      type="error"
+      variant="tonal"
+      closable
+    >
+      {{ error }}
+    </v-alert>
+  </div>
+</template>
+
+<script setup>
+import { ref, computed, onMounted } from 'vue';
+import { useNuxtApp } from '#app';
+import { adminPlanStore } from '~/store/adminPlan';
+
+definePageMeta({
+  layout: 'admin',
+});
+
+const { $AdminPrivateAxios } = useNuxtApp();
+const planStore = adminPlanStore();
+const isLoading = ref(false);
+const error = ref(null);
+
+// Function to get and set auth token
+const setupAuthToken = () => {
+  // Try both possible token keys
+  const token = localStorage.getItem('admin_token') || localStorage.getItem('token');
   
-  <script setup>
-  import { ref, onMounted } from 'vue';
+  if (!token) {
+    console.error('No authentication token found');
+    return null;
+  }
+
+  // Set the auth header
+  $AdminPrivateAxios.defaults.headers.common['Authorization'] = `Bearer ${token}`;
+  return token;
+};
+
+const headers = ref([
+  { text: "Name", value: "name" },
+  { text: "Plan", value: "plan" },
+  { text: "Price", value: "price" },
+  { text: "Duration", value: "duration" },
+]);
+
+onMounted(async () => {
+  error.value = null;
+  isLoading.value = true;
   
-  definePageMeta({
-    layout: 'admin',
-  });
-  
-  const headers = ref([
-    { text: "Name", value: "name" },
-    { text: "Calories", value: "calories" },
-    { text: "Fat (g)", value: "fat" },
-    // { text: "Carbs (g)", value: "carbs" },
-    // { text: "Protein (g)", value: "protein" },
-    // { text: "Iron (%)", value: "iron" },
-    // { text: "Metal", value: "metal" },
-  ]);
-  
-  const dessertsData = ref([
-    { name: "Frozen Yogurt", calories: 159, fat: 6, carbs: 24, protein: 4, iron: "1", metal: "2", active: 1 },
-    { name: "Jelly Bean", calories: 375, fat: 0, carbs: 94, protein: 0, iron: "0", metal: "3", active: 0 },
-    { name: "KitKat", calories: 518, fat: 26, carbs: 65, protein: 7, iron: "6", metal: "4", active: 1 },
-    { name: "Eclair", calories: 262, fat: 16, carbs: 23, protein: 6, iron: "7", metal: "5", active: 0 },
-    { name: "Gingerbread", calories: 356, fat: 16, carbs: 49, protein: 3.9, iron: "16", metal: "6", active: 1 },
-    { name: "Ice Cream Sandwich", calories: 237, fat: 9, carbs: 37, protein: 4.3, iron: "1", metal: "7", active: 0 },
-    { name: "Lollipop", calories: 392, fat: 0.2, carbs: 98, protein: 0, iron: "2", metal: "8", active: 1 },
-    { name: "Cupcake", calories: 305, fat: 3.7, carbs: 67, protein: 4.3, iron: "8", metal: "9", active: 0 },
-    { name: "Honeycomb", calories: 408, fat: 3.2, carbs: 87, protein: 6.5, iron: "45", metal: "10", active: 1 },
-    { name: "Donut", calories: 452, fat: 25, carbs: 51, protein: 4.9, iron: "22", metal: "11", active: 0 },
-  
-    { name: "Gingerbread", calories: 356, fat: 16, carbs: 49, protein: 3.9, iron: "16", metal: "6", active: 1 },
-    { name: "Ice Cream Sandwich", calories: 237, fat: 9, carbs: 37, protein: 4.3, iron: "1", metal: "7", active: 0 },
-    { name: "Lollipop", calories: 392, fat: 0.2, carbs: 98, protein: 0, iron: "2", metal: "8", active: 1 },
-    { name: "Cupcake", calories: 305, fat: 3.7, carbs: 67, protein: 4.3, iron: "8", metal: "9", active: 0 },
-    { name: "Honeycomb", calories: 408, fat: 3.2, carbs: 87, protein: 6.5, iron: "45", metal: "10", active: 1 },
-    { name: "Donut", calories: 452, fat: 25, carbs: 51, protein: 4.9, iron: "22", metal: "11", active: 0 },
-  
-    { name: "Gingerbread", calories: 356, fat: 16, carbs: 49, protein: 3.9, iron: "16", metal: "6", active: 1 },
-    { name: "Ice Cream Sandwich", calories: 237, fat: 9, carbs: 37, protein: 4.3, iron: "1", metal: "7", active: 0 },
-    { name: "Lollipop", calories: 392, fat: 0.2, carbs: 98, protein: 0, iron: "2", metal: "8", active: 1 },
-    { name: "Cupcake", calories: 305, fat: 3.7, carbs: 67, protein: 4.3, iron: "8", metal: "9", active: 0 },
-    { name: "Honeycomb", calories: 408, fat: 3.2, carbs: 87, protein: 6.5, iron: "45", metal: "10", active: 1 },
-    { name: "Donut", calories: 452, fat: 25, carbs: 51, protein: 4.9, iron: "22", metal: "11", active: 0 },
-    { name: "Gingerbread", calories: 356, fat: 16, carbs: 49, protein: 3.9, iron: "16", metal: "6", active: 1 },
-    { name: "Ice Cream Sandwich", calories: 237, fat: 9, carbs: 37, protein: 4.3, iron: "1", metal: "7", active: 0 },
-    { name: "Lollipop", calories: 392, fat: 0.2, carbs: 98, protein: 0, iron: "2", metal: "8", active: 1 },
-    { name: "Cupcake", calories: 305, fat: 3.7, carbs: 67, protein: 4.3, iron: "8", metal: "9", active: 0 },
-    { name: "Honeycomb", calories: 408, fat: 3.2, carbs: 87, protein: 6.5, iron: "45", metal: "10", active: 1 },
-    { name: "Donut", calories: 452, fat: 25, carbs: 51, protein: 4.9, iron: "22", metal: "11", active: 0 },
-  ]);
-  
-  </script>
-  
+  try {
+    const token = setupAuthToken();
+    if (!token) {
+      throw new Error('Authentication token not found. Please login again.');
+    }
+    
+    await planStore.adminGetPlans();
+    console.log('Plans loaded:', planStore.plans); // Debug log
+    
+  } catch (err) {
+    error.value = err.response?.data?.message || err.message || 'Failed to fetch plans';
+    console.error('Error fetching plans:', err);
+  } finally {
+    isLoading.value = false;
+  }
+});
+
+const dessertsData = computed(() => planStore.plans || []);
+
+// Debug helper - remove in production
+// const debugAuth = () => {
+//   console.log('Auth headers:', $AdminPrivateAxios?.defaults?.headers);
+//   console.log('Token in localStorage:', localStorage.getItem('admin_token'));
+// };
+
+// Call debug helper
+debugAuth();
+</script>
+
+

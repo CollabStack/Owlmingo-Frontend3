@@ -71,7 +71,8 @@ const drawer = ref(false);
 // Navigation Items
 const items = ref([
   { title: 'Dashboard', link_nav: '/admin', icon: 'mdi-view-dashboard' },
-  { title: 'Plan', link_nav: '/admin/plan', icon: 'mdi-note-text-outline' }
+  { title: 'Plan', link_nav: '/admin/plan', icon: 'mdi-note-text-outline' },
+  { title: 'User', link_nav: '/admin/user', icon: 'mdi-account'},
 ]);
 
 // Reactive user object
