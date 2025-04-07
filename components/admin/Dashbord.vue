@@ -1,17 +1,15 @@
 <script setup>
-import { ref, onMounted, watch } from 'vue';
-import * as d3 from 'd3';
-
-
-// State management
+import { ref, onMounted } from 'vue';
+import GenderDistribution from './charts/GenderDistribution.vue';
+import SubscriptionTrends from './charts/SubscriptionTrends.vue';
+import WeeklyActivity from './charts/WeeklyActivity.vue';
+import Total from './charts/Total.vue';
 const selectedPeriod = ref('Today');
 const startDate = ref('');
 const endDate = ref('');
 const searchActive = ref(false);
 const totalPrice = ref(250);
 const userCount = ref(15);
-const currentView = ref('daily');
-const loading = ref(false);
 
 // Sample data periods
 const dataPeriods = {
@@ -62,335 +60,8 @@ const dataPeriods = {
   }
 };
 
-// Add helper function to update charts
-function updateCharts(period) {
-  const data = dataPeriods[period];
-  if (!data) return;
-  
-  drawPieChart(data.pieData);
-  drawBarChart(data.barData);
-  drawSparkline(data.sparklineData);
-  
-  // Update summary statistics
-  totalPrice.value = calculateTotalRevenue(data);
-  userCount.value = calculateTotalUsers(data);
-}
-
-function calculateTotalRevenue(data) {
-  return data.barData.reduce((sum, item) => sum + item.value, 0) * 10;
-}
-
-function calculateTotalUsers(data) {
-  return data.pieData.reduce((sum, item) => sum + item.value, 0);
-}
-
-// Add watcher for period changes
-watch(selectedPeriod, (newPeriod) => {
-  if (!searchActive.value) {
-    updateCharts(newPeriod);
-  }
-});
-
-// Initialize charts on mount
-onMounted(() => {
-  updateCharts('Today');
-  
-  window.addEventListener('resize', () => {
-    if (!searchActive.value) {
-      updateCharts(selectedPeriod.value);
-    }
-  });
-});
-
-function drawPieChart(data) {
-  loading.value = true;
-  d3.select("#pieChart").selectAll("*").remove();
-
-  const width = 500;  // Increased size
-  const height = 500; // Increased size
-  const radius = Math.min(width, height) / 2;
-
-  const svg = d3.select("#pieChart")
-    .append("svg")
-    .attr("width", width)
-    .attr("height", height)
-    .append("g")
-    .attr("transform", `translate(${width / 2},${height / 2})`);
-
-  const color = d3.scaleOrdinal()
-    .domain(data.map(d => d.label))
-    .range(["#4e79a7", "#f28e2b", "#e15759"]);
-
-  const pie = d3.pie().value(d => d.value);
-  const arc = d3.arc()
-    .outerRadius(radius * 0.8)
-    .innerRadius(radius * 0.4)
-    .padAngle(0.02);
-
-  const outerArc = d3.arc()
-    .outerRadius(radius * 0.9)
-    .innerRadius(radius * 0.9);
-
-  const arcs = pie(data);
-
-  // Add transitions
-  const path = svg.selectAll('path')
-    .data(arcs)
-    .enter()
-    .append('path')
-    .attr('d', arc)
-    .attr('fill', d => color(d.data.label))
-    .attr('stroke', '#fff')
-    .style('stroke-width', '3px')
-    .style('opacity', 0)
-    .transition()
-    .duration(1000)
-    .style('opacity', 1);
-
-  // Add labels with animations
-  const text = svg.selectAll('text')
-    .data(arcs)
-    .enter()
-    .append('text')
-    .attr('transform', d => `translate(${arc.centroid(d)})`)
-    .attr('text-anchor', 'middle')
-    .style('font-size', '16px')
-    .style('font-weight', '500')
-    .style('fill', '#fff')
-    .style('opacity', 0)
-    .text(d => `${d.data.label}: ${d.data.value}`)
-    .transition()
-    .delay(800)
-    .duration(500)
-    .style('opacity', 1);
-
-  loading.value = false;
-}
-
-function drawBarChart(data) {
-  d3.select("#barChart").selectAll("*").remove();
-
-  // Get the container dimensions
-  const container = document.getElementById("barChart");
-  const margin = { top: 40, right: 30, bottom: 60, left: 60 };
-  const width = container.clientWidth - margin.left - margin.right;
-  const height = container.clientHeight - margin.top - margin.bottom;
-
-  const svg = d3.select("#barChart")
-    .append("svg")
-    .attr("width", "100%")
-    .attr("height", "100%")
-    .attr("viewBox", `0 0 ${width + margin.left + margin.right} ${height + margin.top + margin.bottom}`)
-    .append("g")
-    .attr("transform", `translate(${margin.left},${margin.top})`);
-
-  const x = d3.scaleBand()
-    .range([0, width])
-    .padding(0.2);
-
-  const y = d3.scaleLinear()
-    .range([height, 0]);
-
-  x.domain(data.map(d => d.day));
-  y.domain([0, d3.max(data, d => d.value) * 1.2]);
-
-  // Add bars with animation
-  svg.selectAll(".bar")
-    .data(data)
-    .enter()
-    .append("rect")
-    .attr("class", "bar")
-    .attr("x", d => x(d.day))
-    .attr("width", x.bandwidth())
-    .attr("y", height)
-    .attr("height", 0)
-    .style("fill", "#4e79a7")
-    .transition()
-    .duration(1000)
-    .attr("y", d => y(d.value))
-    .attr("height", d => height - y(d.value));
-
-  // Add value labels
-  svg.selectAll(".label")
-    .data(data)
-    .enter()
-    .append("text")
-    .attr("class", "label")
-    .attr("x", d => x(d.day) + x.bandwidth() / 2)
-    .attr("y", d => y(d.value) - 5)
-    .attr("text-anchor", "middle")
-    .style("font-size", "14px")
-    .style("opacity", 0)
-    .text(d => d.value)
-    .transition()
-    .delay(1000)
-    .duration(500)
-    .style("opacity", 1);
-
-  // Add axes with styling
-  svg.append("g")
-    .attr("transform", `translate(0,${height})`)
-    .call(d3.axisBottom(x))
-    .selectAll("text")
-    .style("font-size", "12px");
-
-  svg.append("g")
-    .call(d3.axisLeft(y))
-    .selectAll("text")
-    .style("font-size", "12px");
-
-  // Add X axis label with larger font
-  svg.append("text")
-    .attr("class", "axis-label")
-    .attr("text-anchor", "middle")
-    .attr("x", width / 2)
-    .attr("y", height + margin.bottom - 5) // Adjusted position
-    .style("font-size", "16px") // Increased from 14px
-    .style("font-weight", "400") // Added bold weight
-    .text("Time Period");
-
-  // Add Y axis label with larger font
-  svg.append("text")
-    .attr("class", "axis-label")
-    .attr("text-anchor", "middle")
-    .attr("transform", `translate(${-margin.left + 20}, ${height/2}) rotate(-90)`) // Adjusted position
-    .style("font-size", "16px") // Increased from 14px
-    .style("font-weight", "400") // Added bold weight
-    .text("Number of Activities");
-}
-
-function drawSparkline(data) {
-  d3.select("#sparkline").selectAll("*").remove();
-
-  // Get the container dimensions
-  const container = document.getElementById("sparkline");
-  const margin = { top: 40, right: 30, bottom: 60, left: 60 };
-  const width = container.clientWidth - margin.left - margin.right;
-  const height = container.clientHeight - margin.top - margin.bottom;
-
-  const svg = d3.select("#sparkline")
-    .append("svg")
-    .attr("width", "100%")
-    .attr("height", "100%")
-    .attr("viewBox", `0 0 ${width + margin.left + margin.right} ${height + margin.top + margin.bottom}`)
-    .append("g")
-    .attr("transform", `translate(${margin.left},${margin.top})`);
-
-  const x = d3.scaleLinear()
-    .domain([0, data.length - 1])
-    .range([0, width]);
-
-  const y = d3.scaleLinear()
-    .domain([0, d3.max(data) * 1.2])
-    .range([height, 0]);
-
-  const line = d3.line()
-    .x((d, i) => x(i))
-    .y(d => y(d))
-    .curve(d3.curveCatmullRom);
-
-  // Add gradient
-  const gradient = svg.append("defs")
-    .append("linearGradient")
-    .attr("id", "line-gradient")
-    .attr("gradientUnits", "userSpaceOnUse")
-    .attr("x1", 0)
-    .attr("y1", y(0))
-    .attr("x2", 0)
-    .attr("y2", y(d3.max(data)));
-
-  gradient.append("stop")
-    .attr("offset", "0%")
-    .attr("stop-color", "#4e79a7")
-    .attr("stop-opacity", 0.2);
-
-  gradient.append("stop")
-    .attr("offset", "100%")
-    .attr("stop-color", "#4e79a7")
-    .attr("stop-opacity", 1);
-
-  // Add area
-  const area = d3.area()
-    .x((d, i) => x(i))
-    .y0(height)
-    .y1(d => y(d))
-    .curve(d3.curveCatmullRom);
-
-  svg.append("path")
-    .datum(data)
-    .attr("class", "area")
-    .attr("d", area)
-    .style("fill", "url(#line-gradient)")
-    .style("opacity", 0)
-    .transition()
-    .duration(1000)
-    .style("opacity", 0.3);
-
-  // Add line with animation
-  const path = svg.append("path")
-    .datum(data)
-    .attr("fill", "none")
-    .attr("stroke", "#4e79a7")
-    .attr("stroke-width", 3)
-    .attr("d", line);
-
-  const pathLength = path.node().getTotalLength();
-
-  path
-    .attr("stroke-dasharray", pathLength)
-    .attr("stroke-dashoffset", pathLength)
-    .transition()
-    .duration(2000)
-    .attr("stroke-dashoffset", 0);
-
-  // Add dots
-  svg.selectAll(".dot")
-    .data(data)
-    .enter()
-    .append("circle")
-    .attr("class", "dot")
-    .attr("cx", (d, i) => x(i))
-    .attr("cy", d => y(d))
-    .attr("r", 5)
-    .style("fill", "#fff")
-    .style("stroke", "#4e79a7")
-    .style("stroke-width", 2)
-    .style("opacity", 0)
-    .transition()
-    .delay((d, i) => i * 100)
-    .duration(500)
-    .style("opacity", 1);
-
-  // Add axes
-  svg.append("g")
-    .attr("transform", `translate(0,${height})`)
-    .call(d3.axisBottom(x))
-    .selectAll("text")
-    .style("font-size", "12px");
-
-  svg.append("g")
-    .call(d3.axisLeft(y))
-    .selectAll("text")
-    .style("font-size", "12px");
-
-  // Add X axis label with larger font
-  svg.append("text")
-    .attr("class", "axis-label")
-    .attr("text-anchor", "middle")
-    .attr("x", width / 2)
-    .attr("y", height + margin.bottom - 5) // Adjusted position
-    .style("font-size", "16px") // Increased from 14px
-    .style("font-weight", "400") // Added bold weight
-    .text("Time Points");
-
-  // Add Y axis label with larger font
-  svg.append("text")
-    .attr("class", "axis-label")
-    .attr("text-anchor", "middle")
-    .attr("transform", `translate(${-margin.left + 20}, ${height/2}) rotate(-90)`) // Adjusted position
-    .style("font-size", "16px") // Increased from 14px
-    .style("font-weight", "400") // Added bold weight
-    .text("Subscription Count");
+function handleSearch() {
+  // Implement search functionality
 }
 </script>
 
@@ -453,7 +124,7 @@ function drawSparkline(data) {
             Gender Distribution
           </v-card-title>
           <v-card-text>
-            <div id="pieChart" class="chart-container" />
+            <GenderDistribution :data="dataPeriods[selectedPeriod].pieData" />
           </v-card-text>
         </v-card>
       </v-col>
@@ -465,7 +136,7 @@ function drawSparkline(data) {
             Subscription Trends
           </v-card-title>
           <v-card-text>
-            <div id="sparkline" class="chart-container" />
+            <SubscriptionTrends :data="dataPeriods[selectedPeriod].sparklineData" />
           </v-card-text>
         </v-card>
       </v-col>
@@ -477,7 +148,7 @@ function drawSparkline(data) {
             Weekly Activity
           </v-card-title>
           <v-card-text>
-            <div id="barChart" class="chart-container" />
+            <WeeklyActivity :data="dataPeriods[selectedPeriod].barData" />
           </v-card-text>
         </v-card>
       </v-col>
@@ -486,32 +157,13 @@ function drawSparkline(data) {
         <v-card elevation="2">
           <v-card-title class="d-flex align-center">
             <v-icon left class="me-2">mdi-information</v-icon>
-            Summary
+            Total
           </v-card-title>
           <v-card-text>
-            <v-row>
-              <v-col cols="12" sm="6">
-                <v-text-field
-                  v-model="totalPrice"
-                  label="Total Revenue"
-                  prefix="$"
-                  readonly
-                  variant="outlined"
-                  density="comfortable"
-                  prepend-inner-icon="mdi-currency-usd"
-                />
-              </v-col>
-              <v-col cols="12" sm="6">
-                <v-text-field
-                  v-model="userCount"
-                  label="Total Users"
-                  readonly
-                  variant="outlined"
-                  density="comfortable"
-                  prepend-inner-icon="mdi-account"
-                />
-              </v-col>
-            </v-row>
+            <Total 
+              :revenue="totalPrice"
+              :users="userCount"
+            />
           </v-card-text>
         </v-card>
       </v-col>
@@ -531,16 +183,26 @@ function drawSparkline(data) {
   transition: all 0.3s ease;
   overflow: hidden;
   height: 100%; /* Make cards equal height */
+  background: linear-gradient(145deg, #ffffff, #f8f9ff);
 }
 
-/* Adjust card spacing */
 .v-card-title {
-  padding: 16px 24px;
+  padding: 20px 24px; /* Increase padding */
   border-bottom: 1px solid rgba(0, 0, 0, 0.05);
+  font-size: 1.25rem !important; /* Make title bigger */
+  font-weight: 600 !important; /* Make title bolder */
+  letter-spacing: 0.5px;
+  color: #1a237e; /* Darker blue for better contrast */
 }
 
-.v-card-text {
-  padding: 16px;
+.v-card-title .v-icon {
+  font-size: 1.5rem !important; /* Make icons bigger */
+  margin-right: 12px !important; /* More space between icon and text */
+  color: #1976D2; /* Match your theme color */
+}
+
+.v-card-title.d-flex.align-center {
+  background: linear-gradient(145deg, #f8f9ff, #ffffff);
 }
 
 .v-card:hover {
@@ -575,6 +237,15 @@ function drawSparkline(data) {
   
   .date-input {
     min-width: 120px;
+  }
+
+  .v-card-title {
+    padding: 16px 20px;
+    font-size: 1.1rem !important;
+  }
+  
+  .v-card-title .v-icon {
+    font-size: 1.3rem !important;
   }
 }
 
