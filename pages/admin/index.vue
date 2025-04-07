@@ -14,50 +14,103 @@ const searchActive = ref(false);
 const totalPrice = ref(250);
 const userCount = ref(15);
 const currentView = ref('daily');
+const loading = ref(false);
 
-// Sample data organized by periods
+// Sample data periods
 const dataPeriods = {
   Today: {
     pieData: [
-      { label: 'Male', value: 25 },
-      { label: 'Female', value: 20 },
-      { label: 'Other', value: 5 }
+      { label: 'Male', value: 45 },
+      { label: 'Female', value: 35 },
+      { label: 'Other', value: 20 }
     ],
-    barData: [15, 20, 25, 30, 10, 35, 40],
-    subscriptionData: [5, 7, 6, 8, 7, 9, 10],
-    revenue: 250,
-    users: 15
+    barData: [
+      { day: 'Mon', value: 10 },
+      { day: 'Tue', value: 15 },
+      { day: 'Wed', value: 20 },
+      { day: 'Thu', value: 25 },
+      { day: 'Fri', value: 22 },
+      { day: 'Sat', value: 30 },
+      { day: 'Sun', value: 28 }
+    ],
+    sparklineData: [4, 8, 15, 16, 23, 42, 38]
   },
   Monthly: {
     pieData: [
-      { label: 'Male', value: 150 },
-      { label: 'Female', value: 130 },
-      { label: 'Other', value: 45 }
+      { label: 'Male', value: 120 },
+      { label: 'Female', value: 150 },
+      { label: 'Other', value: 80 }
     ],
-    barData: [45, 60, 75, 90, 40, 85, 95],
-    subscriptionData: [120, 135, 110, 150, 170, 145, 160],
-    revenue: 1500,
-    users: 45
+    barData: [
+      { day: 'Week 1', value: 45 },
+      { day: 'Week 2', value: 52 },
+      { day: 'Week 3', value: 65 },
+      { day: 'Week 4', value: 78 }
+    ],
+    sparklineData: [20, 40, 45, 60, 55, 75, 80]
   },
   Yearly: {
     pieData: [
-      { label: 'Male', value: 450 },
-      { label: 'Female', value: 400 },
-      { label: 'Other', value: 150 }
+      { label: 'Male', value: 1200 },
+      { label: 'Female', value: 1500 },
+      { label: 'Other', value: 800 }
     ],
-    barData: [250, 300, 450, 600, 200, 650, 750],
-    subscriptionData: [1000, 1200, 1400, 1300, 1500, 1600, 1700],
-    revenue: 15000,
-    users: 150
+    barData: [
+      { day: 'Q1', value: 250 },
+      { day: 'Q2', value: 320 },
+      { day: 'Q3', value: 380 },
+      { day: 'Q4', value: 420 }
+    ],
+    sparklineData: [100, 150, 200, 180, 250, 300, 280]
   }
 };
 
-// Chart drawing functions
+// Add helper function to update charts
+function updateCharts(period) {
+  const data = dataPeriods[period];
+  if (!data) return;
+  
+  drawPieChart(data.pieData);
+  drawBarChart(data.barData);
+  drawSparkline(data.sparklineData);
+  
+  // Update summary statistics
+  totalPrice.value = calculateTotalRevenue(data);
+  userCount.value = calculateTotalUsers(data);
+}
+
+function calculateTotalRevenue(data) {
+  return data.barData.reduce((sum, item) => sum + item.value, 0) * 10;
+}
+
+function calculateTotalUsers(data) {
+  return data.pieData.reduce((sum, item) => sum + item.value, 0);
+}
+
+// Add watcher for period changes
+watch(selectedPeriod, (newPeriod) => {
+  if (!searchActive.value) {
+    updateCharts(newPeriod);
+  }
+});
+
+// Initialize charts on mount
+onMounted(() => {
+  updateCharts('Today');
+  
+  window.addEventListener('resize', () => {
+    if (!searchActive.value) {
+      updateCharts(selectedPeriod.value);
+    }
+  });
+});
+
 function drawPieChart(data) {
+  loading.value = true;
   d3.select("#pieChart").selectAll("*").remove();
 
-  const width = 300;
-  const height = 300;
+  const width = 500;  // Increased size
+  const height = 500; // Increased size
   const radius = Math.min(width, height) / 2;
 
   const svg = d3.select("#pieChart")
@@ -72,376 +125,494 @@ function drawPieChart(data) {
     .range(["#4e79a7", "#f28e2b", "#e15759"]);
 
   const pie = d3.pie().value(d => d.value);
-  const arc = d3.arc().outerRadius(radius).innerRadius(0);
+  const arc = d3.arc()
+    .outerRadius(radius * 0.8)
+    .innerRadius(radius * 0.4)
+    .padAngle(0.02);
+
+  const outerArc = d3.arc()
+    .outerRadius(radius * 0.9)
+    .innerRadius(radius * 0.9);
+
   const arcs = pie(data);
 
-  svg.selectAll('path')
+  // Add transitions
+  const path = svg.selectAll('path')
     .data(arcs)
     .enter()
     .append('path')
     .attr('d', arc)
     .attr('fill', d => color(d.data.label))
     .attr('stroke', '#fff')
-    .style('stroke-width', '2px');
+    .style('stroke-width', '3px')
+    .style('opacity', 0)
+    .transition()
+    .duration(1000)
+    .style('opacity', 1);
 
-  svg.selectAll('text')
+  // Add labels with animations
+  const text = svg.selectAll('text')
     .data(arcs)
     .enter()
     .append('text')
     .attr('transform', d => `translate(${arc.centroid(d)})`)
     .attr('text-anchor', 'middle')
-    .style('font-size', '13px')
+    .style('font-size', '16px')
+    .style('font-weight', '500')
     .style('fill', '#fff')
-    .text(d => `${d.data.label}: ${d.data.value}`);
+    .style('opacity', 0)
+    .text(d => `${d.data.label}: ${d.data.value}`)
+    .transition()
+    .delay(800)
+    .duration(500)
+    .style('opacity', 1);
+
+  loading.value = false;
 }
 
 function drawBarChart(data) {
   d3.select("#barChart").selectAll("*").remove();
 
-  const width = 400;
-  const height = 200;
-  const margin = { top: 20, right: 30, bottom: 30, left: 40 };
+  // Get the container dimensions
+  const container = document.getElementById("barChart");
+  const margin = { top: 40, right: 30, bottom: 60, left: 60 };
+  const width = container.clientWidth - margin.left - margin.right;
+  const height = container.clientHeight - margin.top - margin.bottom;
 
   const svg = d3.select("#barChart")
     .append("svg")
-    .attr("width", width)
-    .attr("height", height);
+    .attr("width", "100%")
+    .attr("height", "100%")
+    .attr("viewBox", `0 0 ${width + margin.left + margin.right} ${height + margin.top + margin.bottom}`)
+    .append("g")
+    .attr("transform", `translate(${margin.left},${margin.top})`);
 
   const x = d3.scaleBand()
-    .domain(data.map((d, i) => i))
-    .range([margin.left, width - margin.right])
-    .padding(0.1);
+    .range([0, width])
+    .padding(0.2);
 
   const y = d3.scaleLinear()
-    .domain([0, d3.max(data)])
-    .nice()
-    .range([height - margin.bottom, margin.top]);
+    .range([height, 0]);
 
-  svg.append("g")
-    .selectAll("rect")
+  x.domain(data.map(d => d.day));
+  y.domain([0, d3.max(data, d => d.value) * 1.2]);
+
+  // Add bars with animation
+  svg.selectAll(".bar")
     .data(data)
-    .join("rect")
-    .attr("x", (d, i) => x(i))
-    .attr("y", d => y(d))
-    .attr("height", d => y(0) - y(d))
+    .enter()
+    .append("rect")
+    .attr("class", "bar")
+    .attr("x", d => x(d.day))
     .attr("width", x.bandwidth())
-    .attr("fill", "steelblue");
+    .attr("y", height)
+    .attr("height", 0)
+    .style("fill", "#4e79a7")
+    .transition()
+    .duration(1000)
+    .attr("y", d => y(d.value))
+    .attr("height", d => height - y(d.value));
+
+  // Add value labels
+  svg.selectAll(".label")
+    .data(data)
+    .enter()
+    .append("text")
+    .attr("class", "label")
+    .attr("x", d => x(d.day) + x.bandwidth() / 2)
+    .attr("y", d => y(d.value) - 5)
+    .attr("text-anchor", "middle")
+    .style("font-size", "14px")
+    .style("opacity", 0)
+    .text(d => d.value)
+    .transition()
+    .delay(1000)
+    .duration(500)
+    .style("opacity", 1);
+
+  // Add axes with styling
+  svg.append("g")
+    .attr("transform", `translate(0,${height})`)
+    .call(d3.axisBottom(x))
+    .selectAll("text")
+    .style("font-size", "12px");
 
   svg.append("g")
-    .attr("transform", `translate(0,${height - margin.bottom})`)
-    .call(d3.axisBottom(x).tickFormat(i => `#${i + 1}`));
+    .call(d3.axisLeft(y))
+    .selectAll("text")
+    .style("font-size", "12px");
 
-  svg.append("g")
-    .attr("transform", `translate(${margin.left},0)`)
-    .call(d3.axisLeft(y));
+  // Add X axis label with larger font
+  svg.append("text")
+    .attr("class", "axis-label")
+    .attr("text-anchor", "middle")
+    .attr("x", width / 2)
+    .attr("y", height + margin.bottom - 5) // Adjusted position
+    .style("font-size", "16px") // Increased from 14px
+    .style("font-weight", "400") // Added bold weight
+    .text("Time Period");
+
+  // Add Y axis label with larger font
+  svg.append("text")
+    .attr("class", "axis-label")
+    .attr("text-anchor", "middle")
+    .attr("transform", `translate(${-margin.left + 20}, ${height/2}) rotate(-90)`) // Adjusted position
+    .style("font-size", "16px") // Increased from 14px
+    .style("font-weight", "400") // Added bold weight
+    .text("Number of Activities");
 }
 
 function drawSparkline(data) {
   d3.select("#sparkline").selectAll("*").remove();
 
-  const width = 400;
-  const height = 150;
-  const margin = { top: 20, right: 30, bottom: 30, left: 40 };
+  // Get the container dimensions
+  const container = document.getElementById("sparkline");
+  const margin = { top: 40, right: 30, bottom: 60, left: 60 };
+  const width = container.clientWidth - margin.left - margin.right;
+  const height = container.clientHeight - margin.top - margin.bottom;
+
+  const svg = d3.select("#sparkline")
+    .append("svg")
+    .attr("width", "100%")
+    .attr("height", "100%")
+    .attr("viewBox", `0 0 ${width + margin.left + margin.right} ${height + margin.top + margin.bottom}`)
+    .append("g")
+    .attr("transform", `translate(${margin.left},${margin.top})`);
 
   const x = d3.scaleLinear()
     .domain([0, data.length - 1])
-    .range([margin.left, width - margin.right]);
+    .range([0, width]);
 
   const y = d3.scaleLinear()
-    .domain([0, d3.max(data)])
-    .nice()
-    .range([height - margin.bottom, margin.top]);
+    .domain([0, d3.max(data) * 1.2])
+    .range([height, 0]);
 
   const line = d3.line()
     .x((d, i) => x(i))
     .y(d => y(d))
-    .curve(d3.curveMonotoneX);
+    .curve(d3.curveCatmullRom);
 
-  const svg = d3.select("#sparkline")
-    .append("svg")
-    .attr("width", width)
-    .attr("height", height);
+  // Add gradient
+  const gradient = svg.append("defs")
+    .append("linearGradient")
+    .attr("id", "line-gradient")
+    .attr("gradientUnits", "userSpaceOnUse")
+    .attr("x1", 0)
+    .attr("y1", y(0))
+    .attr("x2", 0)
+    .attr("y2", y(d3.max(data)));
 
-  svg.append("g")
-    .attr("transform", `translate(0,${height - margin.bottom})`)
-    .call(d3.axisBottom(x).ticks(data.length));
+  gradient.append("stop")
+    .attr("offset", "0%")
+    .attr("stop-color", "#4e79a7")
+    .attr("stop-opacity", 0.2);
 
-  svg.append("g")
-    .attr("transform", `translate(${margin.left},0)`)
-    .call(d3.axisLeft(y));
+  gradient.append("stop")
+    .attr("offset", "100%")
+    .attr("stop-color", "#4e79a7")
+    .attr("stop-opacity", 1);
+
+  // Add area
+  const area = d3.area()
+    .x((d, i) => x(i))
+    .y0(height)
+    .y1(d => y(d))
+    .curve(d3.curveCatmullRom);
 
   svg.append("path")
     .datum(data)
+    .attr("class", "area")
+    .attr("d", area)
+    .style("fill", "url(#line-gradient)")
+    .style("opacity", 0)
+    .transition()
+    .duration(1000)
+    .style("opacity", 0.3);
+
+  // Add line with animation
+  const path = svg.append("path")
+    .datum(data)
     .attr("fill", "none")
     .attr("stroke", "#4e79a7")
-    .attr("stroke-width", 2)
+    .attr("stroke-width", 3)
     .attr("d", line);
 
-  svg.selectAll("circle")
+  const pathLength = path.node().getTotalLength();
+
+  path
+    .attr("stroke-dasharray", pathLength)
+    .attr("stroke-dashoffset", pathLength)
+    .transition()
+    .duration(2000)
+    .attr("stroke-dashoffset", 0);
+
+  // Add dots
+  svg.selectAll(".dot")
     .data(data)
     .enter()
     .append("circle")
+    .attr("class", "dot")
     .attr("cx", (d, i) => x(i))
     .attr("cy", d => y(d))
-    .attr("r", 3)
-    .attr("fill", "#4e79a7");
+    .attr("r", 5)
+    .style("fill", "#fff")
+    .style("stroke", "#4e79a7")
+    .style("stroke-width", 2)
+    .style("opacity", 0)
+    .transition()
+    .delay((d, i) => i * 100)
+    .duration(500)
+    .style("opacity", 1);
+
+  // Add axes
+  svg.append("g")
+    .attr("transform", `translate(0,${height})`)
+    .call(d3.axisBottom(x))
+    .selectAll("text")
+    .style("font-size", "12px");
+
+  svg.append("g")
+    .call(d3.axisLeft(y))
+    .selectAll("text")
+    .style("font-size", "12px");
+
+  // Add X axis label with larger font
+  svg.append("text")
+    .attr("class", "axis-label")
+    .attr("text-anchor", "middle")
+    .attr("x", width / 2)
+    .attr("y", height + margin.bottom - 5) // Adjusted position
+    .style("font-size", "16px") // Increased from 14px
+    .style("font-weight", "400") // Added bold weight
+    .text("Time Points");
+
+  // Add Y axis label with larger font
+  svg.append("text")
+    .attr("class", "axis-label")
+    .attr("text-anchor", "middle")
+    .attr("transform", `translate(${-margin.left + 20}, ${height/2}) rotate(-90)`) // Adjusted position
+    .style("font-size", "16px") // Increased from 14px
+    .style("font-weight", "400") // Added bold weight
+    .text("Subscription Count");
 }
-
-// Update functions
-function updateCharts(period) {
-  const data = dataPeriods[period];
-  if (data) {
-    drawPieChart(data.pieData);
-    drawBarChart(data.barData);
-    drawSparkline(data.subscriptionData);
-    totalPrice.value = data.revenue;
-    userCount.value = data.users;
-  }
-}
-
-function handleSearch() {
-  if (!startDate.value || !endDate.value) return;
-  
-  searchActive.value = true;
-  // In a real application, you would fetch data for the date range
-  // For demo, we'll show monthly data when searching
-  updateCharts('Monthly');
-}
-
-function resetData() {
-  totalPrice.value = 0;
-  userCount.value = 0;
-  startDate.value = '';
-  endDate.value = '';
-  searchActive.value = false;
-  selectedPeriod.value = 'Today';
-  updateCharts('Today');
-}
-
-// Watchers and lifecycle hooks
-watch(selectedPeriod, (newPeriod) => {
-  if (!searchActive.value) {
-    updateCharts(newPeriod);
-  }
-});
-
-onMounted(() => {
-  updateCharts('Today');
-});
 </script>
 
 <template>
-  <div class="admin-dashboard">
-    <v-container class="pa-6">
-      <!-- Period Selection -->
-      <v-card class="mb-6 period-selector" elevation="2">
-        <v-card-text>
-          <div class="d-flex flex-wrap justify-center gap-4">
-            <v-btn-group variant="outlined" rounded="pill">
-              <v-btn 
-                v-for="period in ['Today', 'Monthly', 'Yearly']" 
-                :key="period"
-                :color="selectedPeriod === period ? 'primary' : undefined"
-                @click="selectedPeriod = period; searchActive = false"
-                class="px-6"
-              >
-                {{ period }}
-              </v-btn>
-            </v-btn-group>
-            
-            <v-btn-group variant="outlined" rounded="pill">
-              <v-text-field
-                v-model="startDate"
-                type="date"
-                prepend-icon="mdi-calendar-start"
-                hide-details
-                density="comfortable"
-                class="date-input"
-              />
-              <v-text-field
-                v-model="endDate"
-                type="date"
-                prepend-icon="mdi-calendar-end"
-                hide-details
-                density="comfortable"
-                class="date-input"
-              />
-            </v-btn-group>
-            
+  <div class="admin-dashboard py-6 px-4">
+    <!-- Period Selection -->
+    <v-card class="mb-6 period-selector" elevation="2">
+      <v-card-text>
+        <div class="d-flex flex-wrap justify-center gap-4">
+          <v-btn-group variant="outlined" rounded="pill">
             <v-btn 
-              color="primary" 
-              prepend-icon="mdi-magnify"
-              rounded="pill"
-              @click="handleSearch"
-              :disabled="!startDate || !endDate"
+              v-for="period in ['Today', 'Monthly', 'Yearly']" 
+              :key="period"
+              :color="selectedPeriod === period ? 'primary' : undefined"
+              @click="selectedPeriod = period; searchActive = false"
+              class="px-6"
             >
-              Search
+              {{ period }}
             </v-btn>
-          </div>
-        </v-card-text>
-      </v-card>
+          </v-btn-group>
 
-      <!-- Charts Grid -->
-      <v-row>
-        <v-col cols="12" md="6">
-          <v-card elevation="2" class="chart-card">
-            <v-card-title class="d-flex align-center">
-              <v-icon left class="me-2">mdi-chart-pie</v-icon>
-              Gender Distribution
-            </v-card-title>
-            <v-card-text>
-              <div id="pieChart" class="chart-container"></div>
-            </v-card-text>
-          </v-card>
-        </v-col>
+          <v-btn-group variant="outlined" rounded="pill">
+            <v-text-field
+              v-model="startDate"
+              type="date"
+              prepend-icon="mdi-calendar-start"
+              hide-details
+              density="comfortable"
+              class="date-input"
+            />
+            <v-text-field
+              v-model="endDate"
+              type="date"
+              prepend-icon="mdi-calendar-end"
+              hide-details
+              density="comfortable"
+              class="date-input"
+            />
+          </v-btn-group>
 
-        <v-col cols="12" md="6">
-          <v-card elevation="2" class="chart-card">
-            <v-card-title class="d-flex align-center">
-              <v-icon left class="me-2">mdi-chart-line</v-icon>
-              Subscription Trends
-            </v-card-title>
-            <v-card-text>
-              <div id="sparkline" class="chart-container"></div>
-            </v-card-text>
-          </v-card>
-        </v-col>
+          <v-btn 
+            color="primary" 
+            prepend-icon="mdi-magnify"
+            rounded="pill"
+            @click="handleSearch"
+            :disabled="!startDate || !endDate"
+          >
+            Search
+          </v-btn>
+        </div>
+      </v-card-text>
+    </v-card>
 
-        <v-col cols="12" md="6">
-          <v-card elevation="2" class="chart-card">
-            <v-card-title class="d-flex align-center">
-              <v-icon left class="me-2">mdi-chart-bar</v-icon>
-              Weekly Activity
-            </v-card-title>
-            <v-card-text>
-              <div id="barChart" class="chart-container"></div>
-            </v-card-text>
-          </v-card>
-        </v-col>
+    <!-- Charts Grid -->
+    <v-row>
+      <v-col cols="12" md="6">
+        <v-card elevation="2">
+          <v-card-title class="d-flex align-center">
+            <v-icon left class="me-2">mdi-chart-pie</v-icon>
+            Gender Distribution
+          </v-card-title>
+          <v-card-text>
+            <div id="pieChart" class="chart-container" />
+          </v-card-text>
+        </v-card>
+      </v-col>
 
-        <v-col cols="12" md="6">
-          <v-card elevation="2" class="chart-card">
-            <v-card-title class="d-flex align-center">
-              <v-icon left class="me-2">mdi-information</v-icon>
-              Summary
-            </v-card-title>
-            <v-card-text>
-              <v-row>
-                <v-col cols="12" sm="6">
-                  <v-text-field
-                    v-model="totalPrice"
-                    label="Total Revenue"
-                    prefix="$"
-                    readonly
-                    variant="outlined"
-                    density="comfortable"
-                    prepend-inner-icon="mdi-currency-usd"
-                    class="summary-field"
-                  />
-                </v-col>
-                <v-col cols="12" sm="6">
-                  <v-text-field
-                    v-model="userCount"
-                    label="Total Users"
-                    readonly
-                    variant="outlined"
-                    density="comfortable"
-                    prepend-inner-icon="mdi-account-group"
-                    class="summary-field"
-                  />
-                </v-col>
-              </v-row>
-            </v-card-text>
-            <v-card-actions class="pa-4">
-              <v-spacer />
-              <v-btn
-                color="primary"
-                prepend-icon="mdi-refresh"
-                variant="text"
-                @click="resetData"
-              >
-                Reset Data
-              </v-btn>
-            </v-card-actions>
-          </v-card>
-        </v-col>
-      </v-row>
-    </v-container>
+      <v-col cols="12" md="6">
+        <v-card elevation="2">
+          <v-card-title class="d-flex align-center">
+            <v-icon left class="me-2">mdi-chart-line</v-icon>
+            Subscription Trends
+          </v-card-title>
+          <v-card-text>
+            <div id="sparkline" class="chart-container" />
+          </v-card-text>
+        </v-card>
+      </v-col>
+
+      <v-col cols="12" md="6">
+        <v-card elevation="2">
+          <v-card-title class="d-flex align-center">
+            <v-icon left class="me-2">mdi-chart-bar</v-icon>
+            Weekly Activity
+          </v-card-title>
+          <v-card-text>
+            <div id="barChart" class="chart-container" />
+          </v-card-text>
+        </v-card>
+      </v-col>
+
+      <v-col cols="12" md="6">
+        <v-card elevation="2">
+          <v-card-title class="d-flex align-center">
+            <v-icon left class="me-2">mdi-information</v-icon>
+            Summary
+          </v-card-title>
+          <v-card-text>
+            <v-row>
+              <v-col cols="12" sm="6">
+                <v-text-field
+                  v-model="totalPrice"
+                  label="Total Revenue"
+                  prefix="$"
+                  readonly
+                  variant="outlined"
+                  density="comfortable"
+                  prepend-inner-icon="mdi-currency-usd"
+                />
+              </v-col>
+              <v-col cols="12" sm="6">
+                <v-text-field
+                  v-model="userCount"
+                  label="Total Users"
+                  readonly
+                  variant="outlined"
+                  density="comfortable"
+                  prepend-inner-icon="mdi-account"
+                />
+              </v-col>
+            </v-row>
+          </v-card-text>
+        </v-card>
+      </v-col>
+    </v-row>
   </div>
 </template>
-
 <style scoped>
-.admin-dashboard {
-  background-color: #f5f5f7;
-  min-height: 100vh;
-}
-
-.period-selector {
-  border-radius: 16px;
-  background: rgba(255, 255, 255, 0.9);
-  backdrop-filter: blur(10px);
-}
-
-.chart-card {
-  border-radius: 16px;
-  height: 100%;
-  background: rgba(255, 255, 255, 0.9);
-  backdrop-filter: blur(10px);
-  transition: all 0.3s ease;
-}
-
-.chart-card:hover {
-  transform: translateY(-3px);
-  box-shadow: 0 8px 16px rgba(0, 0, 0, 0.1) !important;
-}
-
 .chart-container {
+  min-height: 500px;
+  position: relative;
   padding: 16px;
-  display: flex;
-  justify-content: center;
-  align-items: center;
-  min-height: 300px;
+  margin: 0; /* Remove margin-bottom */
 }
 
+.v-card {
+  border-radius: 16px;
+  transition: all 0.3s ease;
+  overflow: hidden;
+  height: 100%; /* Make cards equal height */
+}
+
+/* Adjust card spacing */
 .v-card-title {
-  font-size: 1.1rem;
-  font-weight: 600;
-  padding: 20px;
+  padding: 16px 24px;
   border-bottom: 1px solid rgba(0, 0, 0, 0.05);
 }
 
-.summary-field {
-  transition: all 0.3s ease;
+.v-card-text {
+  padding: 16px;
 }
 
-.summary-field:hover {
-  transform: translateY(-2px);
+.v-card:hover {
+  transform: translateY(-4px);
+  box-shadow: 0 4px 25px rgba(0, 0, 0, 0.1) !important;
 }
 
-.gap-4 {
-  gap: 16px;
+/* Period selector adjustments */
+.period-selector {
+  background: linear-gradient(145deg, #ffffff, #f8f9ff);
+  margin-bottom: 24px; /* Consistent spacing */
 }
 
-.date-input {
-  max-width: 160px;
+/* Grid spacing adjustments */
+.v-row {
+  margin: 0 -12px;
 }
 
-.date-input :deep(.v-field__input) {
-  padding-top: 0;
-  padding-bottom: 0;
+.v-col {
+  padding: 12px;
+}
+
+.mb-6 {
+  margin-bottom: 24px !important; /* Consistent spacing */
+}
+
+/* Responsive adjustments */
+@media (max-width: 960px) {
+  .chart-container {
+    min-height: 400px;
+  }
+  
+  .date-input {
+    min-width: 120px;
+  }
 }
 
 @media (max-width: 600px) {
-  .v-container {
-    padding: 12px;
-  }
-  
   .chart-container {
-    min-height: 250px;
+    min-height: 300px;
   }
   
-  .period-selector .v-card-text {
+  .v-card-title {
+    padding: 12px 16px;
+  }
+  
+  .v-card-text {
     padding: 12px;
   }
 }
+
+/* Chart specific styles */
+.bar:hover {
+  opacity: 0.8;
+}
+
+.dot:hover {
+  r: 8;
+  transition: r 0.2s ease;
+}
+
+.area {
+  pointer-events: none;
+}
+
+.axis-label {
+  fill: #2c3e50; /* Darker color for better contrast */
+  font-family: system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+}
 </style>
+
+
