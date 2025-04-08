@@ -1,5 +1,99 @@
 <template>
   <div class="admin-page">
+    <v-app-bar app color="white" class="mx-4 pr-5" rounded="lg" elevation="3">
+      <v-toolbar-title>Filter</v-toolbar-title>
+      <v-spacer></v-spacer>
+      <v-btn variant="tonal" @click="onDailyClick" color="primary" class="mr-4">
+        Daily
+      </v-btn>
+      <v-btn variant="tonal" @click="onMonthlyClick" color="primary" class="mr-4">
+        Monthly
+      </v-btn>
+      <v-btn variant="tonal" @click="onYearlyClick" color="primary" class="mr-4">
+        Yearly
+      </v-btn>
+      <!-- Compact Date Picker Button with Icon + Inline Label -->
+      <v-menu
+        v-model="startDateMenu"
+        :close-on-content-click="false"
+        transition="scale-transition"
+        offset-y
+        min-width="auto"
+      >
+        <!-- Activator Button -->
+        <template #activator="{ props }">
+          <v-btn
+            v-bind="props"
+            color="primary"
+            variant="tonal"
+            class="d-flex align-center mr-4 px-4"
+            height="40"
+          >
+            <v-icon class="me-2" size="20">mdi-calendar</v-icon>
+            <span class="text-caption font-weight-medium me-1">Start Date:</span>
+            <span class="text-body-2">
+              {{ startDate ? new Date(startDate).toLocaleDateString() : 'Pick Date' }}
+            </span>
+          </v-btn>
+        </template>
+
+        <!-- Date Picker Popover -->
+        <v-card elevation="2" class="pa-2" style="border-radius: 12px;">
+          <v-date-picker
+            v-model="startDate"
+            @update:model-value="startDateMenu = false"
+            color="primary"
+            hide-actions
+            show-adjacent-months
+          />
+        </v-card>
+      </v-menu>
+      <!-- Compact Date Picker Button with Icon + Inline Label -->
+      <v-menu
+        v-model="endDateMenu"
+        :close-on-content-click="false"
+        transition="scale-transition"
+        offset-y
+        min-width="auto"
+      >
+        <!-- Activator Button -->
+        <template #activator="{ props }">
+          <v-btn
+            v-bind="props"
+            color="primary"
+            variant="tonal"
+            class="d-flex align-center mr-4 px-4"
+            height="40"
+          >
+            <v-icon class="me-2" size="20">mdi-calendar</v-icon>
+            <span class="text-caption font-weight-medium me-1">End Date:</span>
+            <span class="text-body-2">
+              {{ endDate ? new Date(endDate).toLocaleDateString() : 'Pick Date' }}
+            </span>
+          </v-btn>
+        </template>
+
+        <!-- Date Picker Popover -->
+        <v-card elevation="2" class="pa-2" style="border-radius: 12px;">
+          <v-date-picker
+            v-model="endDate"
+            @update:model-value="endDateMenu = false"
+            color="primary"
+            hide-actions
+            show-adjacent-months
+          />
+        </v-card>
+      </v-menu>
+
+      <v-btn variant="tonal" color="red" @click="clearAllFilters" class="mr-4">
+        Reset Filters
+      </v-btn>
+
+      <v-btn color="primary" variant="flat">
+        <v-icon class="mr-2" size="20">mdi-magnify</v-icon>
+        Search
+      </v-btn>
+    </v-app-bar>
     <v-container fluid>
       <!-- 🟡 Loading State with Skeletons -->
       <template v-if="loading">
@@ -187,6 +281,19 @@ const summariesData = ref({});
 const flashcardsData = ref({});
 const quizzesData = ref({});
 
+const startDateMenu = ref(false)
+const startDate = ref(null)
+const endDateMenu = ref(false)
+const endDate = ref(null)
+
+
+const clearAllFilters = () => {
+  startDate.value = null
+  endDate.value = null
+  // reset other filters too...
+}
+
+
 onMounted(async () => {
   try {
     await useDashboardStore.getDashboardData();
@@ -243,6 +350,12 @@ onMounted(async () => {
   width: 100%;
   min-height: 100vh;
   background-color: #f5f5f5;
-  padding: 16px;
+  padding: 0px;
+  margin: 0px;
 }
+
+.font-weight-medium {
+  font-weight: 500;
+}
+
 </style>

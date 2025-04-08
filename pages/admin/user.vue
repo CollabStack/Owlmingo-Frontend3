@@ -1,5 +1,5 @@
 <template>
-    <div >
+    <div class="mx-3 mt-3" >
         <AdminGlobalTable
         :headers="headers"
         :items="dessertsData"

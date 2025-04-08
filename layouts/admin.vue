@@ -46,7 +46,7 @@
     </v-navigation-drawer>
 
     <!-- Top Bar -->
-    <v-app-bar class="mx-2 rounded-b-xl" color="primary" elevation="0" app>
+    <v-app-bar class="mx-4 rounded-b-xl" color="primary" elevation="0" app>
       <v-app-bar-nav-icon color="white" @click="drawer = !drawer"></v-app-bar-nav-icon>
     </v-app-bar>
 

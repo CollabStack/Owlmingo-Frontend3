@@ -35,5 +35,15 @@ export const dashboardStore = defineStore("dashboardStore", {
         throw new Error(error.message || "Failed to fetch dashboard data");
       }
     },
+    async getPaymentTrend() {
+        const { $AdminPrivateAxios } = useNuxtApp();
+        try {
+            const response = await $AdminPrivateAxios.get("/payment-trend");
+            return response.data.data; // ✅ only the real data
+        } catch (error) {
+            console.log(error);
+            throw new Error(error.message || "Failed to fetch payment trend data");
+        }
+    }
   },
 });
