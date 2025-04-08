@@ -1,44 +1,54 @@
 <template>
-    <div class="mx-3 mt-3" >
-        <AdminGlobalTable
+    <div class="mx-3 mt-3">
+      <AdminGlobalTable
         :headers="headers"
-        :items="dessertsData"
+        :items="users"
         :showEdit="true"
         :showActivate="true"
         :showDeactivate="true"
-        >
-        </AdminGlobalTable>
+      />
     </div>
-</template>
-<script setup >
-import { ref, onMounted } from 'vue';
-
-definePageMeta({
+  </template>
+  
+  <script setup>
+  import { ref, onMounted } from 'vue';
+    import { userAdminStore } from '~/store/userAdmin';  
+  definePageMeta({
     layout: 'admin',
-});
-
-const headers = ref([
-    { text: "Name", value: "name" },
+  });
+  
+  // Define headers for the table
+  const headers = ref([
+    { text: "Name", value: "username" },
     { text: "Role", value: "role" },
-    { text: "Email", value: "email"},
-    { text: "Subscribed", value: "subscribed",},
-    { text: "Created At", value: "created_at" },
-    { text: "Updated At", value: "updated_at" },
-    { text: "Last Login", value: "last_login" },
-    { text: "Last Activity", value: "last_activity" },
-]);
-
-const dessertsData = ref([
-    {
-        name: "Frozen Yogurt",
-        role: "Admin",
-        email: "yogurt@gmail.com",
-        subscribed: "Yes",
-        created_at: "2023-10-01",
-        updated_at: "2023-10-02",
-        last_login: "2023-10-03",
-        last_activity: "2023-10-04",
-    },
-    
-]);
-</script>
+    { text: "Email", value: "email" },
+    { text: "Is Verify", value: "isVerified" },
+    { text: "Is Active", value: "isActive" },
+    { text: "Telegram", value: "telegram_id" },
+    { text: "GitHub", value: "github_id" },
+    { text: "Google", value: "google_id" },
+    { text: "Created At", value: "createdAt" },
+    { text: "Updated At", value: "updatedAt" },
+  ]);
+  
+  // Store state
+  const useUserAdminStore = userAdminStore();
+  const users = ref([]);
+  const isLoading = ref(false);
+  const error = ref(null);
+  
+  // Fetch users when the component is mounted
+  onMounted(async () => {
+    try {
+      isLoading.value = true;
+      // Fetch users from the store
+      users.value = await useUserAdminStore.getAllUsers();
+    } catch (err) {
+      error.value = "Failed to fetch users.";
+      console.error(error.value, err);
+    } finally {
+      isLoading.value = false;
+    }
+  });
+  </script>
+  

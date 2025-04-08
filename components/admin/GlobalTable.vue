@@ -34,7 +34,7 @@
                   </ul>
                 </template>
                 <template v-else>
-                  {{ item[header.value] }}
+                  {{ item[header.value]  }}
                 </template>
               </td>
               <td class="text-right">
