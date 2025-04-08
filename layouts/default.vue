@@ -18,6 +18,6 @@
 import { useRoute } from 'vue-router';
 import { onBeforeMount } from 'vue';
 const route = useRoute();
-const hideFooter = computed(() => route.path === '/auth' || route.path === '/auth/sign-up' || route.path === '/quiz/do-quiz');
+const hideFooter = computed(() => route.path === '/auth' || route.path === '/auth/sign-up' || route.path === '/quiz/do-quiz' || route.path === '/settings');
 
 </script>

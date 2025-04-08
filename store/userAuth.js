@@ -12,25 +12,33 @@ export const userAuth = defineStore('userAuth', {
     actions: {
         // User management methods
         setUser(user) {
-            this.user = user;
+            this.user = { ...user }; // Ensure reactivity
+            localStorage.setItem('user', JSON.stringify(user)); // Persist
+            // console.log("User set:", this.user);
         },
         
+        
         // Add initialization method
-        init() {
-            if (this.tokenInitialized) return; // Prevent multiple initializations
+        async init() {
+            if (this.tokenInitialized) return;
             
             const token = this.getToken();
+            const storedUser = localStorage.getItem('user');
+            
             if (token) {
                 this.token = token;
                 this.isLoggedIn = true;
                 this.tokenInitialized = true;
-                
-                // Add a timeout to allow component mount before refresh
-                setTimeout(() => {
-                    this.refreshToken();
-                }, 300);
+                // this.user = storedUser ? JSON.parse(storedUser) : null; // Restore user
             }
+            
+            // setTimeout(() => {
+            //     this.refreshToken();
+            // }, 300);
+            await this.refreshToken(); // Refresh token on initialization
+
         },
+        
 
         setToken(token) {
             this.token = token;
@@ -51,6 +59,10 @@ export const userAuth = defineStore('userAuth', {
         },
         
         getUser() {
+            if (!this.user) {
+                const storedUser = localStorage.getItem('user');
+                this.user = storedUser ? JSON.parse(storedUser) : null;
+            }
             return this.user;
         },
         
@@ -303,6 +315,7 @@ export const userAuth = defineStore('userAuth', {
             this.isLoggedIn = false;
             this.tokenInitialized = false;
             Cookies.remove('token', { path: '/' });
+            localStorage.removeItem('user');
         },
 
         async telegramOAuth(data) {
@@ -325,28 +338,38 @@ export const userAuth = defineStore('userAuth', {
             throw error;
             }
         },
+
         async refreshToken() {
             try {
                 const {$UserPrivateAxios} = useNuxtApp();
-                const response = await $UserPrivateAxios.post('/refresh-token');
-                
-                if (!response.data || !response.data.data || !response.data.data.token) {
-                    console.error('Invalid refresh token response', response);
+                this.token = this.getToken(); // Ensure token is set before making the request
+                if (!this.token) {
+                    console.error("No token available for refresh.");
                     return;
                 }
-                
+
+                const response = await $UserPrivateAxios.post('/refresh-token');
+
+                if(response.data.success === false) {
+                    console.error("Refresh token failed:", response.data.message);
+                    return;
+                }
+
+        
                 const token = response.data.data.token;
+                const user = response.data.data.user;
+                
                 this.setToken(token);
+                this.setUser(user); // Update user data
                                 
                 return token;
             } catch (error) {
                 console.error("Refresh Token Error:", error);
-                // Don't logout on refresh failures - just try again later
-                setTimeout(() => {
-                    this.refreshToken();
-                }, 60 * 1000);
+                this.logout(); // Logout on error
+                // setTimeout(() => this.refreshToken(), 60 * 1000);
             }
-        },
+        }
+        ,
         
         async checkTokenExpired() {
             let token = this.getToken();
@@ -368,6 +391,8 @@ export const userAuth = defineStore('userAuth', {
                     console.log('Token expired, getting new one');
                     token = await this.refreshToken();
                     return !!token;
+                    // this.logout();
+                    // return false;
                 } else if (payload.exp - currentTime < 900) { // 15 minutes
                     console.log('Token expiring soon, refreshing');
                     this.refreshToken(); // Don't await, let it refresh in background
@@ -379,7 +404,54 @@ export const userAuth = defineStore('userAuth', {
                 return false;
             }
         },
-        
+
+        async updateInformation({ username, file }) {
+            const { $UserPrivateAxios } = useNuxtApp()
+          
+            try {
+              const formData = new FormData()
+          
+              if (username) {
+                formData.append('username', username)
+              }
+          
+              if (file) {
+                formData.append('file', file)
+              }
+          
+              const response = await $UserPrivateAxios.put('/update-information', formData, {
+                headers: {
+                  'Content-Type': 'multipart/form-data'
+                }
+              })
+          
+              return response.data
+            } catch (error) {
+              console.error('Update Information error:', error)
+              throw error;
+            }
+        },
+
+        async changePassword({old_password, new_password}){
+            const {$UserPrivateAxios} = useNuxtApp();
+            try{
+                const response = await $UserPrivateAxios.put('/settings-change-password', {old_password, new_password});
+                return response.data;
+            } catch (error){
+                throw error;
+            }
+        },
+
+        async getCurrentPlan(){
+            const {$UserPrivateAxios} = useNuxtApp();
+            try{
+                const response = await $UserPrivateAxios.get('/get-current-plan');
+                return response.data;
+            } catch (error){
+                throw error;
+            }
+        },
+          
         initializeSession() {
             if (!this.token) {
                 this.logout();

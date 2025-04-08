@@ -12,7 +12,10 @@
     <p class="text-warning">Warning Color</p>
     </section>
  -->
-    <PayPalButton />
+    <!-- <PayPalButton /> -->
+    <SubscriptionPlans />
+
+    
 </template>
 
 <script>

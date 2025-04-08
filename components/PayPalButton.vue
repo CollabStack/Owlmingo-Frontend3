@@ -1,42 +1,38 @@
 <template>
-    <div>
-        <div id="paypal-button-container"></div>
-    </div>
+  <div>
+    <div id="paypal-button-container"></div>
+  </div>
 </template>
 
 <script setup>
-    import { onMounted } from 'vue';
-    import { useNuxtApp } from '#app';
+import { onMounted } from 'vue';
+import { useNuxtApp } from '#app';
 
-    onMounted(() => {
-    const {$UserPrivateAxios} = useNuxtApp();
-    console.log("PayPal Button Mounted");
-    console.log("PayPal Button Axios:", $UserPrivateAxios);
+const props = defineProps({
+  plan: {
+    type: Object,
+    required: true
+  }
 
-    if (window.paypal) {
-        window.paypal.Buttons({
-        createOrder: async () => {
-            try {
-            const res = await $UserPrivateAxios.post('/create-order');
-            console.log("PayPal Order Created:", res);
-            return res.data.data.result.id;
-            } catch (error) {
-            console.error("Error creating PayPal order:", error);
-            }
-        },
-        onApprove: async (data) => {
-            try {
-            const res = await $UserPrivateAxios.post('/capture-order', {
-                orderID: data.orderID
-            });
-            console.log("Payment Captured:", res.data);
-            } catch (error) {
-            console.error("Error capturing PayPal order:", error);
-            }
-        }
-        }).render('#paypal-button-container');
-    } else {
-        console.error("PayPal SDK not loaded.");
-    }
-    });
+});
+
+const emit = defineEmits(['paymentResponse']);
+
+onMounted(() => {
+  const {$UserPrivateAxios} = useNuxtApp();
+  if (window.paypal) {
+    window.paypal.Buttons({
+      createOrder: async () => {
+        // const res = await $UserPrivateAxios.post('/create-order', { planId: props.plan._id, amount: props.plan.total_price });
+
+        const res = await $UserPrivateAxios.post('/create-order', { planId: props.plan._id, amount: props.plan.total_price , duration: props.plan.duration });
+        return res.data.id;
+      },
+      onApprove: async (data) => {
+        const res = await $UserPrivateAxios.post('/capture-order', { orderID: data.orderID });
+        emit('paymentResponse', res.status);
+      }
+    }).render('#paypal-button-container');
+  }
+});
 </script>
