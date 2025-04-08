@@ -102,10 +102,12 @@
 import { ref, onMounted, nextTick } from 'vue';
 import { useRouter } from 'vue-router';
 import { userAuth } from '~/store/userAuth';
+import { useQuizStore } from '~/store/quizStore';
 import Swal from 'sweetalert2';
 
 const router = useRouter();
 const authStore = userAuth();
+const quizStore = useQuizStore();
 
 const questionText = ref('');
 const options = ref([
@@ -191,16 +193,8 @@ const submitEdit = async () => {
       return;
     }
     
-    // Get token
-    const token = authStore.getToken();
-    if (!token) {
-      throw new Error('Authentication required');
-    }
-
-    const endpoint = `https://owlmingo-16f448c07f1f.herokuapp.com/api/v1/user/auth/quiz/${props.quizId}/questions/${props.questionIndex}`;
-    
-    // Prepare payload
-    const payload = {
+    // Prepare the question data payload
+    const questionData = {
       question: questionText.value,
       options: options.value.map(opt => ({
         text: opt.text,
@@ -210,37 +204,28 @@ const submitEdit = async () => {
       }))
     };
 
-    const response = await fetch(endpoint, {
-      method: 'PUT',
-      headers: {
-        'Content-Type': 'application/json',
-        'Authorization': `Bearer ${token}`
-      },
-      body: JSON.stringify(payload),
-    });
-
-    if (!response.ok) {
-      const errorData = await response.json();
-      throw new Error(errorData.message || 'Failed to update question');
+    // Use the quizStore to update the question
+    const result = await quizStore.updateQuestion(props.quizId, props.questionIndex, questionData);
+    
+    if (!result.success) {
+      throw new Error(result.error || 'Failed to update question');
     }
 
-    const responseData = await response.json();
-    // console.log('Update response:', responseData);
-    
-    // Swal.fire({
-    //   icon: 'success',
-    //   title: 'Success!',
-    //   text: 'Question updated successfully!',
-    //   timer: 2000,
-    //   showConfirmButton: false,
-    //   timerProgressBar: true,
-    //   iconColor: '#4caf50'
-    // });
+    // Show success message
+    Swal.fire({
+      icon: 'success',
+      title: 'Success!',
+      text: 'Question updated successfully!',
+      timer: 2000,
+      showConfirmButton: false,
+      timerProgressBar: true,
+      iconColor: '#4caf50'
+    });
 
     // Go back to the quiz review
     setTimeout(() => {
       router.push(`/quiz/review-quiz?id=${props.quizId}`);
-    }, 2000);
+    }, 1500);
     
   } catch (error) {
     console.error('Error updating question:', error);

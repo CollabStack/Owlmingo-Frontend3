@@ -86,7 +86,7 @@
         variant="text" 
         size="small"
         class="action-btn outfit"
-        @click.stop="$emit('delete')"
+        @click.stop="handleDeleteAction"
       >
         <v-icon size="16">mdi-delete</v-icon>
       </v-btn>
@@ -99,7 +99,7 @@
         variant="text" 
         size="small"
         class="action-btn outfit mr-2"
-        @click="$emit('edit')"
+        @click="handleEditAction"
       >
         <span class="d-flex align-center">
           Edit
@@ -125,6 +125,10 @@
 
 <script setup>
 import { computed } from 'vue';
+import { useRouter } from 'vue-router';
+import Swal from 'sweetalert2';
+
+const router = useRouter();
 
 const props = defineProps({
   type: {
@@ -166,7 +170,8 @@ const props = defineProps({
   }
 });
 
-defineEmits(['edit', 'action', 'editTags', 'removeTag', 'delete']);
+// Store the emit function correctly
+const emit = defineEmits(['edit', 'action', 'editTags', 'removeTag', 'delete']);
 
 // Dynamic computed properties based on type
 const getTypeClass = computed(() => {
@@ -186,6 +191,47 @@ const getCountIcon = computed(() => {
   if (props.type === 'summary') return 'mdi-text';
   return 'mdi-card-text-outline';
 });
+
+// Handle edit action with proper routing based on content type
+const handleEditAction = () => {
+  if (props.type === 'quiz') {
+    // For quizzes, navigate directly to the review page
+    router.push(`/quiz/review-quiz?id=${props.id}`);
+  } else {
+    // For other content types, emit the regular edit event for parent handling
+    emit('edit');
+  }
+};
+
+// Handle delete action with confirmation dialog
+const handleDeleteAction = () => {
+  const itemType = props.type.charAt(0).toUpperCase() + props.type.slice(1);
+  
+  Swal.fire({
+    title: `Delete ${itemType}?`,
+    text: `Are you sure you want to delete this ${props.type}? This action cannot be undone.`,
+    icon: 'warning',
+    showCancelButton: true,
+    confirmButtonColor: '#d33',
+    cancelButtonColor: '#3085d6',
+    confirmButtonText: 'Yes, delete it!',
+    cancelButtonText: 'Cancel'
+  }).then((result) => {
+    if (result.isConfirmed) {
+      // If confirmed, emit delete event with the ID
+      emit('delete', props.id);
+      
+      // Show success notification
+      Swal.fire({
+        title: 'Deleted!',
+        text: `Your ${props.type} has been deleted.`,
+        icon: 'success',
+        timer: 2000,
+        showConfirmButton: false
+      });
+    }
+  });
+};
 </script>
 
 <style scoped>
