@@ -36,7 +36,7 @@
             @action="$emit('start-quiz', quiz.quizId || quiz.id)"
             @editTags="$emit('open-tags-dialog', 'quiz', quiz.quizId || quiz.id)"
             @removeTag="$emit('remove-tag-from-item', $event)"
-            @delete="$emit('delete-quiz', quiz.quizId || quiz.id)"
+            @delete="handleDeleteQuiz"
           />
         </v-col>
       </v-row>
@@ -75,6 +75,10 @@
 
 <script setup>
 import Card_Display from './Card_Display.vue';
+import { useQuizStore } from '~/store/quizStore';
+import Swal from 'sweetalert2';
+
+const quizStore = useQuizStore();
 
 defineProps({
   quizzes: {
@@ -87,7 +91,7 @@ defineProps({
   }
 });
 
-defineEmits([
+const emit = defineEmits([
   'edit-quiz',
   'start-quiz',
   'open-quiz-dialog',
@@ -126,6 +130,28 @@ const getQuizStatus = (quiz) => {
     case 'in_progress': return 'In Progress';
     case 'not_started': return 'Not Started';
     default: return quiz.subtitle || 'Quiz';
+  }
+};
+
+const handleDeleteQuiz = async (quizId) => {
+  try {
+    const result = await quizStore.deleteQuiz(quizId);
+    if (result.success) {
+      emit('delete-quiz', quizId);
+    } else {
+      Swal.fire({
+        title: 'Error',
+        text: result.error || 'Failed to delete quiz',
+        icon: 'error'
+      });
+    }
+  } catch (error) {
+    console.error('Error deleting quiz:', error);
+    Swal.fire({
+      title: 'Error',
+      text: 'An unexpected error occurred while deleting the quiz',
+      icon: 'error'
+    });
   }
 };
 </script>
