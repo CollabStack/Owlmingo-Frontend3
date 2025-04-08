@@ -17,39 +17,51 @@
             <tr>
               <th class="text-left">#</th>
               <th v-for="header in computedHeaders" :key="header.value" class="text-left">
-                {{ header.text }}
+                {{ header.text }} <!-- Display the header text -->
               </th>
               <th class="text-right">Actions</th>
             </tr>
           </thead>
           <tbody>
-            <tr v-for="(item, index) in paginatedItems" :key="item.id">
-              <td>{{ (currentPage - 1) * itemsPerPage + index + 1 }}</td>
+            <tr v-for="(item, index) in items" :key="item._id">
+              <td>{{ index + 1 }}</td>
+              <!-- Display item data based on header value -->
               <td v-for="header in computedHeaders" :key="header.value">
-                {{ item[header.value] }}
+                <!-- Check for array or object and display accordingly -->
+                <template v-if="Array.isArray(item[header.value])">
+                  <ul>
+                    <li v-for="(desc, idx) in item[header.value]" :key="idx">{{ desc }}</li>
+                  </ul>
+                </template>
+                <template v-else>
+                  {{ item[header.value] }}
+                </template>
               </td>
               <td class="text-right">
-                <v-tooltip bottom v-if="showActivate && item.active === 1">
+                <!-- Activate Button -->
+                <v-tooltip bottom v-if="showActivate && item.is_active">
                   <template v-slot:activator="{ on, attrs }">
-                    <v-icon @click="onDeactivateClick(item.global_id)" class="mx-1" color="green" v-bind="attrs" v-on="on || {}">
+                    <v-icon @click="onDeactivateClick(item._id)" class="mx-1" color="green" v-bind="attrs" v-on="on || {}">
                       mdi-account-check
                     </v-icon>
                   </template>
                   <span>Activate</span>
                 </v-tooltip>
 
-                <v-tooltip bottom v-if="showDeactivate && item.active === 0">
+                <!-- Deactivate Button -->
+                <v-tooltip bottom v-if="showDeactivate && !item.is_active">
                   <template v-slot:activator="{ on, attrs }">
-                    <v-icon @click="onActivateClick(item.global_id)" class="mx-1" color="red" v-bind="attrs" v-on="on || {}">
+                    <v-icon @click="onActivateClick(item._id)" class="mx-1" color="red" v-bind="attrs" v-on="on || {}">
                       mdi-account-off
                     </v-icon>
                   </template>
                   <span>Deactivate</span>
                 </v-tooltip>
 
+                <!-- Edit Button -->
                 <v-tooltip bottom v-if="showEdit">
                   <template v-slot:activator="{ on, attrs }">
-                    <v-icon @click="onEditClick(item.global_id)" class="mx-1" color="primary" v-bind="attrs" v-on="on || {}">
+                    <v-icon @click="onEditClick(item._id)" class="mx-1" color="primary" v-bind="attrs" v-on="on || {}">
                       mdi-pencil
                     </v-icon>
                   </template>
@@ -60,38 +72,13 @@
           </tbody>
         </v-table>
 
-        <!-- Pagination Controls -->
-        <v-container class="mt-auto">
-          <v-row no-gutters>
-            <v-col cols="12" sm="4">
-
-            </v-col>
-
-            <v-col cols="12" sm="4" class="d-flex justify-center">
-              <v-pagination
-                v-if="items.length > 0"
-                v-model="currentPage"
-                :length="totalPages"
-                :total-visible="7"
-                color="primary"
-                class="mx-auto"
-              ></v-pagination>
-            </v-col>
-
-            <v-col v-if="currentPage === totalPages" cols="12" sm="4" class="d-flex justify-end align-center">
-              <v-btn variant="tonal" @click="onLoadMoreClick" color="primary" class="ml-4">
-                Load More
-              </v-btn>  
-            </v-col>
-          </v-row>
-        </v-container>
       </v-card>
     </v-sheet>
   </v-container>
 </template>
 
 <script setup>
-import { computed, defineProps, defineEmits, ref } from "vue";
+import { computed, defineProps, defineEmits } from "vue";
 
 const props = defineProps({
   title: String,
@@ -106,20 +93,7 @@ const props = defineProps({
 // Emits for button actions
 const emit = defineEmits(["add-click", "edit-click", "activate-click", "deactivate-click"]);
 
-// Pagination states
-const itemsPerPage = 25;
-const currentPage = ref(1);
-
-// Compute total pages
-const totalPages = computed(() => Math.ceil(props.items.length / itemsPerPage));
-
-// Compute paginated items
-const paginatedItems = computed(() => {
-  const start = (currentPage.value - 1) * itemsPerPage;
-  return props.items.slice(start, start + itemsPerPage);
-});
-
-// Format headers
+// Format headers to ensure value matches keys in item
 const computedHeaders = computed(() => {
   return props.headers.map((h) => (typeof h === "string" ? { text: h, value: h } : h));
 });
@@ -129,5 +103,4 @@ const onAddClick = () => emit("add-click");
 const onEditClick = (id) => emit("edit-click", id);
 const onActivateClick = (id) => emit("activate-click", id);
 const onDeactivateClick = (id) => emit("deactivate-click", id);
-const onLoadMoreClick = () => emit("load-more-click");
 </script>

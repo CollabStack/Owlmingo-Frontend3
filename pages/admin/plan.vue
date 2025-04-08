@@ -1,93 +1,88 @@
 <template>
-  <div>
+  <div class="ma-2">
+    <!-- Global Table for Plans -->
     <AdminGlobalTable
       :title="'Plans'"
-      :items="dessertsData"
+      :items="plans"
       :headers="headers"
       :isLoading="isLoading"
       :showEdit="true"
       :showActivate="true"
       :showDeactivate="true"
-    >
-    </AdminGlobalTable>
-    <v-alert
-      v-if="error"
-      type="error"
-      variant="tonal"
-      closable
-    >
+      @edit-click="onEditClick"
+      @activatePlan="activatePlan"
+      @deactivatePlan="deactivatePlan"
+    />
+
+    <!-- Error Alert if any -->
+    <v-alert v-if="error" type="error" variant="tonal" closable>
       {{ error }}
     </v-alert>
   </div>
 </template>
 
 <script setup>
-import { ref, computed, onMounted } from 'vue';
-import { useNuxtApp } from '#app';
+import { ref, onMounted } from 'vue';
 import { adminPlanStore } from '~/store/adminPlan';
 
 definePageMeta({
   layout: 'admin',
 });
 
-const { $AdminPrivateAxios } = useNuxtApp();
-const planStore = adminPlanStore();
+const userAdminPlanStore = adminPlanStore();
+
+// State variables
+const plans = ref([]);
 const isLoading = ref(false);
 const error = ref(null);
 
-// Function to get and set auth token
-const setupAuthToken = () => {
-  // Try both possible token keys
-  const token = localStorage.getItem('admin_token') || localStorage.getItem('token');
-  
-  if (!token) {
-    console.error('No authentication token found');
-    return null;
-  }
+// Headers for the table
+const headers = [
+  { text: 'Plan Name', value: 'plan' },
+  { text: 'Price', value: 'price' },
+  { text: 'Total Price', value: 'total_price' },
+  { text: 'Duration', value: 'duration' },
+  { text: 'Is Annual', value: 'is_annual' },
+  { text: 'Description', value: 'description' },
+  { text: 'Is Active', value: 'is_active' },
+];
 
-  // Set the auth header
-  $AdminPrivateAxios.defaults.headers.common['Authorization'] = `Bearer ${token}`;
-  return token;
-};
-
-const headers = ref([
-  { text: "Name", value: "name" },
-  { text: "Plan", value: "plan" },
-  { text: "Price", value: "price" },
-  { text: "Duration", value: "duration" },
-]);
-
+// Fetch plans when the component is mounted
 onMounted(async () => {
-  error.value = null;
-  isLoading.value = true;
-  
   try {
-    const token = setupAuthToken();
-    if (!token) {
-      throw new Error('Authentication token not found. Please login again.');
-    }
-    
-    await planStore.adminGetPlans();
-    console.log('Plans loaded:', planStore.plans); // Debug log
-    
+    isLoading.value = true;
+    const response = await userAdminPlanStore.adminGetPlans();
+
+    // Log the fetched data for debugging
+    console.log("Plans response:", response);
+
+    // Assuming `response` is an array, ensure you're directly using it
+    plans.value = Array.isArray(response) ? response : Object.values(response);
+
+    // Log to ensure correct data
+    console.log("plans.value", plans.value);
   } catch (err) {
-    error.value = err.response?.data?.message || err.message || 'Failed to fetch plans';
-    console.error('Error fetching plans:', err);
+    error.value = err.message || 'Error fetching plans.';
   } finally {
     isLoading.value = false;
   }
 });
 
-const dessertsData = computed(() => planStore.plans || []);
+// Handle editing a plan
+const onEditClick = (planId) => {
+  console.log('Edit plan with ID:', planId);  // You should now be able to get the plan ID
+  // Implement the logic to edit a plan
+};
 
-// Debug helper - remove in production
-// const debugAuth = () => {
-//   console.log('Auth headers:', $AdminPrivateAxios?.defaults?.headers);
-//   console.log('Token in localStorage:', localStorage.getItem('admin_token'));
-// };
+// Handle activating a plan
+const activatePlan = (planId) => {
+  console.log('Activate plan with ID:', planId);
+  // Implement the logic to activate the plan
+};
 
-// Call debug helper
-debugAuth();
+// Handle deactivating a plan
+const deactivatePlan = (planId) => {
+  console.log('Deactivate plan with ID:', planId);
+  // Implement the logic to deactivate the plan
+};
 </script>
-
-
