@@ -3,13 +3,13 @@
     <v-app-bar app color="white" class="mx-4 pr-5" rounded="lg" elevation="3">
       <v-toolbar-title>Filter</v-toolbar-title>
       <v-spacer></v-spacer>
-      <v-btn variant="tonal" @click="onDailyClick" color="primary" class="mr-4">
+      <v-btn :variant="activeMode === 'today'? 'tonal':'text'" @click="onDailyClick" color="primary" class="mr-4">
         Daily
       </v-btn>
-      <v-btn variant="tonal" @click="onMonthlyClick" color="primary" class="mr-4">
+      <v-btn :variant="activeMode === 'month'? 'tonal':'text'" @click="onMonthlyClick" color="primary" class="mr-4">
         Monthly
       </v-btn>
-      <v-btn variant="tonal" @click="onYearlyClick" color="primary" class="mr-4">
+      <v-btn :variant="activeMode === 'year'? 'tonal':'text'" @click="onYearlyClick" color="primary" class="mr-4">
         Yearly
       </v-btn>
       <!-- Compact Date Picker Button with Icon + Inline Label -->
@@ -89,7 +89,7 @@
         Reset Filters
       </v-btn>
 
-      <v-btn color="primary" variant="flat">
+      <v-btn color="primary" variant="flat" @click="onSearchClick">
         <v-icon class="mr-2" size="20">mdi-magnify</v-icon>
         Search
       </v-btn>
@@ -272,6 +272,11 @@ definePageMeta({
 const useDashboardStore = dashboardStore();
 const loading = ref(true);
 
+const startDateMenu = ref(false);
+const endDateMenu = ref(false);
+const startDate = ref(null);
+const endDate = ref(null);
+
 const usersData = ref({});
 const plansData = ref({});
 const paymentsData = ref({});
@@ -281,23 +286,85 @@ const summariesData = ref({});
 const flashcardsData = ref({});
 const quizzesData = ref({});
 
-const startDateMenu = ref(false)
-const startDate = ref(null)
-const endDateMenu = ref(false)
-const endDate = ref(null)
-
+let activeMode = ref('');
 
 const clearAllFilters = () => {
-  startDate.value = null
-  endDate.value = null
-  // reset other filters too...
-}
+  startDate.value = null;
+  endDate.value = null;
+  startDateMenu.value = false;
+  endDateMenu.value = false;
+  activeMode.value = '';
+  fetchDashboardData();
+};
+
+const onDailyClick = () => {
+  activeMode.value = 'today';
+  fetchDashboardData('today');
+};
+
+const onMonthlyClick = () => {
+  activeMode.value = 'month';
+  fetchDashboardData('month');
+};
+
+const onYearlyClick = () => {
+  activeMode.value = 'year';
+  fetchDashboardData('year');
+};
+
+const onSearchClick = () => {
+  if (startDate.value && endDate.value) {
+    const start = new Date(startDate.value);
+    start.setHours(0, 0, 0, 0); // 👈 Start of day (00:00:00.000)
+
+    const end = new Date(endDate.value);
+    end.setHours(23, 59, 59, 999); // 👈 End-day end (23:59:59.999)
+
+    activeMode.value = 'range';
+
+    // Send ISO strings
+    fetchDashboardData('range', start.toISOString(), end.toISOString());
+  }
+};
 
 
-onMounted(async () => {
+const fetchDashboardData = async (mode = '', start = '', end = '') => {
+  loading.value = true;
   try {
-    await useDashboardStore.getDashboardData();
-    const data = useDashboardStore.dashboardData;
+    let query = '';
+    if (mode === 'today') {
+      query = '?mode=today';
+    } else if (mode === 'month') {
+      const now = new Date();
+      const startOfMonth = new Date(now.getFullYear(), now.getMonth(), 1);
+      startOfMonth.setHours(0, 0, 0, 0);
+
+      const endOfMonth = new Date(now.getFullYear(), now.getMonth() + 1, 0);
+      endOfMonth.setHours(23, 59, 59, 999);
+
+      startDate.value = startOfMonth;
+      endDate.value = endOfMonth;
+
+      query = `?mode=range&startDate=${startOfMonth.toISOString()}&endDate=${endOfMonth.toISOString()}`;
+    } else if (mode === 'year') {
+      const now = new Date();
+      const startOfYear = new Date(now.getFullYear(), 0, 1);
+      startOfYear.setHours(0, 0, 0, 0);
+
+      const endOfYear = new Date(now.getFullYear(), 11, 31);
+      endOfYear.setHours(23, 59, 59, 999);
+
+      startDate.value = startOfYear;
+      endDate.value = endOfYear;
+
+      query = `?mode=range&startDate=${startOfYear.toISOString()}&endDate=${endOfYear.toISOString()}`;
+    } else if (mode === 'range' && start && end) {
+      query = `?mode=range&startDate=${start}&endDate=${end}`;
+    }
+
+    console.log('Query:', query);
+    const response = await useDashboardStore.getDashboardData(query);
+    const data = response;
 
     usersData.value = {
       totalUsers: data.totalUsers,
@@ -336,13 +403,17 @@ onMounted(async () => {
     quizzesData.value = {
       totalQuizzes: data.totalQuizzes
     };
-
-    loading.value = false;
   } catch (e) {
     console.error('Dashboard load error:', e);
+  } finally {
     loading.value = false;
   }
+};
+
+onMounted(() => {
+  fetchDashboardData();
 });
+
 </script>
 
 <style scoped>

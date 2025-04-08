@@ -21,10 +21,10 @@ export const dashboardStore = defineStore("dashboardStore", {
     },
   }),
   actions: {
-    async getDashboardData() {
+    async getDashboardData(query) {
       const { $AdminPrivateAxios } = useNuxtApp();
       try {
-        const response = await $AdminPrivateAxios.get("/dashboard");
+        const response = await $AdminPrivateAxios.get(`/dashboard${query}`);
         this.dashboardData = response.data.data; // ✅ only the real data
         console.log("====== Dashboard Data ======");
         console.log(this.dashboardData);
